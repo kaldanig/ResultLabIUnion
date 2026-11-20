@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 
@@ -55,6 +56,7 @@ public interface IResultState<out T> : IResultState
 /// </para>
 /// </remarks>
 [Union]
+[DebuggerDisplay("{ToString(),nq}")]
 public readonly record struct Result<T> : IUnion, IResultState<T>
     where T : notnull
 {
@@ -338,6 +340,7 @@ public readonly record struct Result<T> : IUnion, IResultState<T>
 /// <see langword="null"/>, even when the result's state means the delegate would not be invoked.
 /// </para>
 /// </remarks>
+[DebuggerDisplay("{ToString(),nq}")]
 public readonly record struct Result : IResultState
 {
     /// <inheritdoc/>

@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using System.Diagnostics;
 
 namespace ResultUnion;
 
@@ -16,6 +17,7 @@ namespace ResultUnion;
 /// </para>
 /// <para>Every factory throws <see cref="ArgumentException"/> when the code or message is <see langword="null"/>, empty or white space.</para>
 /// </remarks>
+[DebuggerDisplay("{ToString(),nq}")]
 public sealed record Error
 {
     /// <summary>Gets the stable, machine-readable error code.</summary>
