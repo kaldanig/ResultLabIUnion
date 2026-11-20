@@ -1,0 +1,213 @@
+# ResultUnion
+
+A small implementation of the **Result pattern** for .NET, built on **C# 15 unions**.
+An operation returns `Result<T>`: either the value or an `Error`. Failures are part of the
+signature instead of exceptions, and pipelines run only while every step succeeds.
+
+```csharp
+public Result<User> Register(string? email, string? age) =>
+    Email.Create(email)                                   // Result<Email>
+        .Ensure(repository.EnsureEmailIsFree)             // keep the email, fail on conflict
+        .Bind(e => User.ParseAge(age).Map(a => new User(Guid.NewGuid(), e, a)))
+        .Ensure(u => u.Age >= 18, u => Error.BusinessRule($"{u.Email} is {u.Age}."))
+        .Tap(repository.Add);
+
+var message = Register("ann@example.com", "34") switch
+{
+    User user   => $"registered {user.Email}",
+    Error error => $"error {error.Code}: {error.Message}",
+};
+```
+
+## Requirements
+
+- .NET 11 SDK (`net11.0`)
+- C# 15 for unions (`[Union]`, `IUnion`) and C# 14 extension members, both default for `net11.0`
+
+## Solution layout
+
+| Project | Contents |
+|---|---|
+| `ResultUnion` | The library: `Result<T>`, `Result`, `Error`, `ErrorType` and the async extensions in `Async/` |
+| `ResultUnion.Tests` | xUnit v3 tests |
+| `ResultUnion.Showcase` | A console app that demonstrates the API on a small user-registration domain |
+
+```bash
+dotnet build ResultLabIUnion.slnx
+```
+
+```bash
+dotnet test ResultLabIUnion.slnx
+```
+
+```bash
+dotnet run --project ResultUnion.Showcase
+```
+
+`global.json` opts `dotnet test` into Microsoft.Testing.Platform, which the .NET 10+ SDK requires for xUnit v3.
+
+## The types
+
+| Type | Meaning |
+|---|---|
+| `Result<T>` | A union of two cases: a `T` value (success) or an `Error` (failure). `T` cannot be `null`. |
+| `Result` | The outcome of an operation without a value: success, or an `Error`. Not a union. |
+| `Error` | `Code`, `Message`, `Type` (`ErrorType`), an optional `Field` and nested `Details`. Compared by value. |
+| `IResultState`, `IResultState<T>` | Common interfaces, so results of different types can be handled together. |
+
+A `default` result is never a half-initialised state: it is a failure carrying `Error.DefaultResult`.
+
+### Creating results
+
+```csharp
+Result<int> a = Result<int>.Success(42);
+Result<int> b = Result<int>.Failure(Error.NotFound("Order 7 was not found."));
+Result<string> c = Result.Success("hi");           // type inferred
+
+Result<int> d = 7;                                 // union conversion from a case
+Result<int> e = Error.Validation("Bad input.");
+Result f = Error.Forbidden("Admins only.");        // user-defined conversion on Result
+```
+
+### Errors
+
+Factories set a stable code and a category:
+
+| Factory | Code | `ErrorType` | Typical HTTP status |
+|---|---|---|---|
+| `Error.Validation` | `validation.failed` | `Validation` | 400 |
+| `Error.Unauthorized` | `unauthorized` | `Unauthorized` | 401 |
+| `Error.Forbidden` | `forbidden` | `Forbidden` | 403 |
+| `Error.NotFound` | `resource.not_found` | `NotFound` | 404 |
+| `Error.Conflict` | `conflict` | `Conflict` | 409 |
+| `Error.Concurrency` | `concurrency.conflict` | `Concurrency` | 409 / 412 |
+| `Error.BusinessRule` | `business_rule.violated` | `BusinessRule` | 422 |
+| `Error.Unexpected` | `unexpected` | `Unexpected` | 500 |
+| `Error.Unavailable` | `dependency.unavailable` | `Unavailable` | 503 |
+| `Error.Create(code, message, type)` | your own | any | |
+
+Name the input an error is about with `WithField`, and group several errors with `Error.Validation(details)`:
+
+```csharp
+var error = Error.Validation("Email is required.").WithField("email");
+var group = Error.Validation([error, Error.Validation("Too short.").WithField("password")]);
+// group.Details: both errors, in order
+```
+
+The library does not map errors to HTTP itself; `ErrorType` is meant for that mapping in your API layer.
+
+## Using results
+
+### Pattern matching
+
+`Result<T>` is a union, so `switch` and `is` work on its cases, and the compiler checks that both are handled.
+Matching does not box value types.
+
+```csharp
+string Describe(Result<User> result) => result switch
+{
+    User { Age: >= 65 } user           => $"senior {user.Email}",
+    User user                          => $"user {user.Email}",
+    Error { Type: ErrorType.NotFound } => "not found",
+    Error error                        => $"error {error.Code}",
+};
+```
+
+### Pipelines
+
+| Method | Runs on | Does |
+|---|---|---|
+| `Map(v => …)` | success | transforms the value |
+| `Bind(v => Result…)` | success | chains a step that can fail (`Result<U>` or `Result`) |
+| `Ensure(predicate, error)` | success | fails when the predicate is false; also `Ensure(predicate, v => error)` and `Ensure(v => Result)` |
+| `MapError(e => …)` | failure | transforms the error |
+| `Tap(v => …)` / `TapError(e => …)` | success / failure | side effect, returns the same result |
+| `Match(onSuccess, onFailure)` | both | produces a value, or runs an action |
+
+`Result` (no value) has the same operations, with parameterless success delegates.
+
+### Reading the value or the error
+
+```csharp
+if (result.TryGetResultValue(out var user)) { /* … */ }
+else if (result.TryGetError(out var error)) { /* … */ }
+
+int age = ageResult.GetValueOrDefault(-1);
+int value = ageResult.ResultValue;   // throws InvalidOperationException on a failure
+Error err = ageResult.Error;         // throws InvalidOperationException on a success
+```
+
+Prefer `switch`, `Match` or the `TryGet…` methods. `GetValueOrDefault()` without an argument returns `0`
+for a failed `Result<int>`, which is easy to mistake for a real value.
+
+### Combining independent checks
+
+```csharp
+Result.Combine(a, b, c);      // stops at the first failure
+Result.CombineAll(a, b, c);   // reports every failure
+
+Result form = Result.CombineAll(
+[
+    Email.Create(email).MapError(e => e.WithField("email")),
+    User.ParseAge(age).MapError(e => e.WithField("age")),
+]);
+// several failures: Error.Validation(details), one detail per field
+// one failure: returned unchanged
+```
+
+Both have an overload for `IEnumerable<IResultState>`, which accepts `Result<T>` of different types (each one is boxed).
+
+### Exceptions and `null`
+
+At the boundary with code that throws or returns `null`:
+
+```csharp
+Result<Uri> uri = Result.Try(() => new Uri(input), ex => Error.Validation(ex.Message));
+
+Result<User> user = Result.FromNullable(cache.GetValueOrDefault(id), Error.NotFound("No such user."));
+
+Task<Result<User>> found = db.Users.FirstOrDefaultAsync(u => u.Id == id)
+    .ToResultAsync(Error.NotFound("No such user."));
+```
+
+- `Try` / `TryAsync` never catch `OperationCanceledException`: cancellation is not a business failure.
+- The error mapper is required; nothing is turned into `Unexpected` silently.
+- `ToResultAsync` turns only `null` into an error; an exception from the lookup itself is not caught.
+
+## Async
+
+Every operation has an `…Async` counterpart, in two groups:
+
+- on `Result<T>` / `Result`, taking an async delegate, for an async step in the middle of a pipeline;
+- on `Task<Result<T>>` / `Task<Result>`, taking a sync or an async delegate, so the chain continues after the first async step.
+
+```csharp
+var message = await Email.Create(input)
+    .EnsureAsync(email => repository.EnsureEmailIsFreeAsync(email, ct))   // Task<Result<Email>>
+    .BindAsync(email => User.ParseAge(age).Map(a => new User(Guid.NewGuid(), email, a)))
+    .TapAsync(user => repository.AddAsync(user, ct))
+    .MatchAsync(user => $"registered {user.Email}", error => error.Code);
+```
+
+- **`Task`, not `ValueTask`.** Most async APIs (EF Core, `HttpClient`, ASP.NET Core) return `Task`, and having
+  both would make async lambdas ambiguous. Use `.AsTask()` for a `ValueTask` source.
+- **Cancellation by closure.** Delegates do not take a `CancellationToken`; capture it: `user => orders.CreateAsync(user, ct)`.
+- **Eager validation.** A `null` delegate or source throws when the method is called, not when the task is awaited.
+  Exceptions thrown by your delegates surface through the returned task.
+- The library uses `ConfigureAwait(false)` throughout.
+
+## Things to know
+
+- **Do not pass `async` lambdas to `Result.Try`.** They compile, but exceptions after the first `await` are not
+  observed. Use `Result.TryAsync`.
+- **Do not serialize results directly.** `System.Text.Json` writes only the case of a `Result<T>` (the value, or the
+  error object), and throws for a successful `Result` because its `Error` getter throws. Map results to a DTO or a
+  ProblemDetails response at the API boundary.
+- **`Result<Error>` is not supported.** Both cases would have the type `Error`, so conversions are ambiguous (CS0457).
+- **Union members are hidden from IntelliSense.** `Value`, `HasValue` and the two `TryGetValue` overloads exist for
+  the compiler's pattern matching. Use `TryGetResultValue` and `TryGetError`; `TryGetValue(out var x)` does not compile
+  because the two overloads make `out var` ambiguous.
+- **Other languages.** The `T` / `Error` → `Result<T>` conversion is a C# 15 union conversion. VB, F# and projects with
+  `LangVersion` below 15 use `Result<T>.Success` and `Result<T>.Failure`.
+- **Equality.** Results and errors compare by value. One quirk: `default(Result<int>)` is not equal to
+  `Result<int>.Failure(Error.DefaultResult)`, although both carry the same error.
