@@ -5,10 +5,9 @@ public sealed class UserRepository
 {
     private readonly Dictionary<string, User> _users = new(StringComparer.Ordinal);
 
+    // A lookup that reports "not found" as null, turned into a Result.
     public Result<User> FindByEmail(Email email) =>
-        _users.TryGetValue(email.Value, out var user)
-            ? user
-            : Error.NotFound($"No user with email {email}.");
+        Result.FromNullable(_users.GetValueOrDefault(email.Value), Error.NotFound($"No user with email {email}."));
 
     /// <summary>A <see cref="Result"/>-returning check, reusable through <c>Ensure(Func&lt;T, Result&gt;)</c>.</summary>
     public Result EnsureEmailIsFree(Email email) =>
@@ -22,12 +21,17 @@ public sealed class UserRepository
 
     private static readonly TimeSpan Latency = TimeSpan.FromMilliseconds(20);
 
-    public async Task<Result<User>> FindByEmailAsync(Email email, CancellationToken cancellationToken = default)
+    /// <summary>Like EF Core's <c>FirstOrDefaultAsync</c>: <see langword="null"/> when there is no match.</summary>
+    public async Task<User?> FirstOrDefaultAsync(Email email, CancellationToken cancellationToken = default)
     {
         await Task.Delay(Latency, cancellationToken);
 
-        return FindByEmail(email);
+        return _users.GetValueOrDefault(email.Value);
     }
+
+    public Task<Result<User>> FindByEmailAsync(Email email, CancellationToken cancellationToken = default) =>
+        FirstOrDefaultAsync(email, cancellationToken)
+            .ToResultAsync(Error.NotFound($"No user with email {email}."));
 
     public async Task<Result> EnsureEmailIsFreeAsync(Email email, CancellationToken cancellationToken = default)
     {

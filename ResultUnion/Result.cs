@@ -447,6 +447,35 @@ public readonly record struct Result : IResultState
         return Success();
     }
 
+    /// <summary>Turns a possibly <see langword="null"/> reference into a result: a success with the value, or a failure carrying <paramref name="errorIfNull"/>.</summary>
+    /// <remarks>
+    /// Use it with APIs that report "not found" as <see langword="null"/>, e.g.
+    /// <c>Result.FromNullable(cache.GetValueOrDefault(key), Error.NotFound("…"))</c>.
+    /// For a pending lookup use <see cref="ResultAsyncExtensions.ToResultAsync{T}(Task{T}, Error)"/>.
+    /// </remarks>
+    /// <exception cref="ArgumentNullException"><paramref name="errorIfNull"/> is <see langword="null"/>.</exception>
+    public static Result<T> FromNullable<T>(T? value, Error errorIfNull)
+        where T : class
+    {
+        ArgumentNullException.ThrowIfNull(errorIfNull);
+
+        return value is not null
+            ? Result<T>.Success(value)
+            : Result<T>.Failure(errorIfNull);
+    }
+
+    /// <summary>Turns a nullable value into a result: a success with the value, or a failure carrying <paramref name="errorIfNull"/>.</summary>
+    /// <exception cref="ArgumentNullException"><paramref name="errorIfNull"/> is <see langword="null"/>.</exception>
+    public static Result<T> FromNullable<T>(T? value, Error errorIfNull)
+        where T : struct
+    {
+        ArgumentNullException.ThrowIfNull(errorIfNull);
+
+        return value.HasValue
+            ? Result<T>.Success(value.Value)
+            : Result<T>.Failure(errorIfNull);
+    }
+
     /// <summary>Returns a success when every result succeeded; otherwise the first failure, in order.</summary>
     public static Result Combine(params ReadOnlySpan<Result> results)
     {
