@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="ResultUnion.Showcase/ResultUnion.Showcase.csproj" />
+  <Project Path="ResultUnion.Tests/ResultUnion.Tests.csproj" />
+  <Project Path="ResultUnion/ResultUnion.csproj" />
+</Solution>
