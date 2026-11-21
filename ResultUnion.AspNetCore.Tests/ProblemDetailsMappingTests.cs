@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using ResultUnion.AspNetCore;
 
-namespace ResultUnion.Tests.AspNetCore;
+namespace ResultUnion.AspNetCore.Tests;
 
 public class ProblemDetailsMappingTests
 {

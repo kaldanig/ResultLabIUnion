@@ -3,9 +3,9 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.DependencyInjection;
 using ResultUnion.AspNetCore;
-using static ResultUnion.Tests.Async.EagerAssert;
+using static ResultUnion.AspNetCore.Tests.EagerAssert;
 
-namespace ResultUnion.Tests.AspNetCore;
+namespace ResultUnion.AspNetCore.Tests;
 
 public class ResultHttpExtensionsTests
 {

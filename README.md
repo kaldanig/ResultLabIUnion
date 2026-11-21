@@ -30,7 +30,8 @@ var message = Register("ann@example.com", "34") switch
 |---|---|
 | `ResultUnion` | The library: `Result<T>`, `Result`, `Error`, `ErrorType` and the async extensions in `Async/`. No dependencies. |
 | `ResultUnion.AspNetCore` | ASP.NET Core integration: status codes, RFC 9457 problem details, `ToHttpResult` for Minimal APIs |
-| `ResultUnion.Tests` | xUnit v3 tests, for both libraries |
+| `ResultUnion.Tests` | xUnit v3 tests for `ResultUnion`; no ASP.NET Core dependency |
+| `ResultUnion.AspNetCore.Tests` | xUnit v3 tests for `ResultUnion.AspNetCore`, including the JSON a client receives |
 | `ResultUnion.Showcase` | A console app that demonstrates the API on a small user-registration domain |
 
 ```bash
