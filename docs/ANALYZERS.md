@@ -12,6 +12,11 @@ compiler and the IDE as soon as a project references the package; there is nothi
 
 Rules RU0001–RU0003 have a code fix (the light bulb in Visual Studio and Rider, with Fix All for a document, project or solution). From the command line, `dotnet format analyzers --diagnostics RU0003 --severity warn` applies one; run one rule per call, because a fix for one rule moves the positions the next rule's diagnostics refer to.
 
+The fixes are covered by tests that apply them with Roslyn's workspace API (`ResultUnion.Analyzers.Tests`), and were
+checked by hand in Visual Studio 2026 with the published `ResultUnion` 0.1.0 package on 2026-11-22: every fix in the
+table above gave the expected code in the preview and after applying it, Fix All in a document fixed every occurrence,
+comments next to the fixed code stayed in place, and RU0004 offered no fix.
+
 Change a rule's severity in `.editorconfig`, for example `dotnet_diagnostic.RU0001.severity = error`, or turn it off
 with `none`.
 
