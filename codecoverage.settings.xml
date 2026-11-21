@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Code coverage settings for dotnet test (docs/RELEASING.md, "Code coverage"). Only the shipped
+     assemblies are measured: the three libraries and the analyzers and code fixes packed into ResultUnion.
+     Tests, demos and samples are not. -->
+<Configuration>
+  <Format>cobertura</Format>
+  <CodeCoverage>
+    <ModulePaths>
+      <Include>
+        <ModulePath>.*[\\/]ResultUnion\.dll$</ModulePath>
+        <ModulePath>.*[\\/]ResultUnion\.AspNetCore\.dll$</ModulePath>
+        <ModulePath>.*[\\/]ResultUnion\.Grpc\.dll$</ModulePath>
+        <ModulePath>.*[\\/]ResultUnion\.Analyzers\.dll$</ModulePath>
+        <ModulePath>.*[\\/]ResultUnion\.CodeFixes\.dll$</ModulePath>
+      </Include>
+    </ModulePaths>
+    <Attributes>
+      <Exclude>
+        <Attribute>^System\.CodeDom\.Compiler\.GeneratedCodeAttribute$</Attribute>
+        <Attribute>^System\.Diagnostics\.CodeAnalysis\.ExcludeFromCodeCoverageAttribute$</Attribute>
+      </Exclude>
+    </Attributes>
+    <EnableStaticNativeInstrumentation>false</EnableStaticNativeInstrumentation>
+    <EnableDynamicNativeInstrumentation>false</EnableDynamicNativeInstrumentation>
+  </CodeCoverage>
+</Configuration>

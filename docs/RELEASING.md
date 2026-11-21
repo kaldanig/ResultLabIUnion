@@ -88,3 +88,20 @@ dotnet tool restore; dotnet docfx docfx.json --serve
 ```
 
 The site is written to `artifacts/docs/_site` and served on <http://localhost:8080>.
+
+## Code coverage
+
+CI measures line and branch coverage of the shipped assemblies (`ResultUnion`, `ResultUnion.AspNetCore`,
+`ResultUnion.Grpc`, the analyzers and the code fixes; `codecoverage.settings.xml`) while the tests run with Runtime Async.
+The summary is on the run page; the full HTML report is the run's `coverage` artifact. To produce it locally:
+
+```powershell
+dotnet test --solution ResultLabIUnion.slnx -c Release --coverage --coverage-settings codecoverage.settings.xml --coverage-output-format cobertura --results-directory artifacts/coverage
+```
+
+```powershell
+dotnet tool restore; dotnet reportgenerator -reports:'artifacts/coverage/*.cobertura.xml' -targetdir:artifacts/coverage/report -reporttypes:Html
+```
+
+Then open `artifacts/coverage/report/index.html`. There is no coverage threshold: the number shows where tests are
+missing, not whether a change may be merged.

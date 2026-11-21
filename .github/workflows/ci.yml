@@ -1,7 +1,8 @@
 name: CI
 
-# Builds, tests and packs on every push to master and every pull request. The packages (version 0.x.y-ci.<run>) are
-# uploaded as a run artifact; nothing is published. Publishing is publish.yml, on a version tag.
+# Builds, tests and packs on every push to master and every pull request. The tests run twice, with Runtime Async (with
+# code coverage) and with the classic state machines. The packages (version 0.x.y-ci.<run>) and the coverage report are
+# uploaded as run artifacts; nothing is published. Publishing is publish.yml, on a version tag.
 
 on:
   push:
@@ -44,8 +45,34 @@ jobs:
       - name: Build
         run: dotnet build ResultLabIUnion.slnx --configuration Release --no-restore ${{ steps.version.outputs.args }}
 
+      # Tests with code coverage of the shipped assemblies (codecoverage.settings.xml); the merged report is in the run
+      # summary and, as HTML, in the "coverage" artifact.
       - name: Test
-        run: dotnet test --solution ResultLabIUnion.slnx --configuration Release --no-build
+        run: >
+          dotnet test --solution ResultLabIUnion.slnx --configuration Release --no-build
+          --coverage --coverage-settings codecoverage.settings.xml --coverage-output-format cobertura
+          --results-directory artifacts/coverage
+
+      - name: Coverage report
+        if: always()
+        shell: bash
+        run: |
+          dotnet tool restore
+          dotnet reportgenerator -reports:'artifacts/coverage/*.cobertura.xml' -targetdir:artifacts/coverage/report \
+            -reporttypes:'Html;MarkdownSummaryGithub' -verbosity:Warning
+          cat artifacts/coverage/report/SummaryGithub.md >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: coverage
+          path: artifacts/coverage/report
+          if-no-files-found: ignore
+
+      # The same tests against the classic async state machines (-p:EnableRuntimeAsync=false builds into
+      # artifacts/state-machines/), since the library must behave the same both ways.
+      - name: Test with classic async state machines
+        run: dotnet test --solution ResultLabIUnion.slnx --configuration Release -p:EnableRuntimeAsync=false
 
       - name: Pack
         shell: bash
