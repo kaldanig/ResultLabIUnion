@@ -1,5 +1,11 @@
 # ResultUnion
 
+[![ResultUnion](https://img.shields.io/nuget/v/ResultUnion.svg?label=ResultUnion)](https://www.nuget.org/packages/ResultUnion)
+[![ResultUnion.AspNetCore](https://img.shields.io/nuget/v/ResultUnion.AspNetCore.svg?label=ResultUnion.AspNetCore)](https://www.nuget.org/packages/ResultUnion.AspNetCore)
+[![ResultUnion.Grpc](https://img.shields.io/nuget/v/ResultUnion.Grpc.svg?label=ResultUnion.Grpc)](https://www.nuget.org/packages/ResultUnion.Grpc)
+[![CI](https://github.com/kaldanig/ResultLabIUnion/actions/workflows/ci.yml/badge.svg)](https://github.com/kaldanig/ResultLabIUnion/actions/workflows/ci.yml)
+[![Docs](https://img.shields.io/badge/docs-kaldanig.github.io-blue)](https://kaldanig.github.io/ResultLabIUnion/)
+
 A small implementation of the **Result pattern** for .NET, built on **C# 15 unions**.
 An operation returns `Result<T>`: either the value or an `Error`. Failures are part of the
 signature instead of exceptions, and pipelines run only while every step succeeds.
