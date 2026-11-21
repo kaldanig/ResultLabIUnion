@@ -1,0 +1,39 @@
+# Dependabot opens pull requests for new versions of the NuGet packages and GitHub Actions used here. Each PR runs CI
+# (build, tests in both async modes, pack with package validation) and Docs, so a green PR is safe to merge.
+# Related packages are grouped, so one release of, say, OpenTelemetry is one PR instead of three.
+
+version: 2
+
+updates:
+  - package-ecosystem: nuget
+    # The repository root (Directory.Build.targets: PublicApiAnalyzers) and every project folder.
+    directories:
+      - "/"
+      - "/*"
+    # Test fixtures of the ResultUnion skill reference packages that do not exist; they are not built.
+    exclude-paths:
+      - ".claude/**"
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    groups:
+      roslyn:
+        patterns: ["Microsoft.CodeAnalysis*"]
+      aspnetcore:
+        patterns: ["Microsoft.AspNetCore.*"]
+      grpc:
+        patterns: ["Grpc.*", "Google.Protobuf"]
+      opentelemetry:
+        patterns: ["OpenTelemetry*"]
+      testing:
+        patterns: ["xunit*", "Microsoft.NET.Test.Sdk"]
+
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: monday
+    groups:
+      actions:
+        patterns: ["*"]

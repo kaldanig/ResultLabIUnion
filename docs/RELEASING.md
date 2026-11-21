@@ -56,6 +56,10 @@ release the next version. Never delete and recreate a tag that has been publishe
   breaking change (CP0002, CP0006, …). If the break is intended, run
   `dotnet pack <project> -c Release -p:GenerateCompatibilitySuppressionFile=true`, commit the generated
   `CompatibilitySuppressions.xml`, and list the change in the changelog (DESIGN.md, 36).
+- Dependabot (`.github/dependabot.yml`) opens pull requests every Monday for new NuGet package and GitHub Actions
+  versions, with related packages grouped (Roslyn, ASP.NET Core, gRPC, OpenTelemetry, testing, actions). CI and Docs
+  run on each one. Merge a green PR as it is; a dependency of a package (`Grpc.StatusProto`) changes what consumers
+  get, so note it in the changelog.
 
 ## Documentation site
 
