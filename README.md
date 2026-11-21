@@ -222,6 +222,9 @@ Task<Result<User>> found = db.Users.FirstOrDefaultAsync(u => u.Id == id)
 ```
 
 - `Try` / `TryAsync` never catch `OperationCanceledException`: cancellation is not a business failure.
+- To translate **one exception type only**, type the mapper's parameter; every other exception propagates:
+  `Result.Try(() => int.Parse(text), (FormatException ex) => Error.Validation(ex.Message))`.
+  An untyped mapper (`ex => …`) catches every exception.
 - The error mapper is required; nothing is turned into `Unexpected` silently.
 - `ToResultAsync` turns only `null` into an error; an exception from the lookup itself is not caught.
 
@@ -384,19 +387,11 @@ public sealed class User
     public static Result<User> Create(Email email, Password password) => /* invariants, returns User or an error */;
 }
 
-// Infrastructure: catch only what means something to the domain.
-public async Task<Result> SaveChangesAsync(CancellationToken ct)
-{
-    try
-    {
-        await db.SaveChangesAsync(ct);
-        return Result.Success();
-    }
-    catch (DbUpdateConcurrencyException)
-    {
-        return Error.Concurrency("The data was changed by someone else; reload and retry.");
-    }
-}
+// Infrastructure: translate only what means something to the domain; any other exception propagates.
+public Task<Result> SaveChangesAsync(CancellationToken ct) =>
+    Result.TryAsync(
+        async () => { await db.SaveChangesAsync(ct); },                      // a block lambda: no value
+        (DbUpdateConcurrencyException _) => Error.Concurrency("The data was changed by someone else; reload and retry."));
 
 // Application
 public Task<Result<Guid>> Handle(RegisterUser command, CancellationToken ct) =>
@@ -414,8 +409,9 @@ app.MapPost("/users", (RegisterUser command, RegisterUserHandler handler, Cancel
     handler.Handle(command, ct).ToHttpResultAsync(id => TypedResults.Created($"/users/{id}", new { id })));
 ```
 
-`Result.TryAsync` catches every exception except cancellation, so it fits code where every failure means the same
-thing (a remote call, a parser). To translate one specific exception, as above, write the `try`/`catch` yourself.
+`Result.TryAsync` with an untyped mapper (`ex => …`) catches every exception except cancellation, so it fits code
+where every failure means the same thing (a remote call, a parser). With a typed mapper (`(DbUpdateConcurrencyException ex) => …`),
+as above, only that exception type becomes an error and everything else propagates.
 
 ## Things to know
 

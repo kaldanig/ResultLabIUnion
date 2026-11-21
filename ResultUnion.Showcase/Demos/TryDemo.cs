@@ -36,6 +36,20 @@ internal static class TryDemo
             .MatchAsync(p => $"listening on {p}", error => $"error {error.Code}: {error.Message}");
         Demo.Show("TryAsync(parse).EnsureAsync(range)", port);
 
+        // One exception type only: the typed lambda parameter selects it, every other exception propagates.
+        foreach (var text in new[] { "8080", "eighty", "99999999999" })
+        {
+            try
+            {
+                var parsed = Result.Try(() => int.Parse(text), (FormatException ex) => Error.Validation($"'{text}' is not a number."));
+                Demo.Show($"Try(int.Parse(\"{text}\")), FormatException only", parsed);
+            }
+            catch (OverflowException exception)
+            {
+                Demo.Show($"Try(int.Parse(\"{text}\")), FormatException only", $"error {exception.GetType().Name} propagated (not a FormatException)");
+            }
+        }
+
         // Cancellation is not caught: it stays an exception.
         using var cancellation = new CancellationTokenSource();
         await cancellation.CancelAsync();
