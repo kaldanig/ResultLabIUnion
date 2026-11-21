@@ -53,10 +53,7 @@ public static partial class ResultAsyncExtensions
                 return Task.FromResult(Result<TResult>.Failure(result.Error));
             }
 
-            return Core(value, next);
-
-            static async Task<Result<TResult>> Core(T value, Func<T, Task<Result<TResult>>> next) =>
-                await next(value).ConfigureAwait(false);
+            return Invoke(next, value);
         }
 
         /// <summary>Chains an asynchronous operation that may fail and produces no value, when this result is a success; failures are propagated unchanged.</summary>
@@ -69,10 +66,7 @@ public static partial class ResultAsyncExtensions
                 return Task.FromResult(Result.Failure(result.Error));
             }
 
-            return Core(value, next);
-
-            static async Task<Result> Core(T value, Func<T, Task<Result>> next) =>
-                await next(value).ConfigureAwait(false);
+            return Invoke(next, value);
         }
 
         /// <summary>Turns a successful result into a failure carrying <paramref name="error"/> when the asynchronous <paramref name="predicate"/> is not satisfied.</summary>
@@ -200,12 +194,9 @@ public static partial class ResultAsyncExtensions
             ArgumentNullException.ThrowIfNull(onSuccess);
             ArgumentNullException.ThrowIfNull(onFailure);
 
-            return Core(result, onSuccess, onFailure);
-
-            static async Task<TResult> Core(Result<T> result, Func<T, Task<TResult>> onSuccess, Func<Error, Task<TResult>> onFailure) =>
-                result.TryGetResultValue(out var value)
-                    ? await onSuccess(value).ConfigureAwait(false)
-                    : await onFailure(result.Error).ConfigureAwait(false);
+            return result.TryGetResultValue(out var value)
+                ? Invoke(onSuccess, value)
+                : Invoke(onFailure, result.Error);
         }
 
         /// <summary>Awaits the asynchronous branch that matches the state of the result.</summary>
@@ -214,19 +205,9 @@ public static partial class ResultAsyncExtensions
             ArgumentNullException.ThrowIfNull(onSuccess);
             ArgumentNullException.ThrowIfNull(onFailure);
 
-            return Core(result, onSuccess, onFailure);
-
-            static async Task Core(Result<T> result, Func<T, Task> onSuccess, Func<Error, Task> onFailure)
-            {
-                if (result.TryGetResultValue(out var value))
-                {
-                    await onSuccess(value).ConfigureAwait(false);
-                }
-                else
-                {
-                    await onFailure(result.Error).ConfigureAwait(false);
-                }
-            }
+            return result.TryGetResultValue(out var value)
+                ? InvokeAction(onSuccess, value)
+                : InvokeAction(onFailure, result.Error);
         }
     }
 
@@ -255,6 +236,11 @@ public static partial class ResultAsyncExtensions
             ArgumentNullException.ThrowIfNull(source);
             ArgumentNullException.ThrowIfNull(mapper);
 
+            if (source.IsCompletedSuccessfully)
+            {
+                return source.Result.MapAsync(mapper);
+            }
+
             return Core(source, mapper);
 
             static async Task<Result<TResult>> Core(Task<Result<T>> source, Func<T, Task<TResult>> mapper) =>
@@ -281,6 +267,11 @@ public static partial class ResultAsyncExtensions
             ArgumentNullException.ThrowIfNull(source);
             ArgumentNullException.ThrowIfNull(next);
 
+            if (source.IsCompletedSuccessfully)
+            {
+                return source.Result.BindAsync(next);
+            }
+
             return Core(source, next);
 
             static async Task<Result<TResult>> Core(Task<Result<T>> source, Func<T, Task<Result<TResult>>> next) =>
@@ -293,6 +284,11 @@ public static partial class ResultAsyncExtensions
             ArgumentNullException.ThrowIfNull(source);
             ArgumentNullException.ThrowIfNull(next);
 
+            if (source.IsCompletedSuccessfully)
+            {
+                return RunCompletedResult(source.Result, next, static (r, n) => r.Bind(n));
+            }
+
             return Core(source, next);
 
             static async Task<Result> Core(Task<Result<T>> source, Func<T, Result> next) =>
@@ -304,6 +300,11 @@ public static partial class ResultAsyncExtensions
         {
             ArgumentNullException.ThrowIfNull(source);
             ArgumentNullException.ThrowIfNull(next);
+
+            if (source.IsCompletedSuccessfully)
+            {
+                return source.Result.BindAsync(next);
+            }
 
             return Core(source, next);
 
@@ -318,6 +319,11 @@ public static partial class ResultAsyncExtensions
             ArgumentNullException.ThrowIfNull(predicate);
             ArgumentNullException.ThrowIfNull(error);
 
+            if (source.IsCompletedSuccessfully)
+            {
+                return KeepCompleted(source, (predicate, error), static (r, s) => r.Ensure(s.predicate, s.error));
+            }
+
             return Core(source, predicate, error);
 
             static async Task<Result<T>> Core(Task<Result<T>> source, Func<T, bool> predicate, Error error) =>
@@ -330,6 +336,11 @@ public static partial class ResultAsyncExtensions
             ArgumentNullException.ThrowIfNull(source);
             ArgumentNullException.ThrowIfNull(predicate);
             ArgumentNullException.ThrowIfNull(error);
+
+            if (source.IsCompletedSuccessfully)
+            {
+                return source.Result.EnsureAsync(predicate, error);
+            }
 
             return Core(source, predicate, error);
 
@@ -344,6 +355,11 @@ public static partial class ResultAsyncExtensions
             ArgumentNullException.ThrowIfNull(predicate);
             ArgumentNullException.ThrowIfNull(errorFactory);
 
+            if (source.IsCompletedSuccessfully)
+            {
+                return KeepCompleted(source, (predicate, errorFactory), static (r, s) => r.Ensure(s.predicate, s.errorFactory));
+            }
+
             return Core(source, predicate, errorFactory);
 
             static async Task<Result<T>> Core(Task<Result<T>> source, Func<T, bool> predicate, Func<T, Error> errorFactory) =>
@@ -357,6 +373,11 @@ public static partial class ResultAsyncExtensions
             ArgumentNullException.ThrowIfNull(predicate);
             ArgumentNullException.ThrowIfNull(errorFactory);
 
+            if (source.IsCompletedSuccessfully)
+            {
+                return source.Result.EnsureAsync(predicate, errorFactory);
+            }
+
             return Core(source, predicate, errorFactory);
 
             static async Task<Result<T>> Core(Task<Result<T>> source, Func<T, Task<bool>> predicate, Func<T, Error> errorFactory) =>
@@ -368,6 +389,11 @@ public static partial class ResultAsyncExtensions
         {
             ArgumentNullException.ThrowIfNull(source);
             ArgumentNullException.ThrowIfNull(check);
+
+            if (source.IsCompletedSuccessfully)
+            {
+                return KeepCompleted(source, check, static (r, c) => r.Ensure(c));
+            }
 
             return Core(source, check);
 
@@ -381,6 +407,11 @@ public static partial class ResultAsyncExtensions
             ArgumentNullException.ThrowIfNull(source);
             ArgumentNullException.ThrowIfNull(check);
 
+            if (source.IsCompletedSuccessfully)
+            {
+                return source.Result.EnsureAsync(check);
+            }
+
             return Core(source, check);
 
             static async Task<Result<T>> Core(Task<Result<T>> source, Func<T, Task<Result>> check) =>
@@ -392,6 +423,11 @@ public static partial class ResultAsyncExtensions
         {
             ArgumentNullException.ThrowIfNull(source);
             ArgumentNullException.ThrowIfNull(mapper);
+
+            if (source.IsCompletedSuccessfully)
+            {
+                return KeepCompleted(source, mapper, static (r, m) => r.MapError(m));
+            }
 
             return Core(source, mapper);
 
@@ -405,6 +441,11 @@ public static partial class ResultAsyncExtensions
             ArgumentNullException.ThrowIfNull(source);
             ArgumentNullException.ThrowIfNull(mapper);
 
+            if (source.IsCompletedSuccessfully)
+            {
+                return source.Result.MapErrorAsync(mapper);
+            }
+
             return Core(source, mapper);
 
             static async Task<Result<T>> Core(Task<Result<T>> source, Func<Error, Task<Error>> mapper) =>
@@ -416,6 +457,11 @@ public static partial class ResultAsyncExtensions
         {
             ArgumentNullException.ThrowIfNull(source);
             ArgumentNullException.ThrowIfNull(action);
+
+            if (source.IsCompletedSuccessfully)
+            {
+                return KeepCompleted(source, action, static (r, a) => r.Tap(a));
+            }
 
             return Core(source, action);
 
@@ -429,6 +475,11 @@ public static partial class ResultAsyncExtensions
             ArgumentNullException.ThrowIfNull(source);
             ArgumentNullException.ThrowIfNull(action);
 
+            if (source.IsCompletedSuccessfully)
+            {
+                return source.Result.TapAsync(action);
+            }
+
             return Core(source, action);
 
             static async Task<Result<T>> Core(Task<Result<T>> source, Func<T, Task> action) =>
@@ -441,6 +492,11 @@ public static partial class ResultAsyncExtensions
             ArgumentNullException.ThrowIfNull(source);
             ArgumentNullException.ThrowIfNull(action);
 
+            if (source.IsCompletedSuccessfully)
+            {
+                return KeepCompleted(source, action, static (r, a) => r.TapError(a));
+            }
+
             return Core(source, action);
 
             static async Task<Result<T>> Core(Task<Result<T>> source, Action<Error> action) =>
@@ -452,6 +508,11 @@ public static partial class ResultAsyncExtensions
         {
             ArgumentNullException.ThrowIfNull(source);
             ArgumentNullException.ThrowIfNull(action);
+
+            if (source.IsCompletedSuccessfully)
+            {
+                return source.Result.TapErrorAsync(action);
+            }
 
             return Core(source, action);
 
@@ -479,6 +540,11 @@ public static partial class ResultAsyncExtensions
             ArgumentNullException.ThrowIfNull(onSuccess);
             ArgumentNullException.ThrowIfNull(onFailure);
 
+            if (source.IsCompletedSuccessfully)
+            {
+                return source.Result.MatchAsync(onSuccess, onFailure);
+            }
+
             return Core(source, onSuccess, onFailure);
 
             static async Task<TResult> Core(Task<Result<T>> source, Func<T, Task<TResult>> onSuccess, Func<Error, Task<TResult>> onFailure) =>
@@ -504,6 +570,11 @@ public static partial class ResultAsyncExtensions
             ArgumentNullException.ThrowIfNull(source);
             ArgumentNullException.ThrowIfNull(onSuccess);
             ArgumentNullException.ThrowIfNull(onFailure);
+
+            if (source.IsCompletedSuccessfully)
+            {
+                return source.Result.MatchAsync(onSuccess, onFailure);
+            }
 
             return Core(source, onSuccess, onFailure);
 

@@ -361,3 +361,5 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+# BenchmarkDotNet 0.16 build folders
+.bdn/

@@ -6,6 +6,17 @@
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 
+  <!-- A build without .NET 11 Runtime Async (-p:EnableRuntimeAsync=false, see Directory.Build.targets) gets its own
+       output folders, so the two kinds of build never reuse each other's compiled files. Set here because these paths
+       must be known before the SDK is imported. They are outside the project folders, so the default globs never pick
+       up the other build's generated files. -->
+  <PropertyGroup Condition="'$(EnableRuntimeAsync)' == 'false'">
+    <BaseIntermediateOutputPath>$(MSBuildThisFileDirectory)artifacts\state-machines\obj\$(MSBuildProjectName)\</BaseIntermediateOutputPath>
+    <BaseOutputPath>$(MSBuildThisFileDirectory)artifacts\state-machines\bin\$(MSBuildProjectName)\</BaseOutputPath>
+    <!-- The SDK excludes only the current BaseOutputPath/BaseIntermediateOutputPath; keep the regular ones out too. -->
+    <DefaultItemExcludes>$(DefaultItemExcludes);bin\**;obj\**</DefaultItemExcludes>
+  </PropertyGroup>
+
   <!-- Package metadata -->
   <PropertyGroup>
     <VersionPrefix>0.1.0</VersionPrefix>

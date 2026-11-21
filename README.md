@@ -25,6 +25,8 @@ Why it is built this way, with the alternatives that were considered: [docs/DESI
 
 - .NET 11 SDK (`net11.0`)
 - C# 15 for unions (`[Union]`, `IUnion`) and C# 14 extension members, both default for `net11.0`
+- The libraries are compiled with .NET 11 Runtime Async (`<Features>runtime-async=on</Features>`, set for every
+  `net11.0` project in `Directory.Build.targets`); `-p:EnableRuntimeAsync=false` builds the classic state machines
 
 ## Solution layout
 
@@ -38,6 +40,7 @@ Why it is built this way, with the alternatives that were considered: [docs/DESI
 | `ResultUnion.AspNetCore.Tests` | xUnit v3 tests for `ResultUnion.AspNetCore`, including the JSON a client receives |
 | `ResultUnion.Grpc.Tests` | xUnit v3 tests for `ResultUnion.Grpc`, including server-to-client round trips |
 | `ResultUnion.Analyzers.Tests` | Tests that compile snippets against the real library and check each rule's diagnostics |
+| `ResultUnion.Benchmarks` | BenchmarkDotNet measurements of matching, pipelines, failures against exceptions, `CombineAll` and async chains ([docs/BENCHMARKS.md](docs/BENCHMARKS.md)) |
 | `ResultUnion.Samples.Domain` | The sample domain shared by the demos: `Email`, `Password`, `User`, `OrderLine`, `Order` with their error catalogs, and a Georgian `ErrorLocalizer`. References only `ResultUnion`. |
 | `ResultUnion.Samples.Application` | The sample application layer shared by the Web API and the gRPC service: commands, use cases, in-memory storage. No HTTP, no gRPC. |
 | `ResultUnion.Showcase` | A console app that demonstrates the API section by section |
@@ -562,6 +565,22 @@ The `ResultUnion` package includes Roslyn analyzers, so mistakes show up as comp
 | `RU0003` | `Map` / `MapAsync` with a mapper that returns a `Result` (use `Bind` / `BindAsync`) |
 
 Details, examples and how to change a rule's severity: [docs/ANALYZERS.md](docs/ANALYZERS.md).
+
+## Performance
+
+Measured with BenchmarkDotNet on .NET 11 ([docs/BENCHMARKS.md](docs/BENCHMARKS.md)):
+
+| | Mean | Allocated |
+|---|---:|---:|
+| `switch` / `Match` / `TryGetResultValue` | 1–3 ns | 0 B |
+| Four-step pipeline (`Ensure → Bind → Ensure → Map`) | 10–13 ns | 0 B |
+| `CombineAll` of three successes | 14 ns | 0 B |
+| Returning a cached catalog error | 4 ns | 0 B |
+| `throw` + `catch`, for comparison | 1,239 ns | 376 B |
+| Async handler chain, five steps, synchronous I/O | 66 ns | 256 B |
+
+The success path allocates nothing; async chains allocate a task per step that creates a value, and steps that keep
+the result (`EnsureAsync`, `TapAsync`, `TapErrorAsync`) reuse their source task.
 
 ## Things to know
 

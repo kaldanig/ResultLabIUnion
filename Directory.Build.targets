@@ -15,4 +15,13 @@
                       OutputItemType="Analyzer" ReferenceOutputAssembly="false" PrivateAssets="all" />
   </ItemGroup>
 
+  <!-- .NET 11 Runtime Async: the runtime suspends and resumes async methods itself instead of compiler-generated
+       state machines (cleaner stack traces, less overhead). Only for net11.0 (the netstandard2.0 analyzer is
+       excluded). Build with -p:EnableRuntimeAsync=false to compile the classic state machines, as the benchmarks do
+       for their comparison job; that build uses its own bin/obj folders (Directory.Build.props), because a change of
+       Features alone does not make an incremental build recompile. -->
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net11.0' and '$(EnableRuntimeAsync)' != 'false'">
+    <Features>$(Features);runtime-async=on</Features>
+  </PropertyGroup>
+
 </Project>

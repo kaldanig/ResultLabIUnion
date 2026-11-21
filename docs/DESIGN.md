@@ -15,7 +15,8 @@ was checked with a small program, and the observed output is quoted.
   [7 TryGetResultValue](#7-trygetresultvalue-and-hidden-union-members) · [8 IResultState](#8-iresultstate-not-iresult) ·
   [9 IResultFactory](#9-iresultfactorytself-has-failure-but-no-success)
 - **Async:** [10 Task](#10-task-not-valuetask) · [11 Eager validation](#11-arguments-are-validated-eagerly) ·
-  [12 Cancellation tokens](#12-cancellation-tokens-are-passed-by-closure) · [13 Sequential collections](#13-combineallasync-is-sequential)
+  [12 Cancellation tokens](#12-cancellation-tokens-are-passed-by-closure) · [13 Sequential collections](#13-combineallasync-is-sequential) ·
+  [32 Runtime Async](#32-built-with-net-11-runtime-async) · [33 No unneeded tasks](#33-async-steps-create-no-task-they-do-not-need)
 - **Exceptions:** [14 Cancellation is never caught](#14-cancellation-is-never-caught) · [15 Required mapper](#15-the-exception-mapper-is-required) ·
   [16 Typed Try](#16-one-exception-type-through-a-typed-mapper) · [17 No async guard](#17-no-compile-time-guard-against-async-lambdas-in-try)
 - **Errors:** [18 Field, Details, Arguments](#18-field-details-and-arguments-on-one-error-type) · [19 Equality](#19-hand-written-value-equality) ·
@@ -205,6 +206,44 @@ for the lazy behaviour this rules out.
 **Alternatives.** Running elements concurrently is faster, but the typical selector is a repository call on an EF Core
 `DbContext`, which does not allow parallel operations. A caller that wants concurrency can start the tasks and combine
 the finished results.
+
+### 32. Built with .NET 11 Runtime Async
+
+**Context.** .NET 11 can run `async` methods natively: the runtime suspends and resumes them instead of
+compiler-generated state machines. It is opt-in per project (`<Features>runtime-async=on</Features>`).
+
+**Decision.** Every `net11.0` project in the repository, the shipped libraries included, is compiled with Runtime Async
+(`Directory.Build.targets`). `-p:EnableRuntimeAsync=false` builds the classic state machines into separate
+`artifacts/state-machines/` folders, for the benchmark comparison and for running the tests both ways.
+
+**Why.** `ResultUnion.dll` shrinks from 105 KB to 58 KB, live stack traces show the real call chain, and a directly
+awaited async method that completes synchronously allocates no task (see [docs/BENCHMARKS.md](BENCHMARKS.md)). The
+library only targets `net11.0`, so every consumer's runtime supports it.
+
+**Consequences.** Changing `Features` alone does not make an incremental build recompile, so the two kinds of build
+must not share `bin`/`obj`. The tests run against both builds.
+
+### 33. Async steps create no task they do not need
+
+**Context.** A fluent chain on `Task<Result<T>>` passes a `Task` from one step to the next, so each step's task must
+exist as an object. Under Runtime Async, the task of an async method that the caller awaits directly does not.
+
+**Decision.** Steps that produce a new result stay ordinary async methods; they are already the cheapest form.
+Allocation-free shortcuts are added only where they create nothing: a value-preserving step (passing `Ensure`, `Tap`,
+`TapError`, `MapError` on a success) on an already-completed source returns the source task itself; successes of
+`Result` share one completed task; `BindAsync` and `MatchAsync` with an async delegate return the delegate's task
+instead of awaiting it inside another one. Exceptions, cancellation and `null` tasks behave exactly as in the async
+methods they replace.
+
+**Alternatives.** Running every step synchronously on a completed source and returning `Task.FromResult` was measured
+first: it allocates a task that the async method would not, so the last step of a chain got more expensive. A custom
+awaitable struct instead of `Task<Result<T>>` would remove the intermediate tasks, but changes every signature and the
+handlers' return types.
+
+**Consequences.** A chain's value-preserving steps now add nothing: in the benchmarks the five-step handler chain
+`ToResultAsync → EnsureAsync → TapAsync → MapAsync → TapErrorAsync` allocates 256 B with Runtime Async, the same as the
+three-step `ToResultAsync → BindAsync → MapAsync`. Measured in isolation, `Ensure → Tap → Map → TapError` on a
+completed task went from 320–400 B to 160 B. The tasks that remain are the source and the steps that create new values.
 
 ## Exceptions
 

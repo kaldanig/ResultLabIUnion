@@ -3,6 +3,7 @@
   <Project Path="ResultUnion.Analyzers/ResultUnion.Analyzers.csproj" />
   <Project Path="ResultUnion.AspNetCore.Tests/ResultUnion.AspNetCore.Tests.csproj" />
   <Project Path="ResultUnion.AspNetCore/ResultUnion.AspNetCore.csproj" />
+  <Project Path="ResultUnion.Benchmarks/ResultUnion.Benchmarks.csproj" />
   <Project Path="ResultUnion.Grpc.Tests/ResultUnion.Grpc.Tests.csproj" />
   <Project Path="ResultUnion.Grpc/ResultUnion.Grpc.csproj" />
   <Project Path="ResultUnion.GrpcClient/ResultUnion.GrpcClient.csproj" />

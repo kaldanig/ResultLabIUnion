@@ -21,7 +21,9 @@ public static class ResultTupleExtensions
         {
             ArgumentNullException.ThrowIfNull(mapper);
 
-            return result.Map(values => mapper(values.Item1, values.Item2));
+            return result.TryGetResultValue(out var values)
+                ? Result<TResult>.Success(mapper(values.Item1, values.Item2))
+                : Result<TResult>.Failure(result.Error);
         }
 
         /// <summary>Chains an operation that may fail and takes both values, when this result is a success; failures are propagated unchanged.</summary>
@@ -30,7 +32,9 @@ public static class ResultTupleExtensions
         {
             ArgumentNullException.ThrowIfNull(next);
 
-            return result.Bind(values => next(values.Item1, values.Item2));
+            return result.TryGetResultValue(out var values)
+                ? next(values.Item1, values.Item2)
+                : Result<TResult>.Failure(result.Error);
         }
     }
 
@@ -49,7 +53,9 @@ public static class ResultTupleExtensions
         {
             ArgumentNullException.ThrowIfNull(mapper);
 
-            return result.Map(values => mapper(values.Item1, values.Item2, values.Item3));
+            return result.TryGetResultValue(out var values)
+                ? Result<TResult>.Success(mapper(values.Item1, values.Item2, values.Item3))
+                : Result<TResult>.Failure(result.Error);
         }
 
         /// <summary>Chains an operation that may fail and takes the three values, when this result is a success; failures are propagated unchanged.</summary>
@@ -58,7 +64,9 @@ public static class ResultTupleExtensions
         {
             ArgumentNullException.ThrowIfNull(next);
 
-            return result.Bind(values => next(values.Item1, values.Item2, values.Item3));
+            return result.TryGetResultValue(out var values)
+                ? next(values.Item1, values.Item2, values.Item3)
+                : Result<TResult>.Failure(result.Error);
         }
     }
 
@@ -79,7 +87,9 @@ public static class ResultTupleExtensions
         {
             ArgumentNullException.ThrowIfNull(mapper);
 
-            return result.Map(values => mapper(values.Item1, values.Item2, values.Item3, values.Item4));
+            return result.TryGetResultValue(out var values)
+                ? Result<TResult>.Success(mapper(values.Item1, values.Item2, values.Item3, values.Item4))
+                : Result<TResult>.Failure(result.Error);
         }
 
         /// <summary>Chains an operation that may fail and takes the four values, when this result is a success; failures are propagated unchanged.</summary>
@@ -88,7 +98,9 @@ public static class ResultTupleExtensions
         {
             ArgumentNullException.ThrowIfNull(next);
 
-            return result.Bind(values => next(values.Item1, values.Item2, values.Item3, values.Item4));
+            return result.TryGetResultValue(out var values)
+                ? next(values.Item1, values.Item2, values.Item3, values.Item4)
+                : Result<TResult>.Failure(result.Error);
         }
     }
 }
