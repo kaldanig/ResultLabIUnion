@@ -1,6 +1,8 @@
 <Solution>
   <Project Path="ResultUnion.AspNetCore.Tests/ResultUnion.AspNetCore.Tests.csproj" />
   <Project Path="ResultUnion.AspNetCore/ResultUnion.AspNetCore.csproj" />
+  <Project Path="ResultUnion.Grpc.Tests/ResultUnion.Grpc.Tests.csproj" />
+  <Project Path="ResultUnion.Grpc/ResultUnion.Grpc.csproj" />
   <Project Path="ResultUnion.Samples.Domain/ResultUnion.Samples.Domain.csproj" />
   <Project Path="ResultUnion.Showcase/ResultUnion.Showcase.csproj" />
   <Project Path="ResultUnion.Tests/ResultUnion.Tests.csproj" />

@@ -24,7 +24,7 @@ was checked with a small program, and the observed output is quoted.
   [23 Closed enum](#23-errortype-is-a-closed-enum) · [24 Concurrency is transient](#24-concurrency-is-transient)
 - **Boundaries:** [25 Separate ASP.NET Core project](#25-aspnet-core-integration-is-a-separate-project) ·
   [26 Unexpected stays private](#26-unexpected-errors-never-reach-the-client) · [27 No JSON for results](#27-results-are-not-serialized-directly) ·
-  [30 Typed HTTP responses](#30-http-responses-are-typed)
+  [30 Typed HTTP responses](#30-http-responses-are-typed) · [31 gRPC rich errors](#31-grpc-errors-use-the-rich-error-model)
 - **DDD:** [28 Error catalogs](#28-error-catalogs-per-domain-concept) · [29 Who sets Field](#29-whoever-knows-the-field-name-sets-it)
 
 ---
@@ -365,6 +365,30 @@ would make every signature long and still not match the runtime choice.
 **Consequences.** This changed the return types of existing methods: code that compared the result to a concrete type
 now unwraps `.Result`. `Results<…>` still implements `IResult`, so endpoints compile unchanged. A lambda that returns two
 different response types infers no `TSuccess` and falls back to the untyped overload.
+
+### 31. gRPC errors use the rich error model
+
+**Context.** gRPC methods return the reply message; failures travel in the call's status. The question was how to
+carry an `Error` (type, code, arguments, fields) over gRPC, and how a client gets it back.
+
+**Decision.** A separate `ResultUnion.Grpc` project (no ASP.NET Core; usable by servers and clients). At the service
+boundary, `GetValueOrThrowRpc` returns the reply or throws an `RpcException` carrying a `google.rpc.Status`: the status
+code from `ErrorType`, an `ErrorInfo`, a `BadRequest` for field violations, and a `RetryInfo` for rate limits.
+`RpcException.ToError()` restores the `Error` on the client.
+
+- `ErrorInfo.reason` is the code in UPPER_SNAKE_CASE, as gRPC requires; the original code, the `ErrorType` and the
+  original code of each field violation go into `ErrorInfo.metadata`, so the round trip is lossless where it can be.
+- Conflict and BusinessRule both map to FailedPrecondition, because a conflict is not always a duplicate
+  (AlreadyExists); the `type` in metadata tells them apart again on the client.
+- Concurrency maps to Aborted, which gRPC defines as "retry the whole operation", the same meaning as `IsTransient`.
+
+**Alternatives.** Putting errors into the reply (`oneof { Reply reply; Error error; }`) is typed, but bypasses what gRPC
+tooling relies on: status codes for retries, deadlines, interceptors and monitoring. It remains the right choice for
+per-item errors in a stream, where a status would end the stream.
+
+**Consequences.** `ErrorInfo.metadata` is a string map, so argument values arrive as strings. `FieldViolation` has no
+metadata, so the arguments of individual field violations are not transmitted. A status from a non-ResultUnion server
+still becomes an `Error`, with the code `grpc.<status>`.
 
 ## DDD
 

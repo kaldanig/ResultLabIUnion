@@ -32,8 +32,10 @@ Why it is built this way, with the alternatives that were considered: [docs/DESI
 |---|---|
 | `ResultUnion` | The library: `Result<T>`, `Result`, `Error`, `ErrorType` and the async extensions in `Async/`. No dependencies. |
 | `ResultUnion.AspNetCore` | ASP.NET Core integration: status codes, RFC 9457 problem details, `ToHttpResult` for Minimal APIs |
+| `ResultUnion.Grpc` | gRPC integration: status codes, the `google.rpc` rich error model, `GetValueOrThrowRpc` for services, `ToError` for clients |
 | `ResultUnion.Tests` | xUnit v3 tests for `ResultUnion`; no ASP.NET Core dependency |
 | `ResultUnion.AspNetCore.Tests` | xUnit v3 tests for `ResultUnion.AspNetCore`, including the JSON a client receives |
+| `ResultUnion.Grpc.Tests` | xUnit v3 tests for `ResultUnion.Grpc`, including server-to-client round trips |
 | `ResultUnion.Samples.Domain` | The sample domain shared by both demos: `Email`, `Password`, `User`, `OrderLine`, `Order` with their error catalogs, and a Georgian `ErrorLocalizer`. References only `ResultUnion`. |
 | `ResultUnion.Showcase` | A console app that demonstrates the API section by section |
 | `ResultUnion.WebApi` | A Minimal API demo with OpenAPI and a Scalar UI: real requests, real problem responses |
@@ -371,6 +373,48 @@ A failure becomes an RFC 9457 `application/problem+json` response:
 ```
 
 `Error.ToProblemDetails()` gives the `ProblemDetails` object itself, for controllers or exception handlers.
+
+## gRPC: `ResultUnion.Grpc`
+
+The domain and application layers stay the same; only the boundary changes. A gRPC method returns the reply message,
+and gRPC reports failures through the call's status, so the service ends the pipeline with `GetValueOrThrowRpc`:
+
+```csharp
+using ResultUnion.Grpc;
+
+public override Task<UserReply> GetUser(GetUserRequest request, ServerCallContext context) =>
+    users.FindAsync(request.Email, context.CancellationToken)      // Task<Result<User>>, as in the Web API
+        .MapAsync(UserReply.From)
+        .GetValueOrThrowRpcAsync();                                 // the reply, or RpcException with a rich status
+
+public override Task<Empty> DeactivateUser(DeactivateUserRequest request, ServerCallContext context) =>
+    users.DeactivateAsync(request.Email, context.CancellationToken)
+        .GetValueOrThrowRpcAsync(() => new Empty());
+```
+
+The `RpcException` carries gRPC's rich error model (`google.rpc.Status`):
+
+| `Error` | gRPC |
+|---|---|
+| `Type` | status code: Validation → InvalidArgument, Unauthorized → Unauthenticated, Forbidden → PermissionDenied, NotFound → NotFound, Conflict and BusinessRule → FailedPrecondition, Concurrency → Aborted, TooManyRequests → ResourceExhausted, Unavailable → Unavailable, Unexpected → Internal |
+| `Code` | `ErrorInfo.reason` in UPPER_SNAKE_CASE (`USER_TOO_YOUNG`), and the original in `ErrorInfo.metadata["code"]` |
+| `Arguments` | `ErrorInfo.metadata`, as strings |
+| `Field` / `Details` | `BadRequest.field_violations`, one per invalid input (`lines[1].quantity`) |
+| `TooManyRequests` + `retryAfterSeconds` | `RetryInfo.retry_delay` |
+| `Message` | the status message; `Unexpected` sends a fixed message and no arguments |
+
+On the client, `ToError` turns the exception back into an `Error`, so a service calling another keeps working with
+results. With the typed `TryAsync`, only `RpcException` is translated:
+
+```csharp
+Result<UserReply> user = await Result.TryAsync(
+    () => client.GetUserAsync(request).ResponseAsync,
+    (RpcException ex) => ex.ToError());
+```
+
+From a ResultUnion service, the type, code, message, arguments and field violations come back; argument values arrive
+as strings, and the arguments of individual field violations are not transmitted. From any other server, the error
+code is `grpc.<status>` (e.g. `grpc.deadline_exceeded`) with the type mapped from the status code.
 
 ## Using ResultUnion in a DDD application
 
