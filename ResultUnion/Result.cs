@@ -366,7 +366,7 @@ public readonly record struct Result<T> : IUnion, IResultState<T>, IResultFactor
 /// </para>
 /// </remarks>
 [DebuggerDisplay("{ToString(),nq}")]
-public readonly record struct Result : IResultFactory<Result>
+public readonly partial record struct Result : IResultFactory<Result>
 {
     /// <inheritdoc/>
     public bool IsSuccess { get; }

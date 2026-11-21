@@ -157,6 +157,20 @@ Result form = Result.CombineAll(
 
 Both have an overload for `IEnumerable<IResultState>`, which accepts `Result<T>` of different types (each one is boxed).
 
+To keep the values, pass two to four `Result<T>` arguments: `CombineAll` then returns a tuple on success, and
+reports every error on failure. `Map` and `Bind` on a tuple result take one parameter per value, so a factory can
+be passed as a method group:
+
+```csharp
+Result<User> user = Result.CombineAll(
+        Email.Create(cmd.Email).MapError(e => e.WithField("email")),
+        Password.Create(cmd.Password).MapError(e => e.WithField("password")))
+    .Bind(User.Create);                       // User.Create(Email, Password) -> Result<User>
+```
+
+Mixing `Result` and `Result<T>` arguments is not supported by these overloads; call `ToResult()` on the generic ones
+and use the plain `CombineAll`, or use the `IEnumerable<IResultState>` overload.
+
 ### Exceptions and `null`
 
 At the boundary with code that throws or returns `null`:

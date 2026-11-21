@@ -37,6 +37,19 @@ internal static class CombineDemo
                 }
             }
         }
+
+        // CombineAll with values: build the entity from every value object at once, or report every invalid field.
+        Console.WriteLine();
+        Console.WriteLine("  CombineAll with values -> entity:");
+        foreach (var (email, age) in new[] { ("eve@example.com", "29"), ("eve@", "abc") })
+        {
+            var user = Result.CombineAll(
+                    Email.Create(email).MapError(error => error.WithField("email")),     // Result<Email>
+                    User.ParseAge(age).MapError(error => error.WithField("age")))        // Result<int>
+                .Map((address, years) => new User(Guid.NewGuid(), address, years));     // one parameter per value
+
+            Demo.Show($"CombineAll(\"{email}\", \"{age}\").Map(...)", user.Map(u => $"{u.Email}, age {u.Age}"));
+        }
     }
 
     private static Result ValidateFirst(string email, string age) =>
