@@ -43,12 +43,14 @@ Why it is built this way, with the alternatives that were considered: [docs/DESI
 | `ResultUnion.AspNetCore` | ASP.NET Core integration: status codes, RFC 9457 problem details, `ToHttpResult` for Minimal APIs |
 | `ResultUnion.Grpc` | gRPC integration: status codes, the `google.rpc` rich error model, `GetValueOrThrowRpc` for services, `ToError` for clients |
 | `ResultUnion.FluentValidation` | FluentValidation integration: a `ValidationResult` as a `Result` with one field error per failure, `ValidateToResultAsync` |
+| `ResultUnion.Http` | HTTP client integration: a response read back as a `Result`, a problem details body as an `Error` (the client side of `ResultUnion.AspNetCore`) |
 | `ResultUnion.Analyzers` | Roslyn analyzers shipped inside the `ResultUnion` package: a discarded `Result`, `async` code in `Result.Try`, `Map` that should be `Bind` ([docs/ANALYZERS.md](docs/ANALYZERS.md)) |
 | `ResultUnion.CodeFixes` | The code fixes for those rules (`_ =`, `TryAsync`, `Bind`), in a separate assembly because they need Roslyn's Workspaces; shipped next to the analyzers |
 | `ResultUnion.Tests` | xUnit v3 tests for `ResultUnion`; no ASP.NET Core dependency |
 | `ResultUnion.AspNetCore.Tests` | xUnit v3 tests for `ResultUnion.AspNetCore`, including the JSON a client receives |
 | `ResultUnion.Grpc.Tests` | xUnit v3 tests for `ResultUnion.Grpc`, including server-to-client round trips |
 | `ResultUnion.FluentValidation.Tests` | xUnit v3 tests for `ResultUnion.FluentValidation`, including the JSON round trip of the errors it creates |
+| `ResultUnion.Http.Tests` | xUnit v3 tests for `ResultUnion.Http`, including round trips through a real ASP.NET Core server and responses from other servers |
 | `ResultUnion.Analyzers.Tests` | Tests that compile snippets against the real library and check each rule's diagnostics |
 | `ResultUnion.Benchmarks` | BenchmarkDotNet measurements of matching, pipelines, failures against exceptions, `CombineAll` and async chains ([docs/BENCHMARKS.md](docs/BENCHMARKS.md)) |
 | `ResultUnion.Samples.Domain` | The sample domain shared by the demos: `Email`, `Password`, `User`, `OrderLine`, `Order` with their error catalogs, and a Georgian `ErrorLocalizer`. References only `ResultUnion`. |
@@ -510,6 +512,34 @@ Result result = validator.Validate(command).ToResult();   // from a ValidationRe
 Every failure is a `Validation` error, whatever its `Severity`, as `IsValid` counts it. The attempted value is never
 copied into the error, since it may be a password. Asynchronous rules (`MustAsync`) need `ValidateToResultAsync`, and
 cancellation is not turned into a failure.
+
+## HTTP clients: `ResultUnion.Http`
+
+The client side of `ResultUnion.AspNetCore`: a response becomes a `Result`, and a problem details body becomes the
+`Error` the server returned, so a service calling another service (or a Blazor or MAUI app calling its API) keeps working
+with codes, types and field errors instead of status codes and JSON:
+
+```csharp
+using ResultUnion.Http;
+
+Result<UserDto> user = await http.GetAsync($"/users/{email}", ct).ReadResultAsync<UserDto>(ct);
+Result deleted = await http.DeleteAsync($"/users/{email}", ct).ReadResultAsync(ct);
+
+if (user.TryGetError(out var error) && error.IsTransient) { /* retry later */ }
+```
+
+| The response | The result |
+|---|---|
+| 2xx | the JSON body as `T` (or a success without a value) |
+| a problem from a ResultUnion server | the same `Error`: `code`, `category` (the `ErrorType`), message, `arguments`, one field error per `details` entry |
+| a problem from another server | type from the status (404 NotFound, 409 Conflict, 429 TooManyRequests, 503 Unavailable, …), code `http.<status>`, message from `detail` or `title`, ASP.NET Core's `errors` as field errors |
+| no body, or an HTML error page | type and code from the status, the reason phrase as the message |
+
+A `Retry-After` header becomes the `retryAfterSeconds` argument. `Unexpected` errors arrive without the server's
+message and arguments, which the server never sends. Only the response is interpreted: a request that fails to arrive
+(`HttpRequestException`, a timeout) and a success body that is not valid JSON stay exceptions, so translate the ones you
+expect with `Result.TryAsync`. The methods on `Task<HttpResponseMessage>` dispose the response; the ones on
+`HttpResponseMessage` leave it to you.
 
 ## JSON: errors in messages between services
 

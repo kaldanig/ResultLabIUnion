@@ -9,6 +9,20 @@ are in the diff of those files.
 
 ## [Unreleased]
 
+### ResultUnion.Http (new package)
+
+- `HttpResponseMessage.ReadResultAsync<T>()` / `ReadResultAsync()` and the same on `Task<HttpResponseMessage>` (which
+  dispose the response): the value from a successful response's JSON body, or the error read from its RFC 9457 problem
+  details body. From a ResultUnion server the error comes back as it was sent (code, type, message, arguments, field
+  errors); from any other server the type and code follow the status, ASP.NET Core's `errors` become field errors and
+  `Retry-After` becomes `retryAfterSeconds`.
+- `HttpResponseMessage.ReadErrorAsync()`: the error of a failed response.
+
+### ResultUnion.AspNetCore
+
+- Problem responses carry the error's type as the `category` member, so a client can tell a `Concurrency` conflict
+  (transient) from a `Conflict`, which share status 409.
+
 ## [0.2.0] - 2026-11-22
 
 ### ResultUnion.FluentValidation (new package)

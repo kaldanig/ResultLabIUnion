@@ -11,6 +11,7 @@
         <ModulePath>.*[\\/]ResultUnion\.AspNetCore\.dll$</ModulePath>
         <ModulePath>.*[\\/]ResultUnion\.Grpc\.dll$</ModulePath>
         <ModulePath>.*[\\/]ResultUnion\.FluentValidation\.dll$</ModulePath>
+        <ModulePath>.*[\\/]ResultUnion\.Http\.dll$</ModulePath>
         <ModulePath>.*[\\/]ResultUnion\.Analyzers\.dll$</ModulePath>
         <ModulePath>.*[\\/]ResultUnion\.CodeFixes\.dll$</ModulePath>
       </Include>

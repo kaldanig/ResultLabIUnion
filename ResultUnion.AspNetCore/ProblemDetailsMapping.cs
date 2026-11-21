@@ -72,7 +72,9 @@ public static class ProblemDetailsMapping
         /// <para>
         /// <see cref="ProblemDetails.Status"/> comes from <see cref="Error.Type"/>, <see cref="ProblemDetails.Detail"/> from
         /// <see cref="Error.Message"/>, and the stable <see cref="Error.Code"/> is added as the <c>code</c> extension.
-        /// <see cref="ProblemDetails.Title"/> and <see cref="ProblemDetails.Type"/> are left to ASP.NET Core's defaults.
+        /// <see cref="ProblemDetails.Title"/> and <see cref="ProblemDetails.Type"/> are left to ASP.NET Core's defaults. The
+        /// <c>category</c> extension holds the <see cref="ErrorType"/> name, which the status code alone does not always give
+        /// (Conflict and Concurrency are both 409), so a client such as ResultUnion.Http can restore the error exactly.
         /// </para>
         /// <para>
         /// An error with a <see cref="Error.Field"/> or <see cref="Error.Details"/> becomes an
@@ -118,6 +120,7 @@ public static class ProblemDetailsMapping
             problem.Status = error.Type.ToStatusCode();
             problem.Detail = unexpected ? UnexpectedDetail : error.Message;
             problem.Extensions["code"] = error.Code;
+            problem.Extensions["category"] = error.Type.ToString();
 
             if (!unexpected && error.Arguments.Count > 0)
             {

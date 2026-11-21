@@ -30,7 +30,8 @@ was checked with a small program, and the observed output is quoted.
   [35 Telemetry](#35-failures-are-reported-through-systemdiagnostics)
 - **DDD:** [28 Error catalogs](#28-error-catalogs-per-domain-concept) · [29 Who sets Field](#29-whoever-knows-the-field-name-sets-it)
 - **Packages:** [36 Compatibility checked against the last release](#36-compatibility-is-checked-against-the-last-release) ·
-  [37 FluentValidation failures become field errors](#37-fluentvalidation-failures-become-field-errors)
+  [37 FluentValidation failures become field errors](#37-fluentvalidation-failures-become-field-errors) ·
+  [38 HTTP clients read problems back as errors](#38-http-clients-read-problems-back-as-errors)
 
 ---
 
@@ -548,3 +549,28 @@ every failure.
 
 **Consequences.** Field naming other than camel case is a parameter of `ToResult(fieldName)`. Asynchronous rules need
 `ValidateToResultAsync`, because FluentValidation refuses to run them synchronously.
+
+### 38. HTTP clients read problems back as errors
+
+**Context.** `ResultUnion.AspNetCore` turns an `Error` into a problem response, and `ResultUnion.Grpc` works in both
+directions, but a .NET client of an HTTP API had to parse status codes and problem JSON itself, and usually lost the code,
+the arguments or the field errors on the way.
+
+**Decision.** A separate client package, `ResultUnion.Http`, with no ASP.NET Core dependency, so Blazor WebAssembly,
+MAUI and worker services can use it (25). `ReadResultAsync<T>` / `ReadResultAsync` read a response; `ReadErrorAsync`
+reads the error of a failed one. The server now also sends the `ErrorType` as the `category` member: the status code
+alone cannot tell `Concurrency` (transient, retry) from `Conflict`, which are both 409. With it, an error from a
+ResultUnion server comes back equal to the one the server returned, except for `Unexpected`, whose message and
+arguments the server never sends (26). From other servers the client reads what is there: the status decides the type,
+the code is `http.<status>` (like `grpc.<status>` in 31), `detail` or `title` the message, ASP.NET Core's `errors` the
+field errors, and a `Retry-After` header the `retryAfterSeconds` argument.
+
+**Alternatives.** Putting the client in `ResultUnion.AspNetCore` would force the ASP.NET Core framework onto every
+client. Catching `HttpRequestException` and timeouts inside the package would turn outages into results without the
+caller choosing to; like `Result.TryAsync` (15), the client leaves that decision to the caller. Mapping every 4xx to
+`Validation` would make a client bug (405, 415) look like the user's mistake, so unknown statuses are `Unexpected`.
+
+**Consequences.** The methods on `Task<HttpResponseMessage>` dispose the response they awaited; those on
+`HttpResponseMessage` leave it to the caller. A successful response without a usable body for `T` is a contract
+violation and throws, as other bugs do. `category` is an addition to the problem body, so existing clients are not
+affected.

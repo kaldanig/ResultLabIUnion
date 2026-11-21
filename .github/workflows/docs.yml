@@ -35,7 +35,7 @@ jobs:
       - name: Build the packages
         shell: bash
         run: |
-          for project in ResultUnion ResultUnion.AspNetCore ResultUnion.Grpc ResultUnion.FluentValidation; do
+          for project in ResultUnion ResultUnion.AspNetCore ResultUnion.Grpc ResultUnion.FluentValidation ResultUnion.Http; do
             dotnet build "$project/$project.csproj" --configuration Release
           done
 

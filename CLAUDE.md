@@ -11,7 +11,7 @@ conventions differ from other Result libraries (`Bind`, not `Then`; `Task` deleg
 `Field`), and code written from memory breaks them. Do this even when the task looks small.
 
 Changes to the library itself (`ResultUnion/`, `ResultUnion.AspNetCore/`, `ResultUnion.Grpc/`,
-`ResultUnion.FluentValidation/`) follow
+`ResultUnion.FluentValidation/`, `ResultUnion.Http/`) follow
 `docs/DESIGN.md`; record a new decision there when one is made.
 
 ## Build and test

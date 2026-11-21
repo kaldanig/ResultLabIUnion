@@ -35,6 +35,17 @@ public class ProblemDetailsMappingTests
         Assert.False(problem.Extensions.ContainsKey("details"));
     }
 
+    [Theory]
+    [InlineData(ErrorType.Conflict)]
+    [InlineData(ErrorType.Concurrency)]
+    [InlineData(ErrorType.Unexpected)]
+    public void The_category_names_the_error_type_which_the_status_alone_does_not(ErrorType type)
+    {
+        var problem = Error.Create("x.y", "Message.", type).ToProblemDetails();
+
+        Assert.Equal(type.ToString(), problem.Extensions["category"]);
+    }
+
     [Fact]
     public void ErrorWithField_BecomesValidationProblemDetails()
     {
