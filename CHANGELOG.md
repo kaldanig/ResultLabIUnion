@@ -25,7 +25,9 @@ The first release. Requires .NET 11 (C# 15 unions).
 - `Result.CombineAll` for two to four results (as a tuple), for spans, and for sequences with indexed field names
   (`lines[2].quantity`); `CombineAllAsync`.
 - `Result.Try` / `Result.TryAsync`, catching every exception or one type through a typed mapper; cancellation is never
-  caught. `Result.FromNullable` and `Task<T?>.ToResultAsync`.
+  caught. `Result.FromNullable` and `ToResultAsync` on `Task<T?>` and `ValueTask<T?>` (EF Core's `FindAsync`).
+- The async pipeline also on `ValueTask<Result<T>>` and `ValueTask<Result>` sources: each source is awaited once and
+  the chain continues on `Task`; delegates stay `Task`-based.
 - `IResultState` and `IResultFactory<TSelf>` for generic pipeline behaviors.
 - `ErrorJsonConverter`: `Error` serializes with System.Text.Json in a fixed format, for events and queue messages.
 - `ResultTelemetry` and `Record` / `RecordAsync`: failures counted in OpenTelemetry (`resultunion.errors`) and added to

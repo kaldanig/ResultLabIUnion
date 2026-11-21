@@ -181,8 +181,10 @@ Run(async x => { await Task.Yield(); return x + 1; });
 its usage rules (await once, never concurrently). Its benefit, avoiding an allocation on synchronous completion, is
 negligible next to the I/O in a typical pipeline.
 
-**Consequences.** A `ValueTask` source needs `.AsTask()`. Extensions on `ValueTask<Result<T>>` *sources* (not delegates)
-could be added later without the ambiguity.
+**Consequences.** Sources may be `ValueTask`: the pipeline also extends `ValueTask<Result<T>>`, `ValueTask<Result>` and
+`ValueTask<T?>` (for EF Core's `FindAsync`). Those methods have the `Task` methods' names and delegates (they are
+generated from them), await the source exactly once, as a `ValueTask` requires, and return `Task`, so a chain moves
+to `Task` after its first step. Only the receiver is new, so no call becomes ambiguous.
 
 ### 11. Arguments are validated eagerly
 

@@ -328,8 +328,11 @@ var message = await Email.Create(input)
     .MatchAsync(user => $"registered {user.Email}", error => error.Code);
 ```
 
-- **`Task`, not `ValueTask`.** Most async APIs (EF Core, `HttpClient`, ASP.NET Core) return `Task`, and having
-  both would make async lambdas ambiguous. Use `.AsTask()` for a `ValueTask` source.
+- **`Task` delegates and results; `Task` or `ValueTask` sources.** Most async APIs (`HttpClient`, ASP.NET Core) return
+  `Task`, and accepting both kinds of delegate would make async lambdas ambiguous, so delegates and return values are
+  `Task`. A chain can still start from a `ValueTask`: `ValueTask<T?>.ToResultAsync` (EF Core's `FindAsync`) and the
+  whole pipeline on `ValueTask<Result<T>>` / `ValueTask<Result>` await the source once and continue on `Task`:
+  `await db.Users.FindAsync([id], ct).ToResultAsync(User.Errors.NotFound(id))`.
 - **Cancellation by closure.** Delegates do not take a `CancellationToken`; capture it: `user => orders.CreateAsync(user, ct)`.
 - **Eager validation.** A `null` delegate or source throws when the method is called, not when the task is awaited.
   Exceptions thrown by your delegates surface through the returned task.

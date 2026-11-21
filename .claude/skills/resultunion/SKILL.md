@@ -25,8 +25,9 @@ reuses a validator and keeps the value. `Tap` / `TapError` for side effects, `Ma
 `Match` at the end.
 
 **Async: `Task`, never `ValueTask`.** Every operation has an `…Async` form, on `Result<T>` (async delegate) and on
-`Task<Result<T>>` (sync or async delegate), so one chain needs a single `await` at the end. A `ValueTask` source needs
-`.AsTask()`. Pass the `CancellationToken` by closure: `user => repo.AddAsync(user, ct)`; delegates take no token.
+`Task<Result<T>>` (sync or async delegate), so one chain needs a single `await` at the end. A `ValueTask` source works
+directly (`db.Users.FindAsync([id], ct).ToResultAsync(error)`, or a `ValueTask<Result<T>>` method followed by
+`.MapAsync(...)`); everything after it is `Task`. Never write `ValueTask` delegates or return types yourself. Pass the `CancellationToken` by closure: `user => repo.AddAsync(user, ct)`; delegates take no token.
 
 **Errors come from catalogs, not inline strings.** Each domain concept declares its errors in a nested `Errors`
 class with stable codes `<concept>.<case>` (snake_case). Codes are a contract with clients (they switch on them and

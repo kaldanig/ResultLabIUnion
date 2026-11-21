@@ -45,4 +45,46 @@ public static partial class ResultAsyncExtensions
                 Result.FromNullable(await source.ConfigureAwait(false), errorIfNull);
         }
     }
+
+    /// <typeparam name="T">The type of the looked-up reference.</typeparam>
+    /// <param name="source">A pending lookup that reports "not found" as <see langword="null"/>. It is awaited once.</param>
+    extension<T>(ValueTask<T?> source)
+        where T : class
+    {
+        /// <summary>Awaits a lookup and turns it into a result: a success with the value, or a failure carrying <paramref name="errorIfNull"/> when it is <see langword="null"/>.</summary>
+        /// <remarks>
+        /// For APIs that return <see cref="ValueTask{TResult}"/>, such as EF Core's <c>FindAsync</c>:
+        /// <c>await db.Users.FindAsync([id], ct).ToResultAsync(User.Errors.NotFound(id))</c>.
+        /// An exception from the lookup itself is not caught; it surfaces through the returned task.
+        /// </remarks>
+        /// <exception cref="ArgumentNullException"><paramref name="errorIfNull"/> is <see langword="null"/>.</exception>
+        public Task<Result<T>> ToResultAsync(Error errorIfNull)
+        {
+            ArgumentNullException.ThrowIfNull(errorIfNull);
+
+            return Core(source, errorIfNull);
+
+            static async Task<Result<T>> Core(ValueTask<T?> source, Error errorIfNull) =>
+                Result.FromNullable(await source.ConfigureAwait(false), errorIfNull);
+        }
+    }
+
+    /// <typeparam name="T">The type of the looked-up value.</typeparam>
+    /// <param name="source">A pending lookup that reports "not found" as <see langword="null"/>. It is awaited once.</param>
+    extension<T>(ValueTask<T?> source)
+        where T : struct
+    {
+        /// <summary>Awaits a lookup and turns it into a result: a success with the value, or a failure carrying <paramref name="errorIfNull"/> when it has no value.</summary>
+        /// <remarks>An exception from the lookup itself is not caught; it surfaces through the returned task.</remarks>
+        /// <exception cref="ArgumentNullException"><paramref name="errorIfNull"/> is <see langword="null"/>.</exception>
+        public Task<Result<T>> ToResultAsync(Error errorIfNull)
+        {
+            ArgumentNullException.ThrowIfNull(errorIfNull);
+
+            return Core(source, errorIfNull);
+
+            static async Task<Result<T>> Core(ValueTask<T?> source, Error errorIfNull) =>
+                Result.FromNullable(await source.ConfigureAwait(false), errorIfNull);
+        }
+    }
 }
