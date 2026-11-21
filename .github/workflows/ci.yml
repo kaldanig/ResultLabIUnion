@@ -1,12 +1,11 @@
 name: CI
 
-# Builds, tests and packs on every push and pull request. The packages are uploaded as a run artifact; nothing is
-# published to nuget.org. A tag such as v0.2.0 packs that exact version; other builds get a ci.<run> suffix.
+# Builds, tests and packs on every push to master and every pull request. The packages (version 0.x.y-ci.<run>) are
+# uploaded as a run artifact; nothing is published. Publishing is publish.yml, on a version tag.
 
 on:
   push:
     branches: [master]
-    tags: ['v*']
   pull_request:
   workflow_dispatch:
 

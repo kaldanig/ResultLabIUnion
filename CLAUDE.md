@@ -26,3 +26,6 @@ dotnet test --solution ResultLabIUnion.slnx
 - Every `net11.0` project builds with .NET 11 Runtime Async (`Directory.Build.targets`). `-p:EnableRuntimeAsync=false`
   builds the classic state machines into `artifacts/state-machines/`; the tests must pass both ways.
 - The ResultUnion analyzers (RU0001–RU0003) run on every project; fix their warnings rather than suppressing them.
+- The public API of each package is recorded in `PublicAPI.Shipped.txt` / `PublicAPI.Unshipped.txt`; a new or changed
+  public member must be added to `PublicAPI.Unshipped.txt` (RS0016/RS0017), and user-visible changes go under
+  `## [Unreleased]` in `CHANGELOG.md`. Releasing is described in `docs/RELEASING.md`.

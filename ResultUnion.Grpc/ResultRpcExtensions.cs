@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using Grpc.Core;
 using ResultUnion.Diagnostics;
 
@@ -24,6 +25,7 @@ public static class ResultRpcExtensions
         /// <summary>Returns the value on success; throws an <see cref="RpcException"/> for the error on failure.</summary>
         /// <param name="domain">The <c>ErrorInfo.domain</c>.</param>
         /// <exception cref="RpcException">The result is a failure.</exception>
+        [SuppressMessage("ApiDesign", "RS0026", Justification = "Different receivers in one static class, not real overloads. Add new options as new overloads, never as new optional parameters.")]
         public T GetValueOrThrowRpc(string domain = RpcErrorMapping.DefaultDomain) =>
             result.TryGetResultValue(out var value) ? value : throw ToRpcFailure(result.Error, domain);
     }
@@ -37,6 +39,7 @@ public static class ResultRpcExtensions
         /// <param name="domain">The <c>ErrorInfo.domain</c>.</param>
         /// <exception cref="ArgumentNullException"><paramref name="onSuccess"/> is <see langword="null"/>.</exception>
         /// <exception cref="RpcException">The result is a failure.</exception>
+        [SuppressMessage("ApiDesign", "RS0026", Justification = "Different receivers in one static class, not real overloads. Add new options as new overloads, never as new optional parameters.")]
         public TReply GetValueOrThrowRpc<TReply>(Func<TReply> onSuccess, string domain = RpcErrorMapping.DefaultDomain)
         {
             ArgumentNullException.ThrowIfNull(onSuccess);
@@ -62,6 +65,7 @@ public static class ResultRpcExtensions
         /// <summary>Awaits the result, then returns the value or throws an <see cref="RpcException"/> for the error.</summary>
         /// <param name="domain">The <c>ErrorInfo.domain</c>.</param>
         /// <exception cref="ArgumentNullException"><paramref name="source"/> is <see langword="null"/>.</exception>
+        [SuppressMessage("ApiDesign", "RS0026", Justification = "Different receivers in one static class, not real overloads. Add new options as new overloads, never as new optional parameters.")]
         public Task<T> GetValueOrThrowRpcAsync(string domain = RpcErrorMapping.DefaultDomain)
         {
             ArgumentNullException.ThrowIfNull(source);
@@ -80,6 +84,7 @@ public static class ResultRpcExtensions
         /// <param name="onSuccess">Creates the reply.</param>
         /// <param name="domain">The <c>ErrorInfo.domain</c>.</param>
         /// <exception cref="ArgumentNullException"><paramref name="source"/> or <paramref name="onSuccess"/> is <see langword="null"/>.</exception>
+        [SuppressMessage("ApiDesign", "RS0026", Justification = "Different receivers in one static class, not real overloads. Add new options as new overloads, never as new optional parameters.")]
         public Task<TReply> GetValueOrThrowRpcAsync<TReply>(Func<TReply> onSuccess, string domain = RpcErrorMapping.DefaultDomain)
         {
             ArgumentNullException.ThrowIfNull(source);

@@ -1,0 +1,325 @@
+#nullable enable
+const ResultUnion.Diagnostics.ResultTelemetry.CategoryAttribute = "resultunion.error.category" -> string!
+const ResultUnion.Diagnostics.ResultTelemetry.CodeAttribute = "resultunion.error.code" -> string!
+const ResultUnion.Diagnostics.ResultTelemetry.ErrorEventName = "resultunion.error" -> string!
+const ResultUnion.Diagnostics.ResultTelemetry.ErrorsCounterName = "resultunion.errors" -> string!
+const ResultUnion.Diagnostics.ResultTelemetry.ErrorTypeAttribute = "error.type" -> string!
+const ResultUnion.Diagnostics.ResultTelemetry.FieldAttribute = "resultunion.error.field" -> string!
+const ResultUnion.Diagnostics.ResultTelemetry.MeterName = "ResultUnion" -> string!
+const ResultUnion.Diagnostics.ResultTelemetry.OperationAttribute = "resultunion.operation" -> string!
+override ResultUnion.Error.Equals(object? obj) -> bool
+override ResultUnion.Error.GetHashCode() -> int
+override ResultUnion.Error.ToString() -> string!
+override ResultUnion.Result.GetHashCode() -> int
+override ResultUnion.Result.ToString() -> string!
+override ResultUnion.Result<T>.GetHashCode() -> int
+override ResultUnion.Result<T>.ToString() -> string!
+override ResultUnion.Serialization.ErrorJsonConverter.Read(ref System.Text.Json.Utf8JsonReader reader, System.Type! typeToConvert, System.Text.Json.JsonSerializerOptions! options) -> ResultUnion.Error!
+override ResultUnion.Serialization.ErrorJsonConverter.Write(System.Text.Json.Utf8JsonWriter! writer, ResultUnion.Error! value, System.Text.Json.JsonSerializerOptions! options) -> void
+ResultUnion.Diagnostics.ResultTelemetry
+ResultUnion.Error
+ResultUnion.Error.<Clone>$() -> ResultUnion.Error!
+ResultUnion.Error.Arguments.get -> System.Collections.Generic.IReadOnlyDictionary<string!, object?>!
+ResultUnion.Error.Code.get -> string!
+ResultUnion.Error.Details.get -> System.Collections.Generic.IReadOnlyList<ResultUnion.Error!>!
+ResultUnion.Error.Equals(ResultUnion.Error? other) -> bool
+ResultUnion.Error.Field.get -> string?
+ResultUnion.Error.Flatten() -> System.Collections.Generic.IEnumerable<ResultUnion.Error!>!
+ResultUnion.Error.Message.get -> string!
+ResultUnion.Error.Type.get -> ResultUnion.ErrorType
+ResultUnion.Error.WithArgument(string! name, object? value) -> ResultUnion.Error!
+ResultUnion.Error.WithField(string! field) -> ResultUnion.Error!
+ResultUnion.Error.WithFieldPrefix(string! prefix) -> ResultUnion.Error!
+ResultUnion.ErrorType
+ResultUnion.ErrorType.BusinessRule = 5 -> ResultUnion.ErrorType
+ResultUnion.ErrorType.Concurrency = 7 -> ResultUnion.ErrorType
+ResultUnion.ErrorType.Conflict = 4 -> ResultUnion.ErrorType
+ResultUnion.ErrorType.Forbidden = 6 -> ResultUnion.ErrorType
+ResultUnion.ErrorType.NotFound = 2 -> ResultUnion.ErrorType
+ResultUnion.ErrorType.TooManyRequests = 9 -> ResultUnion.ErrorType
+ResultUnion.ErrorType.Unauthorized = 3 -> ResultUnion.ErrorType
+ResultUnion.ErrorType.Unavailable = 8 -> ResultUnion.ErrorType
+ResultUnion.ErrorType.Unexpected = 0 -> ResultUnion.ErrorType
+ResultUnion.ErrorType.Validation = 1 -> ResultUnion.ErrorType
+ResultUnion.ErrorTypeExtensions
+ResultUnion.ErrorTypeExtensions.extension(ResultUnion.Error!)
+ResultUnion.ErrorTypeExtensions.extension(ResultUnion.Error!).IsTransient.get -> bool
+ResultUnion.ErrorTypeExtensions.extension(ResultUnion.ErrorType)
+ResultUnion.ErrorTypeExtensions.extension(ResultUnion.ErrorType).IsTransient() -> bool
+ResultUnion.IResultFactory<TSelf>
+ResultUnion.IResultFactory<TSelf>.Failure(ResultUnion.Error! error) -> TSelf
+ResultUnion.IResultState
+ResultUnion.IResultState.Error.get -> ResultUnion.Error!
+ResultUnion.IResultState.IsFailure.get -> bool
+ResultUnion.IResultState.IsSuccess.get -> bool
+ResultUnion.IResultState<T>
+ResultUnion.IResultState<T>.ResultValue.get -> T
+ResultUnion.Result
+ResultUnion.Result.Bind(System.Func<ResultUnion.Result>! next) -> ResultUnion.Result
+ResultUnion.Result.Bind<T>(System.Func<ResultUnion.Result<T>>! next) -> ResultUnion.Result<T>
+ResultUnion.Result.Ensure(System.Func<bool>! predicate, ResultUnion.Error! error) -> ResultUnion.Result
+ResultUnion.Result.Ensure(System.Func<bool>! predicate, System.Func<ResultUnion.Error!>! errorFactory) -> ResultUnion.Result
+ResultUnion.Result.Equals(ResultUnion.Result other) -> bool
+ResultUnion.Result.Error.get -> ResultUnion.Error!
+ResultUnion.Result.IsFailure.get -> bool
+ResultUnion.Result.IsSuccess.get -> bool
+ResultUnion.Result.MapError(System.Func<ResultUnion.Error!, ResultUnion.Error!>! mapper) -> ResultUnion.Result
+ResultUnion.Result.Match(System.Action! onSuccess, System.Action<ResultUnion.Error!>! onFailure) -> void
+ResultUnion.Result.Match<TResult>(System.Func<TResult>! onSuccess, System.Func<ResultUnion.Error!, TResult>! onFailure) -> TResult
+ResultUnion.Result.Result() -> void
+ResultUnion.Result.Tap(System.Action! action) -> ResultUnion.Result
+ResultUnion.Result.TapError(System.Action<ResultUnion.Error!>! action) -> ResultUnion.Result
+ResultUnion.Result.TryGetError(out ResultUnion.Error? error) -> bool
+ResultUnion.Result<T>
+ResultUnion.Result<T>.Bind(System.Func<T, ResultUnion.Result>! next) -> ResultUnion.Result
+ResultUnion.Result<T>.Bind<TResult>(System.Func<T, ResultUnion.Result<TResult>>! next) -> ResultUnion.Result<TResult>
+ResultUnion.Result<T>.Ensure(System.Func<T, bool>! predicate, ResultUnion.Error! error) -> ResultUnion.Result<T>
+ResultUnion.Result<T>.Ensure(System.Func<T, bool>! predicate, System.Func<T, ResultUnion.Error!>! errorFactory) -> ResultUnion.Result<T>
+ResultUnion.Result<T>.Ensure(System.Func<T, ResultUnion.Result>! check) -> ResultUnion.Result<T>
+ResultUnion.Result<T>.Equals(ResultUnion.Result<T> other) -> bool
+ResultUnion.Result<T>.Error.get -> ResultUnion.Error!
+ResultUnion.Result<T>.GetValueOrDefault() -> T?
+ResultUnion.Result<T>.GetValueOrDefault(T defaultValue) -> T
+ResultUnion.Result<T>.HasValue.get -> bool
+ResultUnion.Result<T>.IsFailure.get -> bool
+ResultUnion.Result<T>.IsSuccess.get -> bool
+ResultUnion.Result<T>.Map<TResult>(System.Func<T, TResult>! mapper) -> ResultUnion.Result<TResult>
+ResultUnion.Result<T>.MapError(System.Func<ResultUnion.Error!, ResultUnion.Error!>! mapper) -> ResultUnion.Result<T>
+ResultUnion.Result<T>.Match(System.Action<T>! onSuccess, System.Action<ResultUnion.Error!>! onFailure) -> void
+ResultUnion.Result<T>.Match<TResult>(System.Func<T, TResult>! onSuccess, System.Func<ResultUnion.Error!, TResult>! onFailure) -> TResult
+ResultUnion.Result<T>.Result() -> void
+ResultUnion.Result<T>.Result(ResultUnion.Error! error) -> void
+ResultUnion.Result<T>.Result(T value) -> void
+ResultUnion.Result<T>.ResultValue.get -> T
+ResultUnion.Result<T>.Tap(System.Action<T>! action) -> ResultUnion.Result<T>
+ResultUnion.Result<T>.TapError(System.Action<ResultUnion.Error!>! action) -> ResultUnion.Result<T>
+ResultUnion.Result<T>.ToResult() -> ResultUnion.Result
+ResultUnion.Result<T>.TryGetError(out ResultUnion.Error? error) -> bool
+ResultUnion.Result<T>.TryGetResultValue(out T value) -> bool
+ResultUnion.Result<T>.TryGetValue(out ResultUnion.Error? error) -> bool
+ResultUnion.Result<T>.TryGetValue(out T value) -> bool
+ResultUnion.Result<T>.Value.get -> object?
+ResultUnion.ResultAsyncExtensions
+ResultUnion.ResultAsyncExtensions.extension(ResultUnion.Result)
+ResultUnion.ResultAsyncExtensions.extension(ResultUnion.Result).BindAsync(System.Func<System.Threading.Tasks.Task<ResultUnion.Result>!>! next) -> System.Threading.Tasks.Task<ResultUnion.Result>!
+ResultUnion.ResultAsyncExtensions.extension(ResultUnion.Result).BindAsync<T>(System.Func<System.Threading.Tasks.Task<ResultUnion.Result<T>>!>! next) -> System.Threading.Tasks.Task<ResultUnion.Result<T>>!
+ResultUnion.ResultAsyncExtensions.extension(ResultUnion.Result).EnsureAsync(System.Func<System.Threading.Tasks.Task<bool>!>! predicate, ResultUnion.Error! error) -> System.Threading.Tasks.Task<ResultUnion.Result>!
+ResultUnion.ResultAsyncExtensions.extension(ResultUnion.Result).EnsureAsync(System.Func<System.Threading.Tasks.Task<bool>!>! predicate, System.Func<ResultUnion.Error!>! errorFactory) -> System.Threading.Tasks.Task<ResultUnion.Result>!
+ResultUnion.ResultAsyncExtensions.extension(ResultUnion.Result).MapErrorAsync(System.Func<ResultUnion.Error!, System.Threading.Tasks.Task<ResultUnion.Error!>!>! mapper) -> System.Threading.Tasks.Task<ResultUnion.Result>!
+ResultUnion.ResultAsyncExtensions.extension(ResultUnion.Result).MatchAsync(System.Func<System.Threading.Tasks.Task!>! onSuccess, System.Func<ResultUnion.Error!, System.Threading.Tasks.Task!>! onFailure) -> System.Threading.Tasks.Task!
+ResultUnion.ResultAsyncExtensions.extension(ResultUnion.Result).MatchAsync<TResult>(System.Func<System.Threading.Tasks.Task<TResult>!>! onSuccess, System.Func<ResultUnion.Error!, System.Threading.Tasks.Task<TResult>!>! onFailure) -> System.Threading.Tasks.Task<TResult>!
+ResultUnion.ResultAsyncExtensions.extension(ResultUnion.Result).TapAsync(System.Func<System.Threading.Tasks.Task!>! action) -> System.Threading.Tasks.Task<ResultUnion.Result>!
+ResultUnion.ResultAsyncExtensions.extension(ResultUnion.Result).TapErrorAsync(System.Func<ResultUnion.Error!, System.Threading.Tasks.Task!>! action) -> System.Threading.Tasks.Task<ResultUnion.Result>!
+ResultUnion.ResultAsyncExtensions.extension(System.Threading.Tasks.Task<ResultUnion.Result>!)
+ResultUnion.ResultAsyncExtensions.extension(System.Threading.Tasks.Task<ResultUnion.Result>!).BindAsync(System.Func<ResultUnion.Result>! next) -> System.Threading.Tasks.Task<ResultUnion.Result>!
+ResultUnion.ResultAsyncExtensions.extension(System.Threading.Tasks.Task<ResultUnion.Result>!).BindAsync(System.Func<System.Threading.Tasks.Task<ResultUnion.Result>!>! next) -> System.Threading.Tasks.Task<ResultUnion.Result>!
+ResultUnion.ResultAsyncExtensions.extension(System.Threading.Tasks.Task<ResultUnion.Result>!).BindAsync<T>(System.Func<ResultUnion.Result<T>>! next) -> System.Threading.Tasks.Task<ResultUnion.Result<T>>!
+ResultUnion.ResultAsyncExtensions.extension(System.Threading.Tasks.Task<ResultUnion.Result>!).BindAsync<T>(System.Func<System.Threading.Tasks.Task<ResultUnion.Result<T>>!>! next) -> System.Threading.Tasks.Task<ResultUnion.Result<T>>!
+ResultUnion.ResultAsyncExtensions.extension(System.Threading.Tasks.Task<ResultUnion.Result>!).EnsureAsync(System.Func<bool>! predicate, ResultUnion.Error! error) -> System.Threading.Tasks.Task<ResultUnion.Result>!
+ResultUnion.ResultAsyncExtensions.extension(System.Threading.Tasks.Task<ResultUnion.Result>!).EnsureAsync(System.Func<bool>! predicate, System.Func<ResultUnion.Error!>! errorFactory) -> System.Threading.Tasks.Task<ResultUnion.Result>!
+ResultUnion.ResultAsyncExtensions.extension(System.Threading.Tasks.Task<ResultUnion.Result>!).EnsureAsync(System.Func<System.Threading.Tasks.Task<bool>!>! predicate, ResultUnion.Error! error) -> System.Threading.Tasks.Task<ResultUnion.Result>!
+ResultUnion.ResultAsyncExtensions.extension(System.Threading.Tasks.Task<ResultUnion.Result>!).EnsureAsync(System.Func<System.Threading.Tasks.Task<bool>!>! predicate, System.Func<ResultUnion.Error!>! errorFactory) -> System.Threading.Tasks.Task<ResultUnion.Result>!
+ResultUnion.ResultAsyncExtensions.extension(System.Threading.Tasks.Task<ResultUnion.Result>!).MapErrorAsync(System.Func<ResultUnion.Error!, ResultUnion.Error!>! mapper) -> System.Threading.Tasks.Task<ResultUnion.Result>!
+ResultUnion.ResultAsyncExtensions.extension(System.Threading.Tasks.Task<ResultUnion.Result>!).MapErrorAsync(System.Func<ResultUnion.Error!, System.Threading.Tasks.Task<ResultUnion.Error!>!>! mapper) -> System.Threading.Tasks.Task<ResultUnion.Result>!
+ResultUnion.ResultAsyncExtensions.extension(System.Threading.Tasks.Task<ResultUnion.Result>!).MatchAsync(System.Action! onSuccess, System.Action<ResultUnion.Error!>! onFailure) -> System.Threading.Tasks.Task!
+ResultUnion.ResultAsyncExtensions.extension(System.Threading.Tasks.Task<ResultUnion.Result>!).MatchAsync(System.Func<System.Threading.Tasks.Task!>! onSuccess, System.Func<ResultUnion.Error!, System.Threading.Tasks.Task!>! onFailure) -> System.Threading.Tasks.Task!
+ResultUnion.ResultAsyncExtensions.extension(System.Threading.Tasks.Task<ResultUnion.Result>!).MatchAsync<TResult>(System.Func<System.Threading.Tasks.Task<TResult>!>! onSuccess, System.Func<ResultUnion.Error!, System.Threading.Tasks.Task<TResult>!>! onFailure) -> System.Threading.Tasks.Task<TResult>!
+ResultUnion.ResultAsyncExtensions.extension(System.Threading.Tasks.Task<ResultUnion.Result>!).MatchAsync<TResult>(System.Func<TResult>! onSuccess, System.Func<ResultUnion.Error!, TResult>! onFailure) -> System.Threading.Tasks.Task<TResult>!
+ResultUnion.ResultAsyncExtensions.extension(System.Threading.Tasks.Task<ResultUnion.Result>!).TapAsync(System.Action! action) -> System.Threading.Tasks.Task<ResultUnion.Result>!
+ResultUnion.ResultAsyncExtensions.extension(System.Threading.Tasks.Task<ResultUnion.Result>!).TapAsync(System.Func<System.Threading.Tasks.Task!>! action) -> System.Threading.Tasks.Task<ResultUnion.Result>!
+ResultUnion.ResultAsyncExtensions.extension(System.Threading.Tasks.Task<ResultUnion.Result>!).TapErrorAsync(System.Action<ResultUnion.Error!>! action) -> System.Threading.Tasks.Task<ResultUnion.Result>!
+ResultUnion.ResultAsyncExtensions.extension(System.Threading.Tasks.Task<ResultUnion.Result>!).TapErrorAsync(System.Func<ResultUnion.Error!, System.Threading.Tasks.Task!>! action) -> System.Threading.Tasks.Task<ResultUnion.Result>!
+ResultUnion.ResultAsyncExtensions.extension<T>(ResultUnion.Result<T>)
+ResultUnion.ResultAsyncExtensions.extension<T>(ResultUnion.Result<T>).BindAsync(System.Func<T, System.Threading.Tasks.Task<ResultUnion.Result>!>! next) -> System.Threading.Tasks.Task<ResultUnion.Result>!
+ResultUnion.ResultAsyncExtensions.extension<T>(ResultUnion.Result<T>).BindAsync<TResult>(System.Func<T, System.Threading.Tasks.Task<ResultUnion.Result<TResult>>!>! next) -> System.Threading.Tasks.Task<ResultUnion.Result<TResult>>!
+ResultUnion.ResultAsyncExtensions.extension<T>(ResultUnion.Result<T>).EnsureAsync(System.Func<T, System.Threading.Tasks.Task<bool>!>! predicate, ResultUnion.Error! error) -> System.Threading.Tasks.Task<ResultUnion.Result<T>>!
+ResultUnion.ResultAsyncExtensions.extension<T>(ResultUnion.Result<T>).EnsureAsync(System.Func<T, System.Threading.Tasks.Task<bool>!>! predicate, System.Func<T, ResultUnion.Error!>! errorFactory) -> System.Threading.Tasks.Task<ResultUnion.Result<T>>!
+ResultUnion.ResultAsyncExtensions.extension<T>(ResultUnion.Result<T>).EnsureAsync(System.Func<T, System.Threading.Tasks.Task<ResultUnion.Result>!>! check) -> System.Threading.Tasks.Task<ResultUnion.Result<T>>!
+ResultUnion.ResultAsyncExtensions.extension<T>(ResultUnion.Result<T>).MapAsync<TResult>(System.Func<T, System.Threading.Tasks.Task<TResult>!>! mapper) -> System.Threading.Tasks.Task<ResultUnion.Result<TResult>>!
+ResultUnion.ResultAsyncExtensions.extension<T>(ResultUnion.Result<T>).MapErrorAsync(System.Func<ResultUnion.Error!, System.Threading.Tasks.Task<ResultUnion.Error!>!>! mapper) -> System.Threading.Tasks.Task<ResultUnion.Result<T>>!
+ResultUnion.ResultAsyncExtensions.extension<T>(ResultUnion.Result<T>).MatchAsync(System.Func<T, System.Threading.Tasks.Task!>! onSuccess, System.Func<ResultUnion.Error!, System.Threading.Tasks.Task!>! onFailure) -> System.Threading.Tasks.Task!
+ResultUnion.ResultAsyncExtensions.extension<T>(ResultUnion.Result<T>).MatchAsync<TResult>(System.Func<T, System.Threading.Tasks.Task<TResult>!>! onSuccess, System.Func<ResultUnion.Error!, System.Threading.Tasks.Task<TResult>!>! onFailure) -> System.Threading.Tasks.Task<TResult>!
+ResultUnion.ResultAsyncExtensions.extension<T>(ResultUnion.Result<T>).TapAsync(System.Func<T, System.Threading.Tasks.Task!>! action) -> System.Threading.Tasks.Task<ResultUnion.Result<T>>!
+ResultUnion.ResultAsyncExtensions.extension<T>(ResultUnion.Result<T>).TapErrorAsync(System.Func<ResultUnion.Error!, System.Threading.Tasks.Task!>! action) -> System.Threading.Tasks.Task<ResultUnion.Result<T>>!
+ResultUnion.ResultAsyncExtensions.extension<T>(System.Threading.Tasks.Task<ResultUnion.Result<T>>!)
+ResultUnion.ResultAsyncExtensions.extension<T>(System.Threading.Tasks.Task<ResultUnion.Result<T>>!).BindAsync(System.Func<T, ResultUnion.Result>! next) -> System.Threading.Tasks.Task<ResultUnion.Result>!
+ResultUnion.ResultAsyncExtensions.extension<T>(System.Threading.Tasks.Task<ResultUnion.Result<T>>!).BindAsync(System.Func<T, System.Threading.Tasks.Task<ResultUnion.Result>!>! next) -> System.Threading.Tasks.Task<ResultUnion.Result>!
+ResultUnion.ResultAsyncExtensions.extension<T>(System.Threading.Tasks.Task<ResultUnion.Result<T>>!).BindAsync<TResult>(System.Func<T, ResultUnion.Result<TResult>>! next) -> System.Threading.Tasks.Task<ResultUnion.Result<TResult>>!
+ResultUnion.ResultAsyncExtensions.extension<T>(System.Threading.Tasks.Task<ResultUnion.Result<T>>!).BindAsync<TResult>(System.Func<T, System.Threading.Tasks.Task<ResultUnion.Result<TResult>>!>! next) -> System.Threading.Tasks.Task<ResultUnion.Result<TResult>>!
+ResultUnion.ResultAsyncExtensions.extension<T>(System.Threading.Tasks.Task<ResultUnion.Result<T>>!).EnsureAsync(System.Func<T, bool>! predicate, ResultUnion.Error! error) -> System.Threading.Tasks.Task<ResultUnion.Result<T>>!
+ResultUnion.ResultAsyncExtensions.extension<T>(System.Threading.Tasks.Task<ResultUnion.Result<T>>!).EnsureAsync(System.Func<T, bool>! predicate, System.Func<T, ResultUnion.Error!>! errorFactory) -> System.Threading.Tasks.Task<ResultUnion.Result<T>>!
+ResultUnion.ResultAsyncExtensions.extension<T>(System.Threading.Tasks.Task<ResultUnion.Result<T>>!).EnsureAsync(System.Func<T, ResultUnion.Result>! check) -> System.Threading.Tasks.Task<ResultUnion.Result<T>>!
+ResultUnion.ResultAsyncExtensions.extension<T>(System.Threading.Tasks.Task<ResultUnion.Result<T>>!).EnsureAsync(System.Func<T, System.Threading.Tasks.Task<bool>!>! predicate, ResultUnion.Error! error) -> System.Threading.Tasks.Task<ResultUnion.Result<T>>!
+ResultUnion.ResultAsyncExtensions.extension<T>(System.Threading.Tasks.Task<ResultUnion.Result<T>>!).EnsureAsync(System.Func<T, System.Threading.Tasks.Task<bool>!>! predicate, System.Func<T, ResultUnion.Error!>! errorFactory) -> System.Threading.Tasks.Task<ResultUnion.Result<T>>!
+ResultUnion.ResultAsyncExtensions.extension<T>(System.Threading.Tasks.Task<ResultUnion.Result<T>>!).EnsureAsync(System.Func<T, System.Threading.Tasks.Task<ResultUnion.Result>!>! check) -> System.Threading.Tasks.Task<ResultUnion.Result<T>>!
+ResultUnion.ResultAsyncExtensions.extension<T>(System.Threading.Tasks.Task<ResultUnion.Result<T>>!).MapAsync<TResult>(System.Func<T, System.Threading.Tasks.Task<TResult>!>! mapper) -> System.Threading.Tasks.Task<ResultUnion.Result<TResult>>!
+ResultUnion.ResultAsyncExtensions.extension<T>(System.Threading.Tasks.Task<ResultUnion.Result<T>>!).MapAsync<TResult>(System.Func<T, TResult>! mapper) -> System.Threading.Tasks.Task<ResultUnion.Result<TResult>>!
+ResultUnion.ResultAsyncExtensions.extension<T>(System.Threading.Tasks.Task<ResultUnion.Result<T>>!).MapErrorAsync(System.Func<ResultUnion.Error!, ResultUnion.Error!>! mapper) -> System.Threading.Tasks.Task<ResultUnion.Result<T>>!
+ResultUnion.ResultAsyncExtensions.extension<T>(System.Threading.Tasks.Task<ResultUnion.Result<T>>!).MapErrorAsync(System.Func<ResultUnion.Error!, System.Threading.Tasks.Task<ResultUnion.Error!>!>! mapper) -> System.Threading.Tasks.Task<ResultUnion.Result<T>>!
+ResultUnion.ResultAsyncExtensions.extension<T>(System.Threading.Tasks.Task<ResultUnion.Result<T>>!).MatchAsync(System.Action<T>! onSuccess, System.Action<ResultUnion.Error!>! onFailure) -> System.Threading.Tasks.Task!
+ResultUnion.ResultAsyncExtensions.extension<T>(System.Threading.Tasks.Task<ResultUnion.Result<T>>!).MatchAsync(System.Func<T, System.Threading.Tasks.Task!>! onSuccess, System.Func<ResultUnion.Error!, System.Threading.Tasks.Task!>! onFailure) -> System.Threading.Tasks.Task!
+ResultUnion.ResultAsyncExtensions.extension<T>(System.Threading.Tasks.Task<ResultUnion.Result<T>>!).MatchAsync<TResult>(System.Func<T, System.Threading.Tasks.Task<TResult>!>! onSuccess, System.Func<ResultUnion.Error!, System.Threading.Tasks.Task<TResult>!>! onFailure) -> System.Threading.Tasks.Task<TResult>!
+ResultUnion.ResultAsyncExtensions.extension<T>(System.Threading.Tasks.Task<ResultUnion.Result<T>>!).MatchAsync<TResult>(System.Func<T, TResult>! onSuccess, System.Func<ResultUnion.Error!, TResult>! onFailure) -> System.Threading.Tasks.Task<TResult>!
+ResultUnion.ResultAsyncExtensions.extension<T>(System.Threading.Tasks.Task<ResultUnion.Result<T>>!).TapAsync(System.Action<T>! action) -> System.Threading.Tasks.Task<ResultUnion.Result<T>>!
+ResultUnion.ResultAsyncExtensions.extension<T>(System.Threading.Tasks.Task<ResultUnion.Result<T>>!).TapAsync(System.Func<T, System.Threading.Tasks.Task!>! action) -> System.Threading.Tasks.Task<ResultUnion.Result<T>>!
+ResultUnion.ResultAsyncExtensions.extension<T>(System.Threading.Tasks.Task<ResultUnion.Result<T>>!).TapErrorAsync(System.Action<ResultUnion.Error!>! action) -> System.Threading.Tasks.Task<ResultUnion.Result<T>>!
+ResultUnion.ResultAsyncExtensions.extension<T>(System.Threading.Tasks.Task<ResultUnion.Result<T>>!).TapErrorAsync(System.Func<ResultUnion.Error!, System.Threading.Tasks.Task!>! action) -> System.Threading.Tasks.Task<ResultUnion.Result<T>>!
+ResultUnion.ResultAsyncExtensions.extension<T>(System.Threading.Tasks.Task<T?>!)
+ResultUnion.ResultAsyncExtensions.extension<T>(System.Threading.Tasks.Task<T?>!).ToResultAsync(ResultUnion.Error! errorIfNull) -> System.Threading.Tasks.Task<ResultUnion.Result<T!>>!
+ResultUnion.ResultAsyncExtensions.extension<T>(System.Threading.Tasks.Task<T?>!).ToResultAsync(ResultUnion.Error! errorIfNull) -> System.Threading.Tasks.Task<ResultUnion.Result<T>>!
+ResultUnion.ResultAsyncExtensions.extension<TSource>(System.Collections.Generic.IEnumerable<TSource>!)
+ResultUnion.ResultAsyncExtensions.extension<TSource>(System.Collections.Generic.IEnumerable<TSource>!).CombineAllAsync<T>(System.Func<TSource, System.Threading.Tasks.Task<ResultUnion.Result<T>>!>! selector, string? field = null) -> System.Threading.Tasks.Task<ResultUnion.Result<System.Collections.Generic.IReadOnlyList<T>!>>!
+ResultUnion.ResultCollectionExtensions
+ResultUnion.ResultCollectionExtensions.extension<T>(System.Collections.Generic.IEnumerable<ResultUnion.Result<T>>!)
+ResultUnion.ResultCollectionExtensions.extension<T>(System.Collections.Generic.IEnumerable<ResultUnion.Result<T>>!).CombineAll(string? field = null) -> ResultUnion.Result<System.Collections.Generic.IReadOnlyList<T>!>
+ResultUnion.ResultCollectionExtensions.extension<TSource>(System.Collections.Generic.IEnumerable<TSource>!)
+ResultUnion.ResultCollectionExtensions.extension<TSource>(System.Collections.Generic.IEnumerable<TSource>!).CombineAll<T>(System.Func<TSource, ResultUnion.Result<T>>! selector, string? field = null) -> ResultUnion.Result<System.Collections.Generic.IReadOnlyList<T>!>
+ResultUnion.ResultTelemetryExtensions
+ResultUnion.ResultTelemetryExtensions.extension(ResultUnion.Result)
+ResultUnion.ResultTelemetryExtensions.extension(ResultUnion.Result).Record(string! operation) -> ResultUnion.Result
+ResultUnion.ResultTelemetryExtensions.extension(System.Threading.Tasks.Task<ResultUnion.Result>!)
+ResultUnion.ResultTelemetryExtensions.extension(System.Threading.Tasks.Task<ResultUnion.Result>!).RecordAsync(string! operation) -> System.Threading.Tasks.Task<ResultUnion.Result>!
+ResultUnion.ResultTelemetryExtensions.extension<T>(ResultUnion.Result<T>)
+ResultUnion.ResultTelemetryExtensions.extension<T>(ResultUnion.Result<T>).Record(string! operation) -> ResultUnion.Result<T>
+ResultUnion.ResultTelemetryExtensions.extension<T>(System.Threading.Tasks.Task<ResultUnion.Result<T>>!)
+ResultUnion.ResultTelemetryExtensions.extension<T>(System.Threading.Tasks.Task<ResultUnion.Result<T>>!).RecordAsync(string! operation) -> System.Threading.Tasks.Task<ResultUnion.Result<T>>!
+ResultUnion.ResultTupleExtensions
+ResultUnion.ResultTupleExtensions.extension<T1, T2, T3, T4>(ResultUnion.Result<(T1, T2, T3, T4)>)
+ResultUnion.ResultTupleExtensions.extension<T1, T2, T3, T4>(ResultUnion.Result<(T1, T2, T3, T4)>).Bind<TResult>(System.Func<T1, T2, T3, T4, ResultUnion.Result<TResult>>! next) -> ResultUnion.Result<TResult>
+ResultUnion.ResultTupleExtensions.extension<T1, T2, T3, T4>(ResultUnion.Result<(T1, T2, T3, T4)>).Map<TResult>(System.Func<T1, T2, T3, T4, TResult>! mapper) -> ResultUnion.Result<TResult>
+ResultUnion.ResultTupleExtensions.extension<T1, T2, T3>(ResultUnion.Result<(T1, T2, T3)>)
+ResultUnion.ResultTupleExtensions.extension<T1, T2, T3>(ResultUnion.Result<(T1, T2, T3)>).Bind<TResult>(System.Func<T1, T2, T3, ResultUnion.Result<TResult>>! next) -> ResultUnion.Result<TResult>
+ResultUnion.ResultTupleExtensions.extension<T1, T2, T3>(ResultUnion.Result<(T1, T2, T3)>).Map<TResult>(System.Func<T1, T2, T3, TResult>! mapper) -> ResultUnion.Result<TResult>
+ResultUnion.ResultTupleExtensions.extension<T1, T2>(ResultUnion.Result<(T1, T2)>)
+ResultUnion.ResultTupleExtensions.extension<T1, T2>(ResultUnion.Result<(T1, T2)>).Bind<TResult>(System.Func<T1, T2, ResultUnion.Result<TResult>>! next) -> ResultUnion.Result<TResult>
+ResultUnion.ResultTupleExtensions.extension<T1, T2>(ResultUnion.Result<(T1, T2)>).Map<TResult>(System.Func<T1, T2, TResult>! mapper) -> ResultUnion.Result<TResult>
+ResultUnion.Serialization.ErrorJsonConverter
+ResultUnion.Serialization.ErrorJsonConverter.ErrorJsonConverter() -> void
+static ResultUnion.Diagnostics.ResultTelemetry.Record(ResultUnion.Error! error, string! operation) -> void
+static ResultUnion.Diagnostics.ResultTelemetry.TagActivity(System.Diagnostics.Activity? activity, ResultUnion.Error! error) -> void
+static ResultUnion.Error.BusinessRule(string! message) -> ResultUnion.Error!
+static ResultUnion.Error.Concurrency(string! message) -> ResultUnion.Error!
+static ResultUnion.Error.Conflict(string! message) -> ResultUnion.Error!
+static ResultUnion.Error.Create(string! code, string! message, ResultUnion.ErrorType type) -> ResultUnion.Error!
+static ResultUnion.Error.DefaultResult.get -> ResultUnion.Error!
+static ResultUnion.Error.Forbidden(string! message) -> ResultUnion.Error!
+static ResultUnion.Error.NotFound(string! message) -> ResultUnion.Error!
+static ResultUnion.Error.operator !=(ResultUnion.Error? left, ResultUnion.Error? right) -> bool
+static ResultUnion.Error.operator ==(ResultUnion.Error? left, ResultUnion.Error? right) -> bool
+static ResultUnion.Error.TooManyRequests(string! message) -> ResultUnion.Error!
+static ResultUnion.Error.Unauthorized(string! message) -> ResultUnion.Error!
+static ResultUnion.Error.Unavailable(string! message) -> ResultUnion.Error!
+static ResultUnion.Error.Unexpected(string! message) -> ResultUnion.Error!
+static ResultUnion.Error.Validation(string! message) -> ResultUnion.Error!
+static ResultUnion.Error.Validation(System.Collections.Generic.IEnumerable<ResultUnion.Error!>! details) -> ResultUnion.Error!
+static ResultUnion.ErrorTypeExtensions.get_IsTransient(ResultUnion.Error! error) -> bool
+static ResultUnion.ErrorTypeExtensions.IsTransient(this ResultUnion.ErrorType type) -> bool
+static ResultUnion.Result.Combine(params System.ReadOnlySpan<ResultUnion.Result> results) -> ResultUnion.Result
+static ResultUnion.Result.Combine(System.Collections.Generic.IEnumerable<ResultUnion.IResultState!>! results) -> ResultUnion.Result
+static ResultUnion.Result.CombineAll(params System.ReadOnlySpan<ResultUnion.Result> results) -> ResultUnion.Result
+static ResultUnion.Result.CombineAll(System.Collections.Generic.IEnumerable<ResultUnion.IResultState!>! results) -> ResultUnion.Result
+static ResultUnion.Result.CombineAll<T1, T2, T3, T4>(ResultUnion.Result<T1> first, ResultUnion.Result<T2> second, ResultUnion.Result<T3> third, ResultUnion.Result<T4> fourth) -> ResultUnion.Result<(T1, T2, T3, T4)>
+static ResultUnion.Result.CombineAll<T1, T2, T3>(ResultUnion.Result<T1> first, ResultUnion.Result<T2> second, ResultUnion.Result<T3> third) -> ResultUnion.Result<(T1, T2, T3)>
+static ResultUnion.Result.CombineAll<T1, T2>(ResultUnion.Result<T1> first, ResultUnion.Result<T2> second) -> ResultUnion.Result<(T1, T2)>
+static ResultUnion.Result.Failure(ResultUnion.Error! error) -> ResultUnion.Result
+static ResultUnion.Result.Failure<T>(ResultUnion.Error! error) -> ResultUnion.Result<T>
+static ResultUnion.Result.FromNullable<T>(T? value, ResultUnion.Error! errorIfNull) -> ResultUnion.Result<T!>
+static ResultUnion.Result.FromNullable<T>(T? value, ResultUnion.Error! errorIfNull) -> ResultUnion.Result<T>
+static ResultUnion.Result.implicit operator ResultUnion.Result(ResultUnion.Error! error) -> ResultUnion.Result
+static ResultUnion.Result.operator !=(ResultUnion.Result left, ResultUnion.Result right) -> bool
+static ResultUnion.Result.operator ==(ResultUnion.Result left, ResultUnion.Result right) -> bool
+static ResultUnion.Result.Success() -> ResultUnion.Result
+static ResultUnion.Result.Success<T>(T value) -> ResultUnion.Result<T>
+static ResultUnion.Result.Try(System.Action! action, System.Func<System.Exception!, ResultUnion.Error!>! onException) -> ResultUnion.Result
+static ResultUnion.Result.Try<T, TException>(System.Func<T>! action, System.Func<TException!, ResultUnion.Error!>! onException) -> ResultUnion.Result<T>
+static ResultUnion.Result.Try<T>(System.Func<T>! action, System.Func<System.Exception!, ResultUnion.Error!>! onException) -> ResultUnion.Result<T>
+static ResultUnion.Result.Try<TException>(System.Action! action, System.Func<TException!, ResultUnion.Error!>! onException) -> ResultUnion.Result
+static ResultUnion.Result<T>.Failure(ResultUnion.Error! error) -> ResultUnion.Result<T>
+static ResultUnion.Result<T>.operator !=(ResultUnion.Result<T> left, ResultUnion.Result<T> right) -> bool
+static ResultUnion.Result<T>.operator ==(ResultUnion.Result<T> left, ResultUnion.Result<T> right) -> bool
+static ResultUnion.Result<T>.Success(T value) -> ResultUnion.Result<T>
+static ResultUnion.ResultAsyncExtensions.BindAsync(this ResultUnion.Result result, System.Func<System.Threading.Tasks.Task<ResultUnion.Result>!>! next) -> System.Threading.Tasks.Task<ResultUnion.Result>!
+static ResultUnion.ResultAsyncExtensions.BindAsync(this System.Threading.Tasks.Task<ResultUnion.Result>! source, System.Func<ResultUnion.Result>! next) -> System.Threading.Tasks.Task<ResultUnion.Result>!
+static ResultUnion.ResultAsyncExtensions.BindAsync(this System.Threading.Tasks.Task<ResultUnion.Result>! source, System.Func<System.Threading.Tasks.Task<ResultUnion.Result>!>! next) -> System.Threading.Tasks.Task<ResultUnion.Result>!
+static ResultUnion.ResultAsyncExtensions.BindAsync<T, TResult>(this ResultUnion.Result<T> result, System.Func<T, System.Threading.Tasks.Task<ResultUnion.Result<TResult>>!>! next) -> System.Threading.Tasks.Task<ResultUnion.Result<TResult>>!
+static ResultUnion.ResultAsyncExtensions.BindAsync<T, TResult>(this System.Threading.Tasks.Task<ResultUnion.Result<T>>! source, System.Func<T, ResultUnion.Result<TResult>>! next) -> System.Threading.Tasks.Task<ResultUnion.Result<TResult>>!
+static ResultUnion.ResultAsyncExtensions.BindAsync<T, TResult>(this System.Threading.Tasks.Task<ResultUnion.Result<T>>! source, System.Func<T, System.Threading.Tasks.Task<ResultUnion.Result<TResult>>!>! next) -> System.Threading.Tasks.Task<ResultUnion.Result<TResult>>!
+static ResultUnion.ResultAsyncExtensions.BindAsync<T>(this ResultUnion.Result result, System.Func<System.Threading.Tasks.Task<ResultUnion.Result<T>>!>! next) -> System.Threading.Tasks.Task<ResultUnion.Result<T>>!
+static ResultUnion.ResultAsyncExtensions.BindAsync<T>(this ResultUnion.Result<T> result, System.Func<T, System.Threading.Tasks.Task<ResultUnion.Result>!>! next) -> System.Threading.Tasks.Task<ResultUnion.Result>!
+static ResultUnion.ResultAsyncExtensions.BindAsync<T>(this System.Threading.Tasks.Task<ResultUnion.Result<T>>! source, System.Func<T, ResultUnion.Result>! next) -> System.Threading.Tasks.Task<ResultUnion.Result>!
+static ResultUnion.ResultAsyncExtensions.BindAsync<T>(this System.Threading.Tasks.Task<ResultUnion.Result<T>>! source, System.Func<T, System.Threading.Tasks.Task<ResultUnion.Result>!>! next) -> System.Threading.Tasks.Task<ResultUnion.Result>!
+static ResultUnion.ResultAsyncExtensions.BindAsync<T>(this System.Threading.Tasks.Task<ResultUnion.Result>! source, System.Func<ResultUnion.Result<T>>! next) -> System.Threading.Tasks.Task<ResultUnion.Result<T>>!
+static ResultUnion.ResultAsyncExtensions.BindAsync<T>(this System.Threading.Tasks.Task<ResultUnion.Result>! source, System.Func<System.Threading.Tasks.Task<ResultUnion.Result<T>>!>! next) -> System.Threading.Tasks.Task<ResultUnion.Result<T>>!
+static ResultUnion.ResultAsyncExtensions.CombineAllAsync<TSource, T>(this System.Collections.Generic.IEnumerable<TSource>! source, System.Func<TSource, System.Threading.Tasks.Task<ResultUnion.Result<T>>!>! selector, string? field = null) -> System.Threading.Tasks.Task<ResultUnion.Result<System.Collections.Generic.IReadOnlyList<T>!>>!
+static ResultUnion.ResultAsyncExtensions.EnsureAsync(this ResultUnion.Result result, System.Func<System.Threading.Tasks.Task<bool>!>! predicate, ResultUnion.Error! error) -> System.Threading.Tasks.Task<ResultUnion.Result>!
+static ResultUnion.ResultAsyncExtensions.EnsureAsync(this ResultUnion.Result result, System.Func<System.Threading.Tasks.Task<bool>!>! predicate, System.Func<ResultUnion.Error!>! errorFactory) -> System.Threading.Tasks.Task<ResultUnion.Result>!
+static ResultUnion.ResultAsyncExtensions.EnsureAsync(this System.Threading.Tasks.Task<ResultUnion.Result>! source, System.Func<bool>! predicate, ResultUnion.Error! error) -> System.Threading.Tasks.Task<ResultUnion.Result>!
+static ResultUnion.ResultAsyncExtensions.EnsureAsync(this System.Threading.Tasks.Task<ResultUnion.Result>! source, System.Func<bool>! predicate, System.Func<ResultUnion.Error!>! errorFactory) -> System.Threading.Tasks.Task<ResultUnion.Result>!
+static ResultUnion.ResultAsyncExtensions.EnsureAsync(this System.Threading.Tasks.Task<ResultUnion.Result>! source, System.Func<System.Threading.Tasks.Task<bool>!>! predicate, ResultUnion.Error! error) -> System.Threading.Tasks.Task<ResultUnion.Result>!
+static ResultUnion.ResultAsyncExtensions.EnsureAsync(this System.Threading.Tasks.Task<ResultUnion.Result>! source, System.Func<System.Threading.Tasks.Task<bool>!>! predicate, System.Func<ResultUnion.Error!>! errorFactory) -> System.Threading.Tasks.Task<ResultUnion.Result>!
+static ResultUnion.ResultAsyncExtensions.EnsureAsync<T>(this ResultUnion.Result<T> result, System.Func<T, System.Threading.Tasks.Task<bool>!>! predicate, ResultUnion.Error! error) -> System.Threading.Tasks.Task<ResultUnion.Result<T>>!
+static ResultUnion.ResultAsyncExtensions.EnsureAsync<T>(this ResultUnion.Result<T> result, System.Func<T, System.Threading.Tasks.Task<bool>!>! predicate, System.Func<T, ResultUnion.Error!>! errorFactory) -> System.Threading.Tasks.Task<ResultUnion.Result<T>>!
+static ResultUnion.ResultAsyncExtensions.EnsureAsync<T>(this ResultUnion.Result<T> result, System.Func<T, System.Threading.Tasks.Task<ResultUnion.Result>!>! check) -> System.Threading.Tasks.Task<ResultUnion.Result<T>>!
+static ResultUnion.ResultAsyncExtensions.EnsureAsync<T>(this System.Threading.Tasks.Task<ResultUnion.Result<T>>! source, System.Func<T, bool>! predicate, ResultUnion.Error! error) -> System.Threading.Tasks.Task<ResultUnion.Result<T>>!
+static ResultUnion.ResultAsyncExtensions.EnsureAsync<T>(this System.Threading.Tasks.Task<ResultUnion.Result<T>>! source, System.Func<T, bool>! predicate, System.Func<T, ResultUnion.Error!>! errorFactory) -> System.Threading.Tasks.Task<ResultUnion.Result<T>>!
+static ResultUnion.ResultAsyncExtensions.EnsureAsync<T>(this System.Threading.Tasks.Task<ResultUnion.Result<T>>! source, System.Func<T, ResultUnion.Result>! check) -> System.Threading.Tasks.Task<ResultUnion.Result<T>>!
+static ResultUnion.ResultAsyncExtensions.EnsureAsync<T>(this System.Threading.Tasks.Task<ResultUnion.Result<T>>! source, System.Func<T, System.Threading.Tasks.Task<bool>!>! predicate, ResultUnion.Error! error) -> System.Threading.Tasks.Task<ResultUnion.Result<T>>!
+static ResultUnion.ResultAsyncExtensions.EnsureAsync<T>(this System.Threading.Tasks.Task<ResultUnion.Result<T>>! source, System.Func<T, System.Threading.Tasks.Task<bool>!>! predicate, System.Func<T, ResultUnion.Error!>! errorFactory) -> System.Threading.Tasks.Task<ResultUnion.Result<T>>!
+static ResultUnion.ResultAsyncExtensions.EnsureAsync<T>(this System.Threading.Tasks.Task<ResultUnion.Result<T>>! source, System.Func<T, System.Threading.Tasks.Task<ResultUnion.Result>!>! check) -> System.Threading.Tasks.Task<ResultUnion.Result<T>>!
+static ResultUnion.ResultAsyncExtensions.extension(ResultUnion.Result).TryAsync(System.Func<System.Threading.Tasks.Task!>! action, System.Func<System.Exception!, ResultUnion.Error!>! onException) -> System.Threading.Tasks.Task<ResultUnion.Result>!
+static ResultUnion.ResultAsyncExtensions.extension(ResultUnion.Result).TryAsync<T, TException>(System.Func<System.Threading.Tasks.Task<T>!>! action, System.Func<TException!, ResultUnion.Error!>! onException) -> System.Threading.Tasks.Task<ResultUnion.Result<T>>!
+static ResultUnion.ResultAsyncExtensions.extension(ResultUnion.Result).TryAsync<T>(System.Func<System.Threading.Tasks.Task<T>!>! action, System.Func<System.Exception!, ResultUnion.Error!>! onException) -> System.Threading.Tasks.Task<ResultUnion.Result<T>>!
+static ResultUnion.ResultAsyncExtensions.extension(ResultUnion.Result).TryAsync<TException>(System.Func<System.Threading.Tasks.Task!>! action, System.Func<TException!, ResultUnion.Error!>! onException) -> System.Threading.Tasks.Task<ResultUnion.Result>!
+static ResultUnion.ResultAsyncExtensions.MapAsync<T, TResult>(this ResultUnion.Result<T> result, System.Func<T, System.Threading.Tasks.Task<TResult>!>! mapper) -> System.Threading.Tasks.Task<ResultUnion.Result<TResult>>!
+static ResultUnion.ResultAsyncExtensions.MapAsync<T, TResult>(this System.Threading.Tasks.Task<ResultUnion.Result<T>>! source, System.Func<T, System.Threading.Tasks.Task<TResult>!>! mapper) -> System.Threading.Tasks.Task<ResultUnion.Result<TResult>>!
+static ResultUnion.ResultAsyncExtensions.MapAsync<T, TResult>(this System.Threading.Tasks.Task<ResultUnion.Result<T>>! source, System.Func<T, TResult>! mapper) -> System.Threading.Tasks.Task<ResultUnion.Result<TResult>>!
+static ResultUnion.ResultAsyncExtensions.MapErrorAsync(this ResultUnion.Result result, System.Func<ResultUnion.Error!, System.Threading.Tasks.Task<ResultUnion.Error!>!>! mapper) -> System.Threading.Tasks.Task<ResultUnion.Result>!
+static ResultUnion.ResultAsyncExtensions.MapErrorAsync(this System.Threading.Tasks.Task<ResultUnion.Result>! source, System.Func<ResultUnion.Error!, ResultUnion.Error!>! mapper) -> System.Threading.Tasks.Task<ResultUnion.Result>!
+static ResultUnion.ResultAsyncExtensions.MapErrorAsync(this System.Threading.Tasks.Task<ResultUnion.Result>! source, System.Func<ResultUnion.Error!, System.Threading.Tasks.Task<ResultUnion.Error!>!>! mapper) -> System.Threading.Tasks.Task<ResultUnion.Result>!
+static ResultUnion.ResultAsyncExtensions.MapErrorAsync<T>(this ResultUnion.Result<T> result, System.Func<ResultUnion.Error!, System.Threading.Tasks.Task<ResultUnion.Error!>!>! mapper) -> System.Threading.Tasks.Task<ResultUnion.Result<T>>!
+static ResultUnion.ResultAsyncExtensions.MapErrorAsync<T>(this System.Threading.Tasks.Task<ResultUnion.Result<T>>! source, System.Func<ResultUnion.Error!, ResultUnion.Error!>! mapper) -> System.Threading.Tasks.Task<ResultUnion.Result<T>>!
+static ResultUnion.ResultAsyncExtensions.MapErrorAsync<T>(this System.Threading.Tasks.Task<ResultUnion.Result<T>>! source, System.Func<ResultUnion.Error!, System.Threading.Tasks.Task<ResultUnion.Error!>!>! mapper) -> System.Threading.Tasks.Task<ResultUnion.Result<T>>!
+static ResultUnion.ResultAsyncExtensions.MatchAsync(this ResultUnion.Result result, System.Func<System.Threading.Tasks.Task!>! onSuccess, System.Func<ResultUnion.Error!, System.Threading.Tasks.Task!>! onFailure) -> System.Threading.Tasks.Task!
+static ResultUnion.ResultAsyncExtensions.MatchAsync(this System.Threading.Tasks.Task<ResultUnion.Result>! source, System.Action! onSuccess, System.Action<ResultUnion.Error!>! onFailure) -> System.Threading.Tasks.Task!
+static ResultUnion.ResultAsyncExtensions.MatchAsync(this System.Threading.Tasks.Task<ResultUnion.Result>! source, System.Func<System.Threading.Tasks.Task!>! onSuccess, System.Func<ResultUnion.Error!, System.Threading.Tasks.Task!>! onFailure) -> System.Threading.Tasks.Task!
+static ResultUnion.ResultAsyncExtensions.MatchAsync<T, TResult>(this ResultUnion.Result<T> result, System.Func<T, System.Threading.Tasks.Task<TResult>!>! onSuccess, System.Func<ResultUnion.Error!, System.Threading.Tasks.Task<TResult>!>! onFailure) -> System.Threading.Tasks.Task<TResult>!
+static ResultUnion.ResultAsyncExtensions.MatchAsync<T, TResult>(this System.Threading.Tasks.Task<ResultUnion.Result<T>>! source, System.Func<T, System.Threading.Tasks.Task<TResult>!>! onSuccess, System.Func<ResultUnion.Error!, System.Threading.Tasks.Task<TResult>!>! onFailure) -> System.Threading.Tasks.Task<TResult>!
+static ResultUnion.ResultAsyncExtensions.MatchAsync<T, TResult>(this System.Threading.Tasks.Task<ResultUnion.Result<T>>! source, System.Func<T, TResult>! onSuccess, System.Func<ResultUnion.Error!, TResult>! onFailure) -> System.Threading.Tasks.Task<TResult>!
+static ResultUnion.ResultAsyncExtensions.MatchAsync<T>(this ResultUnion.Result<T> result, System.Func<T, System.Threading.Tasks.Task!>! onSuccess, System.Func<ResultUnion.Error!, System.Threading.Tasks.Task!>! onFailure) -> System.Threading.Tasks.Task!
+static ResultUnion.ResultAsyncExtensions.MatchAsync<T>(this System.Threading.Tasks.Task<ResultUnion.Result<T>>! source, System.Action<T>! onSuccess, System.Action<ResultUnion.Error!>! onFailure) -> System.Threading.Tasks.Task!
+static ResultUnion.ResultAsyncExtensions.MatchAsync<T>(this System.Threading.Tasks.Task<ResultUnion.Result<T>>! source, System.Func<T, System.Threading.Tasks.Task!>! onSuccess, System.Func<ResultUnion.Error!, System.Threading.Tasks.Task!>! onFailure) -> System.Threading.Tasks.Task!
+static ResultUnion.ResultAsyncExtensions.MatchAsync<TResult>(this ResultUnion.Result result, System.Func<System.Threading.Tasks.Task<TResult>!>! onSuccess, System.Func<ResultUnion.Error!, System.Threading.Tasks.Task<TResult>!>! onFailure) -> System.Threading.Tasks.Task<TResult>!
+static ResultUnion.ResultAsyncExtensions.MatchAsync<TResult>(this System.Threading.Tasks.Task<ResultUnion.Result>! source, System.Func<System.Threading.Tasks.Task<TResult>!>! onSuccess, System.Func<ResultUnion.Error!, System.Threading.Tasks.Task<TResult>!>! onFailure) -> System.Threading.Tasks.Task<TResult>!
+static ResultUnion.ResultAsyncExtensions.MatchAsync<TResult>(this System.Threading.Tasks.Task<ResultUnion.Result>! source, System.Func<TResult>! onSuccess, System.Func<ResultUnion.Error!, TResult>! onFailure) -> System.Threading.Tasks.Task<TResult>!
+static ResultUnion.ResultAsyncExtensions.TapAsync(this ResultUnion.Result result, System.Func<System.Threading.Tasks.Task!>! action) -> System.Threading.Tasks.Task<ResultUnion.Result>!
+static ResultUnion.ResultAsyncExtensions.TapAsync(this System.Threading.Tasks.Task<ResultUnion.Result>! source, System.Action! action) -> System.Threading.Tasks.Task<ResultUnion.Result>!
+static ResultUnion.ResultAsyncExtensions.TapAsync(this System.Threading.Tasks.Task<ResultUnion.Result>! source, System.Func<System.Threading.Tasks.Task!>! action) -> System.Threading.Tasks.Task<ResultUnion.Result>!
+static ResultUnion.ResultAsyncExtensions.TapAsync<T>(this ResultUnion.Result<T> result, System.Func<T, System.Threading.Tasks.Task!>! action) -> System.Threading.Tasks.Task<ResultUnion.Result<T>>!
+static ResultUnion.ResultAsyncExtensions.TapAsync<T>(this System.Threading.Tasks.Task<ResultUnion.Result<T>>! source, System.Action<T>! action) -> System.Threading.Tasks.Task<ResultUnion.Result<T>>!
+static ResultUnion.ResultAsyncExtensions.TapAsync<T>(this System.Threading.Tasks.Task<ResultUnion.Result<T>>! source, System.Func<T, System.Threading.Tasks.Task!>! action) -> System.Threading.Tasks.Task<ResultUnion.Result<T>>!
+static ResultUnion.ResultAsyncExtensions.TapErrorAsync(this ResultUnion.Result result, System.Func<ResultUnion.Error!, System.Threading.Tasks.Task!>! action) -> System.Threading.Tasks.Task<ResultUnion.Result>!
+static ResultUnion.ResultAsyncExtensions.TapErrorAsync(this System.Threading.Tasks.Task<ResultUnion.Result>! source, System.Action<ResultUnion.Error!>! action) -> System.Threading.Tasks.Task<ResultUnion.Result>!
+static ResultUnion.ResultAsyncExtensions.TapErrorAsync(this System.Threading.Tasks.Task<ResultUnion.Result>! source, System.Func<ResultUnion.Error!, System.Threading.Tasks.Task!>! action) -> System.Threading.Tasks.Task<ResultUnion.Result>!
+static ResultUnion.ResultAsyncExtensions.TapErrorAsync<T>(this ResultUnion.Result<T> result, System.Func<ResultUnion.Error!, System.Threading.Tasks.Task!>! action) -> System.Threading.Tasks.Task<ResultUnion.Result<T>>!
+static ResultUnion.ResultAsyncExtensions.TapErrorAsync<T>(this System.Threading.Tasks.Task<ResultUnion.Result<T>>! source, System.Action<ResultUnion.Error!>! action) -> System.Threading.Tasks.Task<ResultUnion.Result<T>>!
+static ResultUnion.ResultAsyncExtensions.TapErrorAsync<T>(this System.Threading.Tasks.Task<ResultUnion.Result<T>>! source, System.Func<ResultUnion.Error!, System.Threading.Tasks.Task!>! action) -> System.Threading.Tasks.Task<ResultUnion.Result<T>>!
+static ResultUnion.ResultAsyncExtensions.ToResultAsync<T>(this System.Threading.Tasks.Task<T?>! source, ResultUnion.Error! errorIfNull) -> System.Threading.Tasks.Task<ResultUnion.Result<T!>>!
+static ResultUnion.ResultAsyncExtensions.ToResultAsync<T>(this System.Threading.Tasks.Task<T?>! source, ResultUnion.Error! errorIfNull) -> System.Threading.Tasks.Task<ResultUnion.Result<T>>!
+static ResultUnion.ResultAsyncExtensions.TryAsync(System.Func<System.Threading.Tasks.Task!>! action, System.Func<System.Exception!, ResultUnion.Error!>! onException) -> System.Threading.Tasks.Task<ResultUnion.Result>!
+static ResultUnion.ResultAsyncExtensions.TryAsync<T, TException>(System.Func<System.Threading.Tasks.Task<T>!>! action, System.Func<TException!, ResultUnion.Error!>! onException) -> System.Threading.Tasks.Task<ResultUnion.Result<T>>!
+static ResultUnion.ResultAsyncExtensions.TryAsync<T>(System.Func<System.Threading.Tasks.Task<T>!>! action, System.Func<System.Exception!, ResultUnion.Error!>! onException) -> System.Threading.Tasks.Task<ResultUnion.Result<T>>!
+static ResultUnion.ResultAsyncExtensions.TryAsync<TException>(System.Func<System.Threading.Tasks.Task!>! action, System.Func<TException!, ResultUnion.Error!>! onException) -> System.Threading.Tasks.Task<ResultUnion.Result>!
+static ResultUnion.ResultCollectionExtensions.CombineAll<T>(this System.Collections.Generic.IEnumerable<ResultUnion.Result<T>>! results, string? field = null) -> ResultUnion.Result<System.Collections.Generic.IReadOnlyList<T>!>
+static ResultUnion.ResultCollectionExtensions.CombineAll<TSource, T>(this System.Collections.Generic.IEnumerable<TSource>! source, System.Func<TSource, ResultUnion.Result<T>>! selector, string? field = null) -> ResultUnion.Result<System.Collections.Generic.IReadOnlyList<T>!>
+static ResultUnion.ResultTelemetryExtensions.Record(this ResultUnion.Result result, string! operation) -> ResultUnion.Result
+static ResultUnion.ResultTelemetryExtensions.Record<T>(this ResultUnion.Result<T> result, string! operation) -> ResultUnion.Result<T>
+static ResultUnion.ResultTelemetryExtensions.RecordAsync(this System.Threading.Tasks.Task<ResultUnion.Result>! source, string! operation) -> System.Threading.Tasks.Task<ResultUnion.Result>!
+static ResultUnion.ResultTelemetryExtensions.RecordAsync<T>(this System.Threading.Tasks.Task<ResultUnion.Result<T>>! source, string! operation) -> System.Threading.Tasks.Task<ResultUnion.Result<T>>!
+static ResultUnion.ResultTupleExtensions.Bind<T1, T2, T3, T4, TResult>(this ResultUnion.Result<(T1, T2, T3, T4)> result, System.Func<T1, T2, T3, T4, ResultUnion.Result<TResult>>! next) -> ResultUnion.Result<TResult>
+static ResultUnion.ResultTupleExtensions.Bind<T1, T2, T3, TResult>(this ResultUnion.Result<(T1, T2, T3)> result, System.Func<T1, T2, T3, ResultUnion.Result<TResult>>! next) -> ResultUnion.Result<TResult>
+static ResultUnion.ResultTupleExtensions.Bind<T1, T2, TResult>(this ResultUnion.Result<(T1, T2)> result, System.Func<T1, T2, ResultUnion.Result<TResult>>! next) -> ResultUnion.Result<TResult>
+static ResultUnion.ResultTupleExtensions.Map<T1, T2, T3, T4, TResult>(this ResultUnion.Result<(T1, T2, T3, T4)> result, System.Func<T1, T2, T3, T4, TResult>! mapper) -> ResultUnion.Result<TResult>
+static ResultUnion.ResultTupleExtensions.Map<T1, T2, T3, TResult>(this ResultUnion.Result<(T1, T2, T3)> result, System.Func<T1, T2, T3, TResult>! mapper) -> ResultUnion.Result<TResult>
+static ResultUnion.ResultTupleExtensions.Map<T1, T2, TResult>(this ResultUnion.Result<(T1, T2)> result, System.Func<T1, T2, TResult>! mapper) -> ResultUnion.Result<TResult>
+~override ResultUnion.Result.Equals(object obj) -> bool
+~override ResultUnion.Result<T>.Equals(object obj) -> bool

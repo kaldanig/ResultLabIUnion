@@ -716,6 +716,11 @@ the result (`EnsureAsync`, `TapAsync`, `TapErrorAsync`) reuse their source task.
 - **Equality.** Results and errors compare by value. One quirk: `default(Result<int>)` is not equal to
   `Result<int>.Failure(Error.DefaultResult)`, although both carry the same error.
 
+## Releases
+
+Changes per version are in [CHANGELOG.md](CHANGELOG.md); how a version is published is in
+[docs/RELEASING.md](docs/RELEASING.md).
+
 ## License
 
 MIT, see [LICENSE](LICENSE).

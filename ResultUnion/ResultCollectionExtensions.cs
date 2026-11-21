@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 namespace ResultUnion;
 
 /// <summary>
@@ -26,6 +27,7 @@ public static class ResultCollectionExtensions
         /// <param name="field">When set, the name of the collection, used to prefix each error's field with <c>field[index]</c>.</param>
         /// <exception cref="ArgumentNullException"><paramref name="results"/> is <see langword="null"/>.</exception>
         /// <exception cref="ArgumentException"><paramref name="field"/> is empty or white space.</exception>
+        [SuppressMessage("ApiDesign", "RS0026", Justification = "Different receivers in one static class, not real overloads. Add new options as new overloads, never as new optional parameters.")]
         public Result<IReadOnlyList<T>> CombineAll(string? field = null)
         {
             ArgumentNullException.ThrowIfNull(results);
@@ -52,6 +54,7 @@ public static class ResultCollectionExtensions
         /// <remarks>Every element is processed, even after a failure, so that every error is reported.</remarks>
         /// <exception cref="ArgumentNullException"><paramref name="source"/> or <paramref name="selector"/> is <see langword="null"/>.</exception>
         /// <exception cref="ArgumentException"><paramref name="field"/> is empty or white space.</exception>
+        [SuppressMessage("ApiDesign", "RS0026", Justification = "Different receivers in one static class, not real overloads. Add new options as new overloads, never as new optional parameters.")]
         public Result<IReadOnlyList<T>> CombineAll<T>(Func<TSource, Result<T>> selector, string? field = null)
             where T : notnull
         {

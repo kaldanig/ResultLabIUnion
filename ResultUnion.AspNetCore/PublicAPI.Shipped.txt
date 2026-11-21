@@ -1,0 +1,61 @@
+#nullable enable
+const ResultUnion.AspNetCore.ProblemDetailsMapping.UnexpectedDetail = "An unexpected error occurred." -> string!
+override ResultUnion.AspNetCore.ProblemErrorDetail.Equals(object? obj) -> bool
+override ResultUnion.AspNetCore.ProblemErrorDetail.GetHashCode() -> int
+override ResultUnion.AspNetCore.ProblemErrorDetail.ToString() -> string!
+ResultUnion.AspNetCore.EndpointProblemMetadataExtensions
+ResultUnion.AspNetCore.ProblemDetailsMapping
+ResultUnion.AspNetCore.ProblemDetailsMapping.extension(ResultUnion.Error!)
+ResultUnion.AspNetCore.ProblemDetailsMapping.extension(ResultUnion.Error!).ToProblemDetails() -> Microsoft.AspNetCore.Mvc.ProblemDetails!
+ResultUnion.AspNetCore.ProblemDetailsMapping.extension(ResultUnion.ErrorType)
+ResultUnion.AspNetCore.ProblemDetailsMapping.extension(ResultUnion.ErrorType).ToStatusCode() -> int
+ResultUnion.AspNetCore.ProblemErrorDetail
+ResultUnion.AspNetCore.ProblemErrorDetail.<Clone>$() -> ResultUnion.AspNetCore.ProblemErrorDetail!
+ResultUnion.AspNetCore.ProblemErrorDetail.Arguments.get -> System.Collections.Generic.IReadOnlyDictionary<string!, object?>?
+ResultUnion.AspNetCore.ProblemErrorDetail.Arguments.init -> void
+ResultUnion.AspNetCore.ProblemErrorDetail.Code.get -> string!
+ResultUnion.AspNetCore.ProblemErrorDetail.Code.init -> void
+ResultUnion.AspNetCore.ProblemErrorDetail.Deconstruct(out string! Code, out string? Field, out string! Message, out System.Collections.Generic.IReadOnlyDictionary<string!, object?>? Arguments) -> void
+ResultUnion.AspNetCore.ProblemErrorDetail.Equals(ResultUnion.AspNetCore.ProblemErrorDetail? other) -> bool
+ResultUnion.AspNetCore.ProblemErrorDetail.Field.get -> string?
+ResultUnion.AspNetCore.ProblemErrorDetail.Field.init -> void
+ResultUnion.AspNetCore.ProblemErrorDetail.Message.get -> string!
+ResultUnion.AspNetCore.ProblemErrorDetail.Message.init -> void
+ResultUnion.AspNetCore.ProblemErrorDetail.ProblemErrorDetail(string! Code, string? Field, string! Message, System.Collections.Generic.IReadOnlyDictionary<string!, object?>? Arguments = null) -> void
+ResultUnion.AspNetCore.ResultHttpExtensions
+ResultUnion.AspNetCore.ResultHttpExtensions.extension(ResultUnion.Error!)
+ResultUnion.AspNetCore.ResultHttpExtensions.extension(ResultUnion.Error!).ToHttpResult() -> Microsoft.AspNetCore.Http.HttpResults.ProblemHttpResult!
+ResultUnion.AspNetCore.ResultHttpExtensions.extension(ResultUnion.Result)
+ResultUnion.AspNetCore.ResultHttpExtensions.extension(ResultUnion.Result).ToHttpResult() -> Microsoft.AspNetCore.Http.HttpResults.Results<Microsoft.AspNetCore.Http.HttpResults.NoContent!, Microsoft.AspNetCore.Http.HttpResults.ProblemHttpResult!>!
+ResultUnion.AspNetCore.ResultHttpExtensions.extension(ResultUnion.Result).ToHttpResult(System.Func<Microsoft.AspNetCore.Http.IResult!>! onSuccess) -> Microsoft.AspNetCore.Http.IResult!
+ResultUnion.AspNetCore.ResultHttpExtensions.extension(ResultUnion.Result).ToHttpResult<TSuccess>(System.Func<TSuccess>! onSuccess) -> Microsoft.AspNetCore.Http.HttpResults.Results<TSuccess, Microsoft.AspNetCore.Http.HttpResults.ProblemHttpResult!>!
+ResultUnion.AspNetCore.ResultHttpExtensions.extension(System.Threading.Tasks.Task<ResultUnion.Result>!)
+ResultUnion.AspNetCore.ResultHttpExtensions.extension(System.Threading.Tasks.Task<ResultUnion.Result>!).ToHttpResultAsync() -> System.Threading.Tasks.Task<Microsoft.AspNetCore.Http.HttpResults.Results<Microsoft.AspNetCore.Http.HttpResults.NoContent!, Microsoft.AspNetCore.Http.HttpResults.ProblemHttpResult!>!>!
+ResultUnion.AspNetCore.ResultHttpExtensions.extension(System.Threading.Tasks.Task<ResultUnion.Result>!).ToHttpResultAsync(System.Func<Microsoft.AspNetCore.Http.IResult!>! onSuccess) -> System.Threading.Tasks.Task<Microsoft.AspNetCore.Http.IResult!>!
+ResultUnion.AspNetCore.ResultHttpExtensions.extension(System.Threading.Tasks.Task<ResultUnion.Result>!).ToHttpResultAsync<TSuccess>(System.Func<TSuccess>! onSuccess) -> System.Threading.Tasks.Task<Microsoft.AspNetCore.Http.HttpResults.Results<TSuccess, Microsoft.AspNetCore.Http.HttpResults.ProblemHttpResult!>!>!
+ResultUnion.AspNetCore.ResultHttpExtensions.extension<T>(ResultUnion.Result<T>)
+ResultUnion.AspNetCore.ResultHttpExtensions.extension<T>(ResultUnion.Result<T>).ToHttpResult() -> Microsoft.AspNetCore.Http.HttpResults.Results<Microsoft.AspNetCore.Http.HttpResults.Ok<T>!, Microsoft.AspNetCore.Http.HttpResults.ProblemHttpResult!>!
+ResultUnion.AspNetCore.ResultHttpExtensions.extension<T>(ResultUnion.Result<T>).ToHttpResult(System.Func<T, Microsoft.AspNetCore.Http.IResult!>! onSuccess) -> Microsoft.AspNetCore.Http.IResult!
+ResultUnion.AspNetCore.ResultHttpExtensions.extension<T>(ResultUnion.Result<T>).ToHttpResult<TSuccess>(System.Func<T, TSuccess>! onSuccess) -> Microsoft.AspNetCore.Http.HttpResults.Results<TSuccess, Microsoft.AspNetCore.Http.HttpResults.ProblemHttpResult!>!
+ResultUnion.AspNetCore.ResultHttpExtensions.extension<T>(System.Threading.Tasks.Task<ResultUnion.Result<T>>!)
+ResultUnion.AspNetCore.ResultHttpExtensions.extension<T>(System.Threading.Tasks.Task<ResultUnion.Result<T>>!).ToHttpResultAsync() -> System.Threading.Tasks.Task<Microsoft.AspNetCore.Http.HttpResults.Results<Microsoft.AspNetCore.Http.HttpResults.Ok<T>!, Microsoft.AspNetCore.Http.HttpResults.ProblemHttpResult!>!>!
+ResultUnion.AspNetCore.ResultHttpExtensions.extension<T>(System.Threading.Tasks.Task<ResultUnion.Result<T>>!).ToHttpResultAsync(System.Func<T, Microsoft.AspNetCore.Http.IResult!>! onSuccess) -> System.Threading.Tasks.Task<Microsoft.AspNetCore.Http.IResult!>!
+ResultUnion.AspNetCore.ResultHttpExtensions.extension<T>(System.Threading.Tasks.Task<ResultUnion.Result<T>>!).ToHttpResultAsync<TSuccess>(System.Func<T, TSuccess>! onSuccess) -> System.Threading.Tasks.Task<Microsoft.AspNetCore.Http.HttpResults.Results<TSuccess, Microsoft.AspNetCore.Http.HttpResults.ProblemHttpResult!>!>!
+static ResultUnion.AspNetCore.EndpointProblemMetadataExtensions.ProducesErrors<TBuilder>(this TBuilder builder, params ResultUnion.ErrorType[]! types) -> TBuilder
+static ResultUnion.AspNetCore.ProblemDetailsMapping.ToProblemDetails(this ResultUnion.Error! error) -> Microsoft.AspNetCore.Mvc.ProblemDetails!
+static ResultUnion.AspNetCore.ProblemDetailsMapping.ToStatusCode(this ResultUnion.ErrorType type) -> int
+static ResultUnion.AspNetCore.ProblemErrorDetail.operator !=(ResultUnion.AspNetCore.ProblemErrorDetail? left, ResultUnion.AspNetCore.ProblemErrorDetail? right) -> bool
+static ResultUnion.AspNetCore.ProblemErrorDetail.operator ==(ResultUnion.AspNetCore.ProblemErrorDetail? left, ResultUnion.AspNetCore.ProblemErrorDetail? right) -> bool
+static ResultUnion.AspNetCore.ResultHttpExtensions.ToHttpResult(this ResultUnion.Error! error) -> Microsoft.AspNetCore.Http.HttpResults.ProblemHttpResult!
+static ResultUnion.AspNetCore.ResultHttpExtensions.ToHttpResult(this ResultUnion.Result result) -> Microsoft.AspNetCore.Http.HttpResults.Results<Microsoft.AspNetCore.Http.HttpResults.NoContent!, Microsoft.AspNetCore.Http.HttpResults.ProblemHttpResult!>!
+static ResultUnion.AspNetCore.ResultHttpExtensions.ToHttpResult(this ResultUnion.Result result, System.Func<Microsoft.AspNetCore.Http.IResult!>! onSuccess) -> Microsoft.AspNetCore.Http.IResult!
+static ResultUnion.AspNetCore.ResultHttpExtensions.ToHttpResult<T, TSuccess>(this ResultUnion.Result<T> result, System.Func<T, TSuccess>! onSuccess) -> Microsoft.AspNetCore.Http.HttpResults.Results<TSuccess, Microsoft.AspNetCore.Http.HttpResults.ProblemHttpResult!>!
+static ResultUnion.AspNetCore.ResultHttpExtensions.ToHttpResult<T>(this ResultUnion.Result<T> result) -> Microsoft.AspNetCore.Http.HttpResults.Results<Microsoft.AspNetCore.Http.HttpResults.Ok<T>!, Microsoft.AspNetCore.Http.HttpResults.ProblemHttpResult!>!
+static ResultUnion.AspNetCore.ResultHttpExtensions.ToHttpResult<T>(this ResultUnion.Result<T> result, System.Func<T, Microsoft.AspNetCore.Http.IResult!>! onSuccess) -> Microsoft.AspNetCore.Http.IResult!
+static ResultUnion.AspNetCore.ResultHttpExtensions.ToHttpResult<TSuccess>(this ResultUnion.Result result, System.Func<TSuccess>! onSuccess) -> Microsoft.AspNetCore.Http.HttpResults.Results<TSuccess, Microsoft.AspNetCore.Http.HttpResults.ProblemHttpResult!>!
+static ResultUnion.AspNetCore.ResultHttpExtensions.ToHttpResultAsync(this System.Threading.Tasks.Task<ResultUnion.Result>! source) -> System.Threading.Tasks.Task<Microsoft.AspNetCore.Http.HttpResults.Results<Microsoft.AspNetCore.Http.HttpResults.NoContent!, Microsoft.AspNetCore.Http.HttpResults.ProblemHttpResult!>!>!
+static ResultUnion.AspNetCore.ResultHttpExtensions.ToHttpResultAsync(this System.Threading.Tasks.Task<ResultUnion.Result>! source, System.Func<Microsoft.AspNetCore.Http.IResult!>! onSuccess) -> System.Threading.Tasks.Task<Microsoft.AspNetCore.Http.IResult!>!
+static ResultUnion.AspNetCore.ResultHttpExtensions.ToHttpResultAsync<T, TSuccess>(this System.Threading.Tasks.Task<ResultUnion.Result<T>>! source, System.Func<T, TSuccess>! onSuccess) -> System.Threading.Tasks.Task<Microsoft.AspNetCore.Http.HttpResults.Results<TSuccess, Microsoft.AspNetCore.Http.HttpResults.ProblemHttpResult!>!>!
+static ResultUnion.AspNetCore.ResultHttpExtensions.ToHttpResultAsync<T>(this System.Threading.Tasks.Task<ResultUnion.Result<T>>! source) -> System.Threading.Tasks.Task<Microsoft.AspNetCore.Http.HttpResults.Results<Microsoft.AspNetCore.Http.HttpResults.Ok<T>!, Microsoft.AspNetCore.Http.HttpResults.ProblemHttpResult!>!>!
+static ResultUnion.AspNetCore.ResultHttpExtensions.ToHttpResultAsync<T>(this System.Threading.Tasks.Task<ResultUnion.Result<T>>! source, System.Func<T, Microsoft.AspNetCore.Http.IResult!>! onSuccess) -> System.Threading.Tasks.Task<Microsoft.AspNetCore.Http.IResult!>!
+static ResultUnion.AspNetCore.ResultHttpExtensions.ToHttpResultAsync<TSuccess>(this System.Threading.Tasks.Task<ResultUnion.Result>! source, System.Func<TSuccess>! onSuccess) -> System.Threading.Tasks.Task<Microsoft.AspNetCore.Http.HttpResults.Results<TSuccess, Microsoft.AspNetCore.Http.HttpResults.ProblemHttpResult!>!>!
