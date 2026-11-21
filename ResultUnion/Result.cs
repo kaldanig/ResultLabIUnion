@@ -31,6 +31,31 @@ public interface IResultState<out T> : IResultState
     T ResultValue { get; }
 }
 
+/// <summary>Lets generic code create a failed result of a type it only knows as a type parameter.</summary>
+/// <typeparam name="TSelf">The result type itself: <see cref="Result"/> or <see cref="Result{T}"/>.</typeparam>
+/// <remarks>
+/// <para>
+/// Typical use is a CQRS pipeline behavior (validation, authorisation, transactions) that wraps handlers returning
+/// <c>Result</c>, <c>Result&lt;OrderId&gt;</c>, <c>Result&lt;UserDto&gt;</c> and so on, and must short-circuit with a failure:
+/// </para>
+/// <code>
+/// TResponse Handle&lt;TResponse&gt;(Func&lt;TResponse&gt; next)
+///     where TResponse : IResultFactory&lt;TResponse&gt; =&gt;
+///     isValid ? next() : TResponse.Failure(Error.Validation("…"));
+/// </code>
+/// <para>
+/// There is deliberately no generic <c>Success</c>: a successful <see cref="Result{T}"/> needs a value that the
+/// generic code does not have. Success comes from the wrapped handler.
+/// </para>
+/// </remarks>
+public interface IResultFactory<out TSelf> : IResultState
+    where TSelf : IResultFactory<TSelf>
+{
+    /// <summary>Creates a failed result carrying <paramref name="error"/>.</summary>
+    /// <exception cref="ArgumentNullException"><paramref name="error"/> is <see langword="null"/>.</exception>
+    static abstract TSelf Failure(Error error);
+}
+
 /// <summary>
 /// The outcome of an operation that produces a <typeparamref name="T"/> value: a union of two cases,
 /// the value on success or an <see cref="ResultUnion.Error"/> on failure.
@@ -57,7 +82,7 @@ public interface IResultState<out T> : IResultState
 /// </remarks>
 [Union]
 [DebuggerDisplay("{ToString(),nq}")]
-public readonly record struct Result<T> : IUnion, IResultState<T>
+public readonly record struct Result<T> : IUnion, IResultState<T>, IResultFactory<Result<T>>
     where T : notnull
 {
     private readonly T? _value;
@@ -341,7 +366,7 @@ public readonly record struct Result<T> : IUnion, IResultState<T>
 /// </para>
 /// </remarks>
 [DebuggerDisplay("{ToString(),nq}")]
-public readonly record struct Result : IResultState
+public readonly record struct Result : IResultFactory<Result>
 {
     /// <inheritdoc/>
     public bool IsSuccess { get; }

@@ -196,6 +196,27 @@ var message = await Email.Create(input)
   Exceptions thrown by your delegates surface through the returned task.
 - The library uses `ConfigureAwait(false)` throughout.
 
+## Generic code: pipeline behaviors
+
+`Result` and `Result<T>` implement `IResultFactory<TSelf>`, so code that only knows the result type as a type
+parameter can still create a failure. This is what a CQRS pipeline behavior (validation, authorisation,
+transactions) needs when it wraps handlers that return `Result`, `Result<OrderId>`, `Result<UserDto>` and so on:
+
+```csharp
+public static async Task<TResponse> RequireRoleAsync<TResponse>(string role, Func<Task<TResponse>> handler)
+    where TResponse : IResultFactory<TResponse>
+{
+    if (role != "admin")
+        return TResponse.Failure(Error.Forbidden("Admins only."));   // the handler does not run
+
+    var response = await handler();
+    // IResultFactory<T> is also an IResultState: response.IsSuccess / response.Error are available here.
+    return response;
+}
+```
+
+There is no generic `Success`: a successful `Result<T>` needs a value that the behavior does not have.
+
 ## Things to know
 
 - **Do not pass `async` lambdas to `Result.Try`.** They compile, but exceptions after the first `await` are not

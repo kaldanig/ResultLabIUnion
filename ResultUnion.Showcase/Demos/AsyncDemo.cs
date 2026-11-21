@@ -1,3 +1,4 @@
+using ResultUnion.Showcase.Application;
 using ResultUnion.Showcase.Domain;
 
 namespace ResultUnion.Showcase.Demos;
@@ -58,6 +59,17 @@ internal static class AsyncDemo
         Demo.Show("RegisterAsAdminAsync(\"guest\", ...)", await service.RegisterAsAdminAsync("guest", "carl@example.com", "52"));
         Console.WriteLine("  RegisterAsAdminAsync(\"admin\", ...)");
         Demo.Show("    -> MapAsync(user => user.Email)", await service.RegisterAsAdminAsync("admin", "carl@example.com", "52").MapAsync(user => user.Email));
+
+        // One generic behavior for handlers with different result types: Result<User> and Result.
+        Console.WriteLine();
+        Console.WriteLine("  Generic pipeline behavior (IResultFactory<TSelf>):");
+        Demo.Show("RequireRole(guest) -> RegisterAsync", await AuthorisationBehavior.RequireRoleAsync(
+            "guest", "admin", () => service.RegisterAsync("dora@example.com", "41")));       // Task<Result<User>>
+        Demo.Show("RequireRole(guest) -> DeactivateAsync", await AuthorisationBehavior.RequireRoleAsync(
+            "guest", "admin", () => service.DeactivateAsync("carl@example.com")));           // Task<Result>
+        Console.WriteLine("  RequireRole(admin) -> DeactivateAsync");
+        Demo.Show("    -> result", await AuthorisationBehavior.RequireRoleAsync(
+            "admin", "admin", () => service.DeactivateAsync("carl@example.com")));
 
         // Cancellation is not a business failure: it stays an exception and is not turned into a Result.
         Console.WriteLine();
