@@ -7,8 +7,10 @@ internal static class PatternMatchingDemo
 {
     public static void Run()
     {
+#pragma warning disable RU0004 // constant addresses that are valid
         var ann = new User(Guid.NewGuid(), Email.Create("ann@example.com").ResultValue, 34);
         var bob = new User(Guid.NewGuid(), Email.Create("bob@example.com").ResultValue, 71);
+#pragma warning restore RU0004
 
         Result<User>[] results =
         [

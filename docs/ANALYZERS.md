@@ -8,8 +8,9 @@ compiler and the IDE as soon as a project references the package; there is nothi
 | [RU0001](#ru0001) | Warning | A `Result` is discarded | `_ = …` |
 | [RU0002](#ru0002) | Warning | Asynchronous code passed to `Result.Try` | `Result.TryAsync`, awaited in an `async` function |
 | [RU0003](#ru0003) | Warning | `Map` with a mapper that returns a `Result` | `Bind` / `BindAsync` |
+| [RU0004](#ru0004) | Warning | `ResultValue` or `Error` read without checking the result | none |
 
-Each rule has a code fix (the light bulb in Visual Studio and Rider, with Fix All for a document, project or solution). From the command line, `dotnet format analyzers --diagnostics RU0003 --severity warn` applies one; run one rule per call, because a fix for one rule moves the positions the next rule's diagnostics refer to.
+Rules RU0001–RU0003 have a code fix (the light bulb in Visual Studio and Rider, with Fix All for a document, project or solution). From the command line, `dotnet format analyzers --diagnostics RU0003 --severity warn` applies one; run one rule per call, because a fix for one rule moves the positions the next rule's diagnostics refer to.
 
 Change a rule's severity in `.editorconfig`, for example `dotnet_diagnostic.RU0001.severity = error`, or turn it off
 with `none`.
@@ -68,3 +69,39 @@ Reported for `Map` and `MapAsync` on `Result<T>`, on `Task<Result<T>>` and on th
 message names the replacement (`Bind` or `BindAsync`).
 
 **Code fix:** renames `Map` to `Bind` and `MapAsync` to `BindAsync`, dropping explicit type arguments (the ones written for `Map` would be wrong for `Bind`).
+
+## RU0004
+
+**`ResultValue` or `Error` read without checking the result.** `ResultValue` throws on a failure and `Error` throws on a
+success, so reading one where the state is not known is an exception waiting for the wrong input.
+
+```csharp
+var user = users.Find(email);
+return user.ResultValue.Name;                       // RU0004: throws when the user was not found
+
+if (user.TryGetError(out var error)) return error;  // or: if (user.IsFailure) return user.Error;
+return user.ResultValue.Name;                       // fine: the state is known here
+```
+
+Prefer `switch`, `Match` or `TryGetResultValue` / `TryGetError`, which need no check at all. A read is accepted when, for
+the same result (the same local, parameter, field or property, or `this`):
+
+- it is inside `if (r.IsSuccess)` / `if (r.IsFailure)` (or `!`, `== false`, the `else` branch), or on the matching
+  side of `?:`, `&&` or `||`;
+- an earlier `if` in the same block exits when the state is wrong: `if (r.IsFailure) return …;`,
+  `if (!r.IsSuccess) throw …;`;
+- the check is `r.TryGetResultValue(out …)` or `r.TryGetError(out …)`.
+
+A read on a call's result, `Parse(s).ResultValue`, is always reported: it cannot have been checked. The rule is local and
+does not follow reassignments, loops or `switch` statements, so it may report a read that another construct makes safe;
+rewrite it with `switch`, `Match` or `TryGetResultValue`, or suppress it where the state is known by construction.
+
+Tests read values directly on results whose state they know; turn the rule off for them in `.editorconfig`:
+
+```ini
+[*Tests/**.cs]
+dotnet_diagnostic.RU0004.severity = none
+```
+
+No code fix: the right replacement (return, throw, `Match`, a default) depends on what the code should do on the other
+track.

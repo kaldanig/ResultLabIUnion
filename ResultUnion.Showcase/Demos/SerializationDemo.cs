@@ -17,7 +17,9 @@ internal static class SerializationDemo
         var service = new RegistrationService(new UserRepository());
 
         // The sender publishes an event with the error (for example to a queue).
+#pragma warning disable RU0004 // the demo input is known to fail
         var rejected = new RegistrationRejected("bob@example.com", service.Register("bob@example.com", "15").Error);
+#pragma warning restore RU0004
         var json = JsonSerializer.Serialize(rejected, Indented);
 
         Console.WriteLine("  The event on the wire:");
@@ -34,7 +36,9 @@ internal static class SerializationDemo
         Demo.Show("  retry?", received.Reason.IsTransient);
 
         // A validation group keeps its details, with their fields, through the round trip.
+#pragma warning disable RU0004 // the demo inputs are known to fail
         var invalid = Result.CombineAll(Email.Create("dan@"), Password.Create("123")).Error;
+#pragma warning restore RU0004
         var copy = JsonSerializer.Deserialize<Error>(JsonSerializer.Serialize(invalid))!;
         Demo.Show("  group round trip", string.Join(", ", copy.Flatten().Select(error => error.Code)));
     }

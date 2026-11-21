@@ -215,7 +215,8 @@ and never retry a BusinessRule or Unexpected error.
 ## Quick check before you finish
 
 Build the project: the package's analyzers report a discarded `Result` (RU0001), `async` code in `Result.Try`
-(RU0002) and `Map` with a mapper that returns a `Result` (RU0003). Fix them rather than suppressing them; a discard
+(RU0002), `Map` with a mapper that returns a `Result` (RU0003) and `ResultValue` / `Error` read without checking
+the result (RU0004). Fix them rather than suppressing them; a discard
 that is really intended is written `_ = ...`.
 
 | If the code has… | Change it to… |

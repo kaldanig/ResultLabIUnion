@@ -8,6 +8,7 @@ internal static class LocalizationDemo
         var service = new RegistrationService(new UserRepository());
         _ = service.Register("ann@example.com", "34");
 
+#pragma warning disable RU0004 // the demo inputs are known to fail
         Error[] errors =
         [
             service.Register("bob@example.com", "15").Error,                        // user.too_young
@@ -16,6 +17,7 @@ internal static class LocalizationDemo
             .. Result.CombineAll(Email.Create("dan@"), Password.Create("123")).Error.Flatten(),
             .. new[] { new OrderLineInput("", 0) }.CombineAll(OrderLine.Create, "lines").Error.Flatten(),
         ];
+#pragma warning restore RU0004
 
         foreach (var error in errors)
         {

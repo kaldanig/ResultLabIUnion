@@ -30,9 +30,11 @@ internal static class SafeAccessDemo
         Demo.Show("success.ToResult()", success.ToResult());
 
         // ResultValue and Error throw when read on the wrong track: check the state first, or use Match/switch.
+#pragma warning disable RU0004 // this section shows what reading each case does, the wrong one included
         Demo.Show("success.ResultValue", success.ResultValue);
         Demo.Show("failure.ResultValue", Capture(() => failure.ResultValue));
         Demo.Show("success.Error", Capture(() => success.Error));
+#pragma warning restore RU0004
 
         // Guard clauses: delegates are validated eagerly, even on the track where they would not run.
         Demo.Show("failure.Map<int>(null!)", Capture(() => failure.Map<int>(null!)));

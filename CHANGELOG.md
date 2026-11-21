@@ -31,7 +31,8 @@ The first release. Requires .NET 11 (C# 15 unions).
 - `ResultTelemetry` and `Record` / `RecordAsync`: failures counted in OpenTelemetry (`resultunion.errors`) and added to
   the current span, through `System.Diagnostics`, without an OpenTelemetry dependency.
 - Analyzers in the package: RU0001 (a discarded result), RU0002 (asynchronous code in `Result.Try`), RU0003 (`Map`
-  with a mapper that returns a result), each with a code fix (`_ =`, `TryAsync`, `Bind`).
+  with a mapper that returns a result), each with a code fix (`_ =`, `TryAsync`, `Bind`), and RU0004 (`ResultValue`
+  or `Error` read without checking the result).
 - Built with .NET 11 Runtime Async.
 
 ### ResultUnion.AspNetCore

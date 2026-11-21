@@ -27,7 +27,9 @@ internal static class BasicsDemo
         // State.
         Demo.Show("success.IsSuccess", success.IsSuccess);
         Demo.Show("failure.IsFailure", failure.IsFailure);
+#pragma warning disable RU0004 // the demo's failure is known; the next sections show switch, Match and TryGetError
         Demo.Show("failure.Error.Type", failure.Error.Type);
+#pragma warning restore RU0004
 
         // Non-generic Result for operations without a value.
         Demo.Show("Result.Success()", Result.Success());

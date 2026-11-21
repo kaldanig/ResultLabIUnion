@@ -24,8 +24,10 @@ public static class ServiceCollectionExtensions
     /// <summary>Registers ann@example.com, so there is a user to look up, deactivate and order for.</summary>
     public static IServiceProvider SeedSampleData(this IServiceProvider services)
     {
+#pragma warning disable RU0004 // seed data: the address is a constant that is valid
         services.GetRequiredService<InMemoryUserStore>()
             .Seed(new User(Guid.NewGuid(), Email.Create("ann@example.com").ResultValue, 34));
+#pragma warning restore RU0004
 
         return services;
     }

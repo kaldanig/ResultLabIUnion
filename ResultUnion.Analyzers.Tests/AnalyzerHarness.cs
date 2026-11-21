@@ -32,7 +32,7 @@ internal static class AnalyzerHarness
     /// The analyzer's diagnostics as (id, line), with line 1 being the first line of <paramref name="source"/>.
     /// Fails when the snippet itself does not compile, so a test cannot pass by accident.
     /// </summary>
-    public static async Task<IReadOnlyList<(string Id, int Line)>> AnalyzeAsync(string source)
+    public static async Task<IReadOnlyList<(string Id, int Line)>> AnalyzeAsync(string source, DiagnosticAnalyzer? analyzer = null)
     {
         var tree = CSharpSyntaxTree.ParseText(
             Usings + source,
@@ -51,7 +51,7 @@ internal static class AnalyzerHarness
         Assert.True(errors.Count == 0, "The snippet does not compile:\n" + string.Join("\n", errors));
 
         var diagnostics = await compilation
-            .WithAnalyzers([new ResultUsageAnalyzer()])
+            .WithAnalyzers([analyzer ?? new ResultUsageAnalyzer()])
             .GetAnalyzerDiagnosticsAsync(TestContext.Current.CancellationToken);
 
         return diagnostics

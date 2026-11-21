@@ -39,4 +39,17 @@ internal static class Descriptors
         description: "Map is for steps that cannot fail (T to U). A step that returns a Result belongs in Bind, which "
             + "flattens it; Map would produce Result<Result<U>> and hide the inner failure from the rest of the chain.",
         helpLinkUri: HelpBase + "ru0003");
+
+    public static readonly DiagnosticDescriptor UncheckedAccess = new(
+        id: "RU0004",
+        title: "ResultValue or Error read without checking the result",
+        messageFormat: "'{0}' is read without checking that the result is a {1}, so it throws when it is not; "
+            + "use switch, Match or {2}, or check {3} first",
+        category: Category,
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "ResultValue throws on a failure and Error throws on a success. Read them only where the state is "
+            + "known: inside 'if (result.IsSuccess)', after 'if (result.IsFailure) return ...;', on the matching side of "
+            + "?: or &&, or after TryGetResultValue / TryGetError. A switch on the union or Match needs no check at all.",
+        helpLinkUri: HelpBase + "ru0004");
 }

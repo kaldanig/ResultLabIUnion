@@ -1,0 +1,6 @@
+# Repository-wide analyzer settings.
+
+# Tests read ResultValue and Error directly on results whose state the test knows; a wrong state throws and fails the
+# test, which is what an assertion is for. RU0004 (read without checking the state) is meant for production code.
+[ResultUnion*.Tests/**.cs]
+dotnet_diagnostic.RU0004.severity = none

@@ -8,3 +8,4 @@ Rule ID | Category | Severity | Notes
 RU0001 | Usage | Warning | A Result is discarded
 RU0002 | Usage | Warning | Asynchronous code passed to Result.Try
 RU0003 | Usage | Warning | Map with a mapper that returns a Result
+RU0004 | Usage | Warning | ResultValue or Error read without checking the result

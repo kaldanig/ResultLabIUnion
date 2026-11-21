@@ -663,6 +663,7 @@ fix in the IDE:
 | `RU0001` | a `Result` that is discarded, so a failure would go unnoticed (use it, or discard it with `_ = ...`) |
 | `RU0002` | an `async` lambda or a task-returning method passed to `Result.Try` (use `Result.TryAsync`) |
 | `RU0003` | `Map` / `MapAsync` with a mapper that returns a `Result` (use `Bind` / `BindAsync`) |
+| `RU0004` | `ResultValue` / `Error` read without checking the result (use `switch`, `Match` or `TryGetResultValue`) |
 
 Details, examples and how to change a rule's severity: [docs/ANALYZERS.md](docs/ANALYZERS.md).
 
