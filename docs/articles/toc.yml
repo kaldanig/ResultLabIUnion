@@ -1,0 +1,8 @@
+- name: Getting started
+  href: getting-started.md
+- name: EF Core
+  href: ef-core.md
+- name: Pipeline behaviors
+  href: pipeline-behaviors.md
+- name: Testing
+  href: testing.md

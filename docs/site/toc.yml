@@ -1,5 +1,7 @@
 - name: Guide
   href: ../../README.md
+- name: Articles
+  href: ../articles/
 - name: Design
   href: ../DESIGN.md
 - name: Analyzers
