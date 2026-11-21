@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ResultUnion Demo</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="top">
+    <div>
+      <h1>ResultUnion demo</h1>
+      <p class="muted">Every failure is a problem response with a stable <code>code</code>, <code>arguments</code> and, for forms,
+        one error per field. This page shows them next to the inputs they belong to.</p>
+    </div>
+    <div class="top-actions">
+      <div class="segmented" role="group" aria-label="Server messages">
+        <button type="button" data-lang="en" aria-pressed="true">English</button>
+        <button type="button" data-lang="ka" aria-pressed="false">ქართული</button>
+      </div>
+      <a class="link" href="/scalar" target="_blank" rel="noopener">API docs (Scalar)</a>
+    </div>
+  </header>
+
+  <main class="layout">
+    <section class="cards">
+
+      <form class="card" id="register" novalidate>
+        <h2>Register a user</h2>
+        <p class="hint">Try <code>bob@</code>, a short password, age <code>abc</code> or <code>15</code>, or <code>ann@example.com</code>.</p>
+        <label>Email <input name="email" autocomplete="off" placeholder="bob@example.com"></label>
+        <p class="field-error" data-error-for="email"></p>
+        <label>Password <input name="password" type="password" placeholder="at least 8 characters"></label>
+        <p class="field-error" data-error-for="password"></p>
+        <label>Age <input name="age" inputmode="numeric" placeholder="29"></label>
+        <p class="field-error" data-error-for="age"></p>
+        <div class="actions"><button type="submit">Register</button></div>
+        <div class="outcome" aria-live="polite"></div>
+      </form>
+
+      <form class="card" id="find" novalidate>
+        <h2>Find, deactivate, reset password</h2>
+        <p class="hint"><code>ann@example.com</code> exists. Deactivate twice for a conflict; reset four times for a rate limit.</p>
+        <label>Email <input name="email" autocomplete="off" value="ann@example.com"></label>
+        <p class="field-error" data-error-for="email"></p>
+        <div class="actions">
+          <button type="submit" data-action="find">Find</button>
+          <button type="submit" data-action="deactivate" class="secondary">Deactivate</button>
+          <button type="submit" data-action="reset" class="secondary">Reset password</button>
+        </div>
+        <div class="outcome" aria-live="polite"></div>
+      </form>
+
+      <form class="card wide" id="order" novalidate>
+        <h2>Place an order</h2>
+        <p class="hint">Errors in a line appear under that line: <code>lines[1].quantity</code>.</p>
+        <label>Customer email <input name="customerEmail" autocomplete="off" value="ann@example.com"></label>
+        <p class="field-error" data-error-for="customerEmail"></p>
+        <div class="lines" id="lines"></div>
+        <p class="field-error" data-error-for="lines"></p>
+        <div class="actions">
+          <button type="button" class="secondary" id="add-line">Add line</button>
+          <button type="submit">Place order</button>
+        </div>
+        <div class="outcome" aria-live="polite"></div>
+      </form>
+
+      <form class="card" id="admin" novalidate>
+        <h2>Admin: all users</h2>
+        <p class="hint">Sends the role as the <code>X-Role</code> header; without <code>admin</code> the API answers 403.</p>
+        <label>Role
+          <select name="role">
+            <option value="">(none)</option>
+            <option value="admin">admin</option>
+          </select>
+        </label>
+        <div class="actions"><button type="submit">List users</button></div>
+        <div class="outcome" aria-live="polite"></div>
+      </form>
+
+    </section>
+
+    <aside class="inspector" aria-label="Last response">
+      <h2>Last response</h2>
+      <p class="request muted" id="last-request">Send a request to see it here.</p>
+      <pre id="last-response"></pre>
+    </aside>
+  </main>
+
+  <template id="line-template">
+    <div class="line">
+      <label>Product <input data-part="product" autocomplete="off"></label>
+      <label>Quantity <input data-part="quantity" inputmode="numeric"></label>
+      <button type="button" class="icon" data-remove aria-label="Remove line">×</button>
+      <p class="field-error" data-part-error="product"></p>
+      <p class="field-error" data-part-error="quantity"></p>
+    </div>
+  </template>
+
+  <script src="app.js"></script>
+</body>
+</html>

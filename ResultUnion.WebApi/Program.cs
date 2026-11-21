@@ -22,10 +22,13 @@ var app = builder.Build();
 
 app.UseExceptionHandler();
 
+// A small browser UI for the API (wwwroot/index.html at /): plain HTML and JavaScript, no build step.
+app.UseDefaultFiles();
+app.UseStaticFiles();
+
 // The API description and its UI. A demo, so they are always on; a real API would limit them to Development.
 app.MapOpenApi();                                       // /openapi/v1.json
 app.MapScalarApiReference(options => options.WithTitle("ResultUnion Web API"));   // /scalar
-app.MapGet("/", () => Results.Redirect("/scalar")).ExcludeFromDescription();
 
 var api = app.MapGroup("").AddEndpointFilter<AcceptLanguageProblemFilter>();
 api.MapUserEndpoints();

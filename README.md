@@ -39,7 +39,7 @@ Why it is built this way, with the alternatives that were considered: [docs/DESI
 | `ResultUnion.Samples.Domain` | The sample domain shared by the demos: `Email`, `Password`, `User`, `OrderLine`, `Order` with their error catalogs, and a Georgian `ErrorLocalizer`. References only `ResultUnion`. |
 | `ResultUnion.Samples.Application` | The sample application layer shared by the Web API and the gRPC service: commands, use cases, in-memory storage. No HTTP, no gRPC. |
 | `ResultUnion.Showcase` | A console app that demonstrates the API section by section |
-| `ResultUnion.WebApi` | A Minimal API demo with OpenAPI and a Scalar UI: real requests, real problem responses |
+| `ResultUnion.WebApi` | A Minimal API demo with a browser UI, OpenAPI and a Scalar reference: real requests, real problem responses |
 | `ResultUnion.GrpcService` | The same use cases as a gRPC service (`Protos/demo.proto`), failures as rich gRPC statuses |
 | `ResultUnion.GrpcClient` | A console client for the gRPC service that turns every `RpcException` back into an `Error` |
 
@@ -71,8 +71,14 @@ dotnet run --project ResultUnion.GrpcClient
 
 ### The Web API demo
 
-`dotnet run --project ResultUnion.WebApi` serves the API on <http://localhost:5258> and opens the Scalar UI at
-`/scalar` (the OpenAPI document is at `/openapi/v1.json`). `ResultUnion.WebApi.http` has a request for every scenario.
+`dotnet run --project ResultUnion.WebApi` serves the API on <http://localhost:5258>:
+
+- **`/`**: a small browser UI (`wwwroot`, plain HTML and JavaScript, no build step) with a form for every scenario.
+  It puts each field error under its input, including the lines of an order (`lines[1].quantity`), switches the
+  server messages between English and Georgian, locks the reset button for `retryAfterSeconds` after a 429, and shows
+  the raw request and problem response next to the forms;
+- **`/scalar`**: the Scalar API reference (the OpenAPI document is at `/openapi/v1.json`);
+- `ResultUnion.WebApi.http` has a request for every scenario.
 
 | Endpoint | Shows | Responses |
 |---|---|---|
