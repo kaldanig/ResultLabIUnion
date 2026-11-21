@@ -41,11 +41,13 @@ Why it is built this way, with the alternatives that were considered: [docs/DESI
 | `ResultUnion` | The library: `Result<T>`, `Result`, `Error`, `ErrorType` and the async extensions in `Async/`. No dependencies. |
 | `ResultUnion.AspNetCore` | ASP.NET Core integration: status codes, RFC 9457 problem details, `ToHttpResult` for Minimal APIs |
 | `ResultUnion.Grpc` | gRPC integration: status codes, the `google.rpc` rich error model, `GetValueOrThrowRpc` for services, `ToError` for clients |
+| `ResultUnion.FluentValidation` | FluentValidation integration: a `ValidationResult` as a `Result` with one field error per failure, `ValidateToResultAsync` |
 | `ResultUnion.Analyzers` | Roslyn analyzers shipped inside the `ResultUnion` package: a discarded `Result`, `async` code in `Result.Try`, `Map` that should be `Bind` ([docs/ANALYZERS.md](docs/ANALYZERS.md)) |
 | `ResultUnion.CodeFixes` | The code fixes for those rules (`_ =`, `TryAsync`, `Bind`), in a separate assembly because they need Roslyn's Workspaces; shipped next to the analyzers |
 | `ResultUnion.Tests` | xUnit v3 tests for `ResultUnion`; no ASP.NET Core dependency |
 | `ResultUnion.AspNetCore.Tests` | xUnit v3 tests for `ResultUnion.AspNetCore`, including the JSON a client receives |
 | `ResultUnion.Grpc.Tests` | xUnit v3 tests for `ResultUnion.Grpc`, including server-to-client round trips |
+| `ResultUnion.FluentValidation.Tests` | xUnit v3 tests for `ResultUnion.FluentValidation`, including the JSON round trip of the errors it creates |
 | `ResultUnion.Analyzers.Tests` | Tests that compile snippets against the real library and check each rule's diagnostics |
 | `ResultUnion.Benchmarks` | BenchmarkDotNet measurements of matching, pipelines, failures against exceptions, `CombineAll` and async chains ([docs/BENCHMARKS.md](docs/BENCHMARKS.md)) |
 | `ResultUnion.Samples.Domain` | The sample domain shared by the demos: `Email`, `Password`, `User`, `OrderLine`, `Order` with their error catalogs, and a Georgian `ErrorLocalizer`. References only `ResultUnion`. |
@@ -472,6 +474,42 @@ From a ResultUnion service, the type, code, message, arguments and field violati
 as strings, and the arguments of individual field violations are not transmitted. From any other server, the error
 code is `grpc.<status>` (e.g. `grpc.deadline_exceeded`) with the type mapped from the status code.
 
+## FluentValidation: `ResultUnion.FluentValidation`
+
+A FluentValidation validator's outcome becomes a `Result`, with one field error per failure, so validators written
+with FluentValidation plug into pipelines and reach HTTP and gRPC clients as field errors:
+
+```csharp
+using ResultUnion.FluentValidation;
+
+public sealed class RegisterUserValidator : AbstractValidator<RegisterUser>
+{
+    public RegisterUserValidator()
+    {
+        RuleFor(x => x.Email).NotEmpty().WithErrorCode("email.required");
+        RuleFor(x => x.Password).MinimumLength(8).WithErrorCode("password.too_short");
+    }
+}
+
+public Task<Result<User>> RegisterAsync(RegisterUser command, CancellationToken ct) =>
+    validator.ValidateToResultAsync(command, ct)          // the command, or every failure at once
+        .BindAsync(valid => CreateUserAsync(valid, ct));
+
+Result result = validator.Validate(command).ToResult();   // from a ValidationResult you already have
+```
+
+| FluentValidation | ResultUnion |
+|---|---|
+| `ErrorCode` (set stable ones with `WithErrorCode`) | `Error.Code` |
+| `ErrorMessage` | `Error.Message` |
+| `PropertyName` in camel case (`Lines[1].Quantity` → `lines[1].quantity`) | `Error.Field`; other naming with `ToResult(fieldName)` |
+| number, string and Boolean placeholders (`MinLength`, `From`, `To`, …) | `Error.Arguments` (`minLength`, …) |
+| one failure / several | the failure itself / a `validation.failed` group, as `CombineAll` does |
+
+Every failure is a `Validation` error, whatever its `Severity`, as `IsValid` counts it. The attempted value is never
+copied into the error, since it may be a password. Asynchronous rules (`MustAsync`) need `ValidateToResultAsync`, and
+cancellation is not turned into a failure.
+
 ## JSON: errors in messages between services
 
 `Error` serializes with System.Text.Json out of the box (it carries `[JsonConverter]`), so an error can travel in an
@@ -735,7 +773,7 @@ New to the library? Start with [Getting started](docs/articles/getting-started.m
 [EF Core](docs/articles/ef-core.md), [pipeline behaviors](docs/articles/pipeline-behaviors.md) and
 [testing](docs/articles/testing.md).
 
-This guide, the articles, the other pages in `docs/` and an API reference for the three packages are also built as a website with DocFX
+This guide, the articles, the other pages in `docs/` and an API reference for the packages are also built as a website with DocFX
 (`docfx.json`, the landing page and navigation in `docs/site/`). How to build it locally and publish it on GitHub Pages:
 [docs/RELEASING.md](docs/RELEASING.md#documentation-site).
 

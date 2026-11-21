@@ -29,7 +29,8 @@ was checked with a small program, and the observed output is quoted.
   [34 Error JSON](#34-errors-have-a-fixed-json-format) ·
   [35 Telemetry](#35-failures-are-reported-through-systemdiagnostics)
 - **DDD:** [28 Error catalogs](#28-error-catalogs-per-domain-concept) · [29 Who sets Field](#29-whoever-knows-the-field-name-sets-it)
-- **Packages:** [36 Compatibility checked against the last release](#36-compatibility-is-checked-against-the-last-release)
+- **Packages:** [36 Compatibility checked against the last release](#36-compatibility-is-checked-against-the-last-release) ·
+  [37 FluentValidation failures become field errors](#37-fluentvalidation-failures-become-field-errors)
 
 ---
 
@@ -523,3 +524,27 @@ ApiCompat against a hand-kept reference assembly does the same as package valida
 be recorded on purpose: `dotnet pack -p:GenerateCompatibilitySuppressionFile=true` writes `CompatibilitySuppressions.xml`
 next to the project, and that file shows the break in review. Packing needs nuget.org to be reachable, because the
 baseline package is downloaded on the first pack.
+
+### 37. FluentValidation failures become field errors
+
+**Context.** Many applications already validate requests with FluentValidation. Its `ValidationResult` is a list of
+failures with a property path, an error code, a message and placeholder values; without an adapter, each application
+writes the same loop to turn it into errors, and usually copies the wrong things (the attempted value) or loses the
+field.
+
+**Decision.** A separate package, `ResultUnion.FluentValidation`, like the ASP.NET Core and gRPC integrations (25), so
+the core keeps no dependencies. A failure becomes a `Validation` error with the rule's `ErrorCode` as the code, its
+message, the property path converted to camel case as the field (`Lines[1].Quantity` → `lines[1].quantity`, the name a
+JSON client sees), and the number, string and Boolean placeholders as arguments in camel case. One failure is returned
+as it is and several are grouped with `Error.Validation(details)`, the same shape as `CombineAll` (20), so problem
+details and gRPC `BadRequest` report one entry per field. `ValidateToResult` / `ValidateToResultAsync` return the
+validated instance, so validation is the first step of a pipeline.
+
+**Alternatives.** Mapping FluentValidation's default codes (`NotEmptyValidator`) to ResultUnion-style codes would invent
+a contract nobody chose; the package documents `WithErrorCode` instead. Copying `AttemptedValue` or every placeholder
+would put user input (passwords included) and values that do not survive JSON (dates, objects) into errors that are
+logged and sent to clients. Honouring `Severity` (warnings that do not fail) would disagree with `IsValid`, which counts
+every failure.
+
+**Consequences.** Field naming other than camel case is a parameter of `ToResult(fieldName)`. Asynchronous rules need
+`ValidateToResultAsync`, because FluentValidation refuses to run them synchronously.

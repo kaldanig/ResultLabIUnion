@@ -1,0 +1,26 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- FluentValidation integration: a ValidationResult as a Result, with one field error per failure. -->
+
+  <PropertyGroup>
+    <TargetFramework>net11.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <IsPackable>true</IsPackable>
+    <Description>FluentValidation integration for ResultUnion: a ValidationResult becomes a Result whose error has one field error per failure (field, code, message, arguments), and IValidator.ValidateToResultAsync returns the validated value as a Result.</Description>
+    <PackageTags>result;result-pattern;fluentvalidation;validation</PackageTags>
+    <!-- Not on nuget.org yet, so there is no released version to validate against (docs/RELEASING.md). -->
+    <IsNewPackage>true</IsNewPackage>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FluentValidation" Version="12.2.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- PrivateAssets="none": a project that installs only this package still gets the ResultUnion analyzers. -->
+    <ProjectReference Include="..\ResultUnion\ResultUnion.csproj" PrivateAssets="none" />
+  </ItemGroup>
+
+</Project>

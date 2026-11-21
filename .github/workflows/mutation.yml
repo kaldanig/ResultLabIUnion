@@ -22,7 +22,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        package: [ResultUnion, ResultUnion.AspNetCore, ResultUnion.Grpc]
+        package: [ResultUnion, ResultUnion.AspNetCore, ResultUnion.Grpc, ResultUnion.FluentValidation]
     steps:
       - uses: actions/checkout@v7
 

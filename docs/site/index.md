@@ -21,6 +21,7 @@ public Result<User> Register(string? email, string? age) =>
 | `ResultUnion` | `Result<T>`, `Result`, `Error`, the async pipeline, JSON for errors, OpenTelemetry metrics, and the analyzers RU0001–RU0004 with their code fixes |
 | `ResultUnion.AspNetCore` | Results as HTTP responses: status codes, RFC 9457 problem details, OpenAPI error responses |
 | `ResultUnion.Grpc` | Results as gRPC statuses with the `google.rpc` rich error model, and `RpcException` back to `Error` |
+| `ResultUnion.FluentValidation` | FluentValidation results as `Result`, with one field error per failure |
 
 ## Where to go next
 

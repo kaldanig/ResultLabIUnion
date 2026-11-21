@@ -1,6 +1,6 @@
 # Releasing
 
-The three packages (`ResultUnion`, `ResultUnion.AspNetCore`, `ResultUnion.Grpc`) are released together, with one version,
+The packages (`ResultUnion`, `ResultUnion.AspNetCore`, `ResultUnion.Grpc`, `ResultUnion.FluentValidation`) are released together, with one version,
 by pushing a tag. [`publish.yml`](https://github.com/kaldanig/ResultLabIUnion/blob/master/.github/workflows/publish.yml) builds, tests, packs and pushes them to nuget.org
 with NuGet trusted publishing: no API key is stored anywhere.
 
@@ -39,6 +39,12 @@ with NuGet trusted publishing: no API key is stored anywhere.
 6. **Baseline.** After the packages are on nuget.org, set `<PackageValidationBaselineVersion>` in
    `Directory.Build.targets` to the version just released (for example `0.2.0`), delete any
    `CompatibilitySuppressions.xml`, and commit. From then on `dotnet pack` compares every change with that version.
+   A package released for the first time (`<IsNewPackage>true</IsNewPackage>` in its project, such as
+   `ResultUnion.FluentValidation`) had no baseline until now: remove that property in the same commit.
+
+Before the first release of a new package, check the trusted publishing policy on nuget.org: its scope must allow
+pushing *new* packages (not only new versions), with a glob pattern that matches the new ID (`*` or `ResultUnion*`).
+Otherwise `publish.yml` pushes the existing packages and fails with 403 on the new one.
 
 `publish.yml` refuses a tag that does not match `VersionPrefix` or has no changelog entry. A prerelease is a tag with a
 suffix on the same prefix: `v0.2.0-preview.1` publishes `0.2.0-preview.1`.
@@ -63,7 +69,7 @@ release the next version. Never delete and recreate a tag that has been publishe
 - Security: CodeQL (`codeql.yml`) scans the C# code and the workflows on every push, pull request and weekly;
   findings are under **Security → Code scanning**. Dependabot alerts and security updates, secret scanning with push
   protection, and private vulnerability reporting are enabled in the repository settings. A reported vulnerability is
-  fixed in a new version of all three packages and announced as a GitHub security advisory (`SECURITY.md`).
+  fixed in a new version of all the packages and announced as a GitHub security advisory (`SECURITY.md`).
 
 ## Documentation site
 
@@ -113,7 +119,7 @@ Code coverage says which lines the tests run; mutation testing says whether they
 check or flipping a condition, and runs that package's tests against each one. A change no test fails on (a
 *survivor*) usually means a missing assertion.
 
-`mutation.yml` runs it for the three packages every Monday and on demand, and uploads the HTML reports as artifacts;
+`mutation.yml` runs it for every package every Monday and on demand, and uploads the HTML reports as artifacts;
 it never blocks a pull request. To run it locally for one package:
 
 ```powershell

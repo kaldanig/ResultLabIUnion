@@ -9,6 +9,13 @@ are in the diff of those files.
 
 ## [Unreleased]
 
+### ResultUnion.FluentValidation (new package)
+
+- `ValidationResult.ToResult()` / `ToResult(fieldName)`: a success, one failure as it is, or several grouped in
+  `validation.failed`, each with the rule's error code, message, the property path in camel case as its field and the
+  rule's number, string and Boolean placeholders as arguments. The attempted value is never copied.
+- `IValidator<T>.ValidateToResult` / `ValidateToResultAsync`: the validated value as a `Result<T>`.
+
 ### ResultUnion.Grpc
 
 #### Changed

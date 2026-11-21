@@ -10,7 +10,8 @@ pipeline), read `.claude/skills/resultunion/SKILL.md` and the reference file it 
 conventions differ from other Result libraries (`Bind`, not `Then`; `Task` delegates, never `ValueTask` ones; error catalogs; who sets
 `Field`), and code written from memory breaks them. Do this even when the task looks small.
 
-Changes to the library itself (`ResultUnion/`, `ResultUnion.AspNetCore/`, `ResultUnion.Grpc/`) follow
+Changes to the library itself (`ResultUnion/`, `ResultUnion.AspNetCore/`, `ResultUnion.Grpc/`,
+`ResultUnion.FluentValidation/`) follow
 `docs/DESIGN.md`; record a new decision there when one is made.
 
 ## Build and test

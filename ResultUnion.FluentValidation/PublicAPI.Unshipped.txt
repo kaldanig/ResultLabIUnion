@@ -1,0 +1,12 @@
+#nullable enable
+ResultUnion.FluentValidation.ValidationResultExtensions
+ResultUnion.FluentValidation.ValidationResultExtensions.extension(FluentValidation.Results.ValidationResult!)
+ResultUnion.FluentValidation.ValidationResultExtensions.extension(FluentValidation.Results.ValidationResult!).ToResult() -> ResultUnion.Result
+ResultUnion.FluentValidation.ValidationResultExtensions.extension(FluentValidation.Results.ValidationResult!).ToResult(System.Func<string!, string!>! fieldName) -> ResultUnion.Result
+ResultUnion.FluentValidation.ValidationResultExtensions.extension<T>(FluentValidation.IValidator<T>!)
+ResultUnion.FluentValidation.ValidationResultExtensions.extension<T>(FluentValidation.IValidator<T>!).ValidateToResult(T instance) -> ResultUnion.Result<T>
+ResultUnion.FluentValidation.ValidationResultExtensions.extension<T>(FluentValidation.IValidator<T>!).ValidateToResultAsync(T instance, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<ResultUnion.Result<T>>!
+static ResultUnion.FluentValidation.ValidationResultExtensions.ToResult(this FluentValidation.Results.ValidationResult! result) -> ResultUnion.Result
+static ResultUnion.FluentValidation.ValidationResultExtensions.ToResult(this FluentValidation.Results.ValidationResult! result, System.Func<string!, string!>! fieldName) -> ResultUnion.Result
+static ResultUnion.FluentValidation.ValidationResultExtensions.ValidateToResult<T>(this FluentValidation.IValidator<T>! validator, T instance) -> ResultUnion.Result<T>
+static ResultUnion.FluentValidation.ValidationResultExtensions.ValidateToResultAsync<T>(this FluentValidation.IValidator<T>! validator, T instance, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<ResultUnion.Result<T>>!

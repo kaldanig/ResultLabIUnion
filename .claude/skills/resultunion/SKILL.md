@@ -210,6 +210,9 @@ and never retry a BusinessRule or Unexpected error.
 - **Minimal API endpoint** (`ResultUnion.AspNetCore`): read `references/http.md`. In short:
   `handler(...).MapAsync(Dto.From).ToHttpResultAsync(dto => TypedResults.Created(...))` plus
   `.ProducesErrors(ErrorType.Validation, ...)` on the endpoint.
+- **FluentValidation** (`ResultUnion.FluentValidation`): when the project already has FluentValidation validators,
+  start the pipeline with `validator.ValidateToResultAsync(command, ct)` (the command, or every failure as field errors)
+  instead of re-validating with `CombineAll`. Give each rule a catalog-style code with `WithErrorCode("email.required")`.
 - **gRPC service or client** (`ResultUnion.Grpc`): read `references/grpc.md`. In short: the service method ends with
   `.GetValueOrThrowRpcAsync()`; a client wraps calls in `Result.TryAsync(call, (RpcException ex) => ex.ToError())`.
 

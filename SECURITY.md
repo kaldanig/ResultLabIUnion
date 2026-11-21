@@ -2,8 +2,8 @@
 
 ## Supported versions
 
-ResultUnion is before 1.0. Security fixes are released as a new version of all three packages (`ResultUnion`,
-`ResultUnion.AspNetCore`, `ResultUnion.Grpc`) on top of the latest release; older versions are not patched.
+ResultUnion is before 1.0. Security fixes are released as a new version of all the packages (`ResultUnion`,
+`ResultUnion.AspNetCore`, `ResultUnion.Grpc`, `ResultUnion.FluentValidation`) on top of the latest release; older versions are not patched.
 
 | Version | Supported |
 |---|---|
