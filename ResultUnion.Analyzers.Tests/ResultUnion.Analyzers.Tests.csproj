@@ -23,10 +23,12 @@
     <!-- A compiler that understands the library's C# 14 extension members and C# 15 unions, to compile the snippets.
          The same version the analyzer is built against. -->
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="5.12.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="5.12.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\ResultUnion.Analyzers\ResultUnion.Analyzers.csproj" />
+    <ProjectReference Include="..\ResultUnion.CodeFixes\ResultUnion.CodeFixes.csproj" />
     <ProjectReference Include="..\ResultUnion\ResultUnion.csproj" />
   </ItemGroup>
 

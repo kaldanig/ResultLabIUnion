@@ -8,7 +8,7 @@ namespace ResultUnion.Analyzers.Tests;
 /// <summary>Compiles a snippet against the real ResultUnion assembly and runs the analyzer on it.</summary>
 internal static class AnalyzerHarness
 {
-    private const string Usings = """
+    internal const string Usings = """
         using System;
         using System.Threading;
         using System.Threading.Tasks;
@@ -16,9 +16,9 @@ internal static class AnalyzerHarness
 
         """;
 
-    private static readonly int UsingLines = Usings.Count(c => c == '\n');
+    internal static readonly int UsingLines = Usings.Count(c => c == '\n');
 
-    private static readonly ImmutableArray<MetadataReference> References =
+    internal static readonly ImmutableArray<MetadataReference> References =
     [
         .. ((string)AppContext.GetData("TRUSTED_PLATFORM_ASSEMBLIES")!)
             .Split(Path.PathSeparator)

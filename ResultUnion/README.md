@@ -30,7 +30,7 @@ var message = await RegisterAsync(command, ct) switch
   format) for events and queue messages
 - OpenTelemetry through `System.Diagnostics`: `Record("users.register")` counts failures by code
   (`AddMeter("ResultUnion")`), and tags the current span
-- Analyzers included: a discarded `Result` (RU0001), `async` code in `Result.Try` (RU0002), `Map` that should be
+- Analyzers with code fixes included: a discarded `Result` (RU0001), `async` code in `Result.Try` (RU0002), `Map` that should be
   `Bind` (RU0003)
 
 Requires `net11.0` (C# 15). Integrations: **ResultUnion.AspNetCore** (typed Minimal API results, problem details) and

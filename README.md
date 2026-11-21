@@ -36,6 +36,7 @@ Why it is built this way, with the alternatives that were considered: [docs/DESI
 | `ResultUnion.AspNetCore` | ASP.NET Core integration: status codes, RFC 9457 problem details, `ToHttpResult` for Minimal APIs |
 | `ResultUnion.Grpc` | gRPC integration: status codes, the `google.rpc` rich error model, `GetValueOrThrowRpc` for services, `ToError` for clients |
 | `ResultUnion.Analyzers` | Roslyn analyzers shipped inside the `ResultUnion` package: a discarded `Result`, `async` code in `Result.Try`, `Map` that should be `Bind` ([docs/ANALYZERS.md](docs/ANALYZERS.md)) |
+| `ResultUnion.CodeFixes` | The code fixes for those rules (`_ =`, `TryAsync`, `Bind`), in a separate assembly because they need Roslyn's Workspaces; shipped next to the analyzers |
 | `ResultUnion.Tests` | xUnit v3 tests for `ResultUnion`; no ASP.NET Core dependency |
 | `ResultUnion.AspNetCore.Tests` | xUnit v3 tests for `ResultUnion.AspNetCore`, including the JSON a client receives |
 | `ResultUnion.Grpc.Tests` | xUnit v3 tests for `ResultUnion.Grpc`, including server-to-client round trips |
@@ -654,7 +655,8 @@ as above, only that exception type becomes an error and everything else propagat
 
 ## Analyzers
 
-The `ResultUnion` package includes Roslyn analyzers, so mistakes show up as compiler warnings:
+The `ResultUnion` package includes Roslyn analyzers, so mistakes show up as compiler warnings, each with a code
+fix in the IDE:
 
 | Rule | Finds |
 |---|---|

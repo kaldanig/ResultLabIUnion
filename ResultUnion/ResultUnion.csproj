@@ -10,10 +10,12 @@
     <PackageTags>result;result-pattern;railway;union;discriminated-union;error-handling;functional;ddd</PackageTags>
   </PropertyGroup>
 
-  <!-- The analyzers ship in this package, so every project that uses ResultUnion gets them. The analyzer project is
-       referenced (and built first) from Directory.Build.targets. -->
+  <!-- The analyzers and their code fixes ship in this package, so every project that uses ResultUnion gets them. Both
+       projects are referenced (and built first) from Directory.Build.targets. -->
   <ItemGroup>
     <None Include="..\ResultUnion.Analyzers\bin\$(Configuration)\netstandard2.0\ResultUnion.Analyzers.dll"
+          Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
+    <None Include="..\ResultUnion.CodeFixes\bin\$(Configuration)\netstandard2.0\ResultUnion.CodeFixes.dll"
           Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
   </ItemGroup>
 
