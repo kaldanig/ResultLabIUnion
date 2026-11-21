@@ -10,5 +10,6 @@ Demo.Section("4. Combining independent checks", CombineDemo.Run);
 Demo.Section("5. Safe access and common mistakes", SafeAccessDemo.Run);
 await Demo.SectionAsync("6. Async pipelines: MapAsync, BindAsync, EnsureAsync, TapAsync, MatchAsync", AsyncDemo.RunAsync);
 await Demo.SectionAsync("7. From exceptions to results: Result.Try, Result.TryAsync", TryDemo.RunAsync);
+await Demo.SectionAsync("8. HTTP responses with ResultUnion.AspNetCore: ToHttpResult, ProblemDetails", HttpDemo.RunAsync);
 
 Console.WriteLine();

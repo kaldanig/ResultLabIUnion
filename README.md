@@ -28,8 +28,9 @@ var message = Register("ann@example.com", "34") switch
 
 | Project | Contents |
 |---|---|
-| `ResultUnion` | The library: `Result<T>`, `Result`, `Error`, `ErrorType` and the async extensions in `Async/` |
-| `ResultUnion.Tests` | xUnit v3 tests |
+| `ResultUnion` | The library: `Result<T>`, `Result`, `Error`, `ErrorType` and the async extensions in `Async/`. No dependencies. |
+| `ResultUnion.AspNetCore` | ASP.NET Core integration: status codes, RFC 9457 problem details, `ToHttpResult` for Minimal APIs |
+| `ResultUnion.Tests` | xUnit v3 tests, for both libraries |
 | `ResultUnion.Showcase` | A console app that demonstrates the API on a small user-registration domain |
 
 ```bash
@@ -230,6 +231,54 @@ public static async Task<TResponse> RequireRoleAsync<TResponse>(string role, Fun
 ```
 
 There is no generic `Success`: a successful `Result<T>` needs a value that the behavior does not have.
+
+## ASP.NET Core: `ResultUnion.AspNetCore`
+
+A separate project, so the core library and your domain stay free of ASP.NET Core.
+
+```csharp
+using ResultUnion.AspNetCore;
+
+app.MapPost("/users", (RegisterUser command, RegistrationService service) =>
+    service.Register(command.Email, command.Age)
+        .ToHttpResult(user => TypedResults.Created($"/users/{user.Id}", user)));
+
+app.MapDelete("/users/{email}", (string email, AsyncRegistrationService service, CancellationToken ct) =>
+    service.DeactivateAsync(email, ct).ToHttpResultAsync());    // 204 No Content, or a problem
+```
+
+| Call | Success | Failure |
+|---|---|---|
+| `Result<T>.ToHttpResult()` | `200 OK` with the value | problem response |
+| `Result<T>.ToHttpResult(value => …)` | the response you build | problem response |
+| `Result.ToHttpResult()` | `204 No Content` | problem response |
+| `Task<Result…>.ToHttpResultAsync(…)` | same, after `await` | same |
+
+A failure becomes an RFC 9457 `application/problem+json` response:
+
+- the status comes from `ErrorType`: Validation 400, Unauthorized 401, Forbidden 403, NotFound 404,
+  Conflict and Concurrency 409, BusinessRule 422, Unavailable 503, Unexpected 500 (`ErrorType.ToStatusCode()`);
+- `detail` is the message, and the stable error `code` is an extension, so clients can switch on it;
+- an error with a `Field` or `Details` becomes a validation problem: `errors` lists the messages per field, and
+  `details` lists every error with its `code`, `field` and `message`;
+- `Unexpected` errors never send their message to the client (it often comes from an exception); log them instead.
+
+```json
+{
+  "type": "https://tools.ietf.org/html/rfc9110#section-15.5.1",
+  "title": "One or more validation errors occurred.",
+  "status": 400,
+  "detail": "One or more validation errors occurred.",
+  "errors": { "email": ["'dan@' is not a valid email."], "password": ["Password must be at least 8 characters."] },
+  "code": "validation.failed",
+  "details": [
+    { "code": "email.invalid_format", "field": "email", "message": "'dan@' is not a valid email." },
+    { "code": "password.too_short", "field": "password", "message": "Password must be at least 8 characters." }
+  ]
+}
+```
+
+`Error.ToProblemDetails()` gives the `ProblemDetails` object itself, for controllers or exception handlers.
 
 ## Things to know
 

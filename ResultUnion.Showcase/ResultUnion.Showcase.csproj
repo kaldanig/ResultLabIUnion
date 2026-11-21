@@ -2,6 +2,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ResultUnion\ResultUnion.csproj" />
+    <ProjectReference Include="..\ResultUnion.AspNetCore\ResultUnion.AspNetCore.csproj" />
   </ItemGroup>
 
   <PropertyGroup>
