@@ -1,6 +1,3 @@
-using ResultUnion.Showcase.Application;
-using ResultUnion.Showcase.Domain;
-
 namespace ResultUnion.Showcase.Demos;
 
 /// <summary>Async pipelines: MapAsync, BindAsync, EnsureAsync, TapAsync, TapErrorAsync, MapErrorAsync and MatchAsync.</summary>

@@ -1,0 +1,81 @@
+# Requests for every scenario. Run the API first (dotnet run --project ResultUnion.WebApi),
+# then send these from Visual Studio, Rider or VS Code (REST Client). Scalar UI: http://localhost:5258/scalar
+
+@api = http://localhost:5258
+
+### 201 Created
+POST {{api}}/users
+Content-Type: application/json
+
+{ "email": "bob@example.com", "password": "s3cret!pass", "age": "29" }
+
+### 400: every invalid field at once (email, password, age)
+POST {{api}}/users
+Content-Type: application/json
+
+{ "email": "bob@", "password": "123", "age": "abc" }
+
+### 400 in Georgian: translated from code + arguments
+POST {{api}}/users
+Content-Type: application/json
+Accept-Language: ka
+
+{ "email": "bob@", "password": "123", "age": "abc" }
+
+### 409: ann@example.com is already registered
+POST {{api}}/users
+Content-Type: application/json
+
+{ "email": "ann@example.com", "password": "s3cret!pass", "age": "40" }
+
+### 422: business rule, too young (arguments: minimumAge, age)
+POST {{api}}/users
+Content-Type: application/json
+
+{ "email": "kid@example.com", "password": "s3cret!pass", "age": "15" }
+
+### 200
+GET {{api}}/users/ann@example.com
+
+### 404 (arguments: email)
+GET {{api}}/users/zoe@example.com
+
+### 204, then 409 on a second call
+DELETE {{api}}/users/ann@example.com
+
+### 202 three times, then 429 with arguments.retryAfterSeconds
+POST {{api}}/users/ann@example.com/password-reset
+
+### 201 Created
+POST {{api}}/orders
+Content-Type: application/json
+
+{ "customerEmail": "ann@example.com", "lines": [ { "product": "apple", "quantity": 2 }, { "product": "pear", "quantity": 1 } ] }
+
+### 400: lines[1].product, lines[1].quantity, lines[2].quantity
+POST {{api}}/orders
+Content-Type: application/json
+
+{ "customerEmail": "ann@example.com", "lines": [ { "product": "apple", "quantity": 2 }, { "product": "", "quantity": 0 }, { "product": "pear", "quantity": -1 } ] }
+
+### 400: an order needs at least one line
+POST {{api}}/orders
+Content-Type: application/json
+
+{ "customerEmail": "ann@example.com", "lines": [] }
+
+### 404: unknown customer (field customerEmail)
+POST {{api}}/orders
+Content-Type: application/json
+
+{ "customerEmail": "zoe@example.com", "lines": [ { "product": "apple", "quantity": 1 } ] }
+
+### 403 without the admin role
+GET {{api}}/admin/users
+
+### 200 with the admin role
+GET {{api}}/admin/users
+X-Role: admin
+
+### The OpenAPI document
+GET {{api}}/openapi/v1.json

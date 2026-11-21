@@ -1,4 +1,4 @@
-namespace ResultUnion.Showcase.Domain;
+namespace ResultUnion.Samples.Domain;
 
 /// <summary>A value object that can only exist in a valid state: the factory returns a <see cref="Result{T}"/> instead of throwing.</summary>
 public sealed record Email

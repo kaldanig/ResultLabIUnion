@@ -1,5 +1,3 @@
-using ResultUnion.Showcase.Domain;
-
 namespace ResultUnion.Showcase.Demos;
 
 /// <summary>Railway-oriented composition: Map, Bind, Ensure, Tap, TapError, MapError and Match.</summary>

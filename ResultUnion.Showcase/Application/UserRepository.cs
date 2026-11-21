@@ -1,4 +1,4 @@
-namespace ResultUnion.Showcase.Domain;
+namespace ResultUnion.Showcase.Application;
 
 /// <summary>An in-memory stand-in for a database.</summary>
 public sealed class UserRepository

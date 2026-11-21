@@ -1,4 +1,4 @@
-namespace ResultUnion.Showcase.Domain;
+namespace ResultUnion.Showcase.Application;
 
 /// <summary>
 /// The async version of <see cref="RegistrationService"/>: synchronous and asynchronous steps mixed in one pipeline.

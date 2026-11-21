@@ -34,7 +34,9 @@ Why it is built this way, with the alternatives that were considered: [docs/DESI
 | `ResultUnion.AspNetCore` | ASP.NET Core integration: status codes, RFC 9457 problem details, `ToHttpResult` for Minimal APIs |
 | `ResultUnion.Tests` | xUnit v3 tests for `ResultUnion`; no ASP.NET Core dependency |
 | `ResultUnion.AspNetCore.Tests` | xUnit v3 tests for `ResultUnion.AspNetCore`, including the JSON a client receives |
-| `ResultUnion.Showcase` | A console app that demonstrates the API on a small user-registration domain |
+| `ResultUnion.Samples.Domain` | The sample domain shared by both demos: `Email`, `Password`, `User`, `OrderLine`, `Order` with their error catalogs, and a Georgian `ErrorLocalizer`. References only `ResultUnion`. |
+| `ResultUnion.Showcase` | A console app that demonstrates the API section by section |
+| `ResultUnion.WebApi` | A Minimal API demo with OpenAPI and a Scalar UI: real requests, real problem responses |
 
 ```bash
 dotnet build ResultLabIUnion.slnx
@@ -48,7 +50,30 @@ dotnet test ResultLabIUnion.slnx
 dotnet run --project ResultUnion.Showcase
 ```
 
+```bash
+dotnet run --project ResultUnion.WebApi
+```
+
 `global.json` opts `dotnet test` into Microsoft.Testing.Platform, which the .NET 10+ SDK requires for xUnit v3.
+
+### The Web API demo
+
+`dotnet run --project ResultUnion.WebApi` serves the API on <http://localhost:5258> and opens the Scalar UI at
+`/scalar` (the OpenAPI document is at `/openapi/v1.json`). `ResultUnion.WebApi.http` has a request for every scenario.
+
+| Endpoint | Shows | Responses |
+|---|---|---|
+| `POST /users` | `CombineAll` over email, password and age; a domain rule; a duplicate check that also catches a race | 201, 400, 409, 422 |
+| `GET /users/{email}` | `ToResultAsync` on a nullable lookup | 200, 400, 404 |
+| `DELETE /users/{email}` | a `Result` without a value; a second call is a conflict | 204, 400, 404, 409 |
+| `POST /users/{email}/password-reset` | a quota: the fourth call within a minute is 429 with `arguments.retryAfterSeconds` | 202, 400, 404, 429 |
+| `POST /orders` | collection validation (`lines[1].quantity`) and an aggregate factory | 201, 400, 404 |
+| `GET /admin/users` | a generic `IResultFactory` behavior; send `X-Role: admin` | 200, 403 |
+
+Send `Accept-Language: ka` to get Georgian messages: an endpoint filter translates each problem from its `code` and
+`arguments`, without reading the English text. Every response is documented in OpenAPI from the typed results and
+`.ProducesErrors(…)`; no endpoint declares its responses by hand. Storage is in memory, with `ann@example.com`
+registered at startup.
 
 ## The types
 

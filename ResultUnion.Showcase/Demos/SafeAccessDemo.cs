@@ -1,5 +1,3 @@
-using ResultUnion.Showcase.Domain;
-
 namespace ResultUnion.Showcase.Demos;
 
 /// <summary>Reading the value or the error without pattern matching, and what happens when it is done wrongly.</summary>

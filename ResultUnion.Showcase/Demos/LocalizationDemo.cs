@@ -1,6 +1,3 @@
-using ResultUnion.Showcase.Application;
-using ResultUnion.Showcase.Domain;
-
 namespace ResultUnion.Showcase.Demos;
 
 /// <summary>Error arguments: the values behind a message, so it can be translated by code without parsing the English text.</summary>

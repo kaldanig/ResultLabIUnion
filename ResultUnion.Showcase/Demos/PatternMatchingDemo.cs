@@ -1,5 +1,4 @@
 using ResultUnion.AspNetCore;
-using ResultUnion.Showcase.Domain;
 
 namespace ResultUnion.Showcase.Demos;
 

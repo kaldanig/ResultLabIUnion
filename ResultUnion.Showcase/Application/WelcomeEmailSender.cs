@@ -1,4 +1,4 @@
-namespace ResultUnion.Showcase.Domain;
+namespace ResultUnion.Showcase.Application;
 
 /// <summary>A fake email gateway: an asynchronous side effect that does not change the result.</summary>
 public sealed class WelcomeEmailSender

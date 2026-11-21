@@ -106,6 +106,13 @@ public static class ProblemDetailsMapping
                         .GroupBy(entry => entry.Field ?? string.Empty, StringComparer.Ordinal)
                         .ToDictionary(group => group.Key, group => group.Select(entry => entry.Message).ToArray(), StringComparer.Ordinal));
 
+            // HttpValidationProblemDetails presets the title "One or more validation errors occurred.". Keep it only for
+            // validation errors; a NotFound or Conflict with a field gets the default title for its status ("Not Found").
+            if (problem is HttpValidationProblemDetails && error.Type != ErrorType.Validation)
+            {
+                problem.Title = null;
+            }
+
             var unexpected = error.Type == ErrorType.Unexpected;
 
             problem.Status = error.Type.ToStatusCode();

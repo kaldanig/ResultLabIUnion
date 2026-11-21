@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- The sample domain, shared by ResultUnion.Showcase (console) and ResultUnion.WebApi.
+       It references only ResultUnion: no ASP.NET Core, no infrastructure. -->
+
+  <PropertyGroup>
+    <TargetFramework>net11.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ResultUnion\ResultUnion.csproj" />
+  </ItemGroup>
+
+</Project>

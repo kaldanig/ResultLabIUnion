@@ -1,4 +1,4 @@
-namespace ResultUnion.Showcase.Domain;
+namespace ResultUnion.Showcase.Application;
 
 /// <summary>A use case written as one railway pipeline: every step runs only if the previous one succeeded.</summary>
 public sealed class RegistrationService(UserRepository repository)

@@ -1,4 +1,4 @@
-namespace ResultUnion.Showcase.Domain;
+namespace ResultUnion.Samples.Domain;
 
 /// <summary>The input for one order line, as it arrives from a client.</summary>
 public sealed record OrderLineInput(string? Product, int Quantity);

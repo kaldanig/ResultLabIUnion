@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Http.Metadata;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using ResultUnion.AspNetCore;
-using ResultUnion.Showcase.Domain;
 
 namespace ResultUnion.Showcase.Demos;
 

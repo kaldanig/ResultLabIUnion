@@ -1,4 +1,4 @@
-namespace ResultUnion.Showcase.Domain;
+namespace ResultUnion.Samples.Domain;
 
 /// <summary>A value object for a password that meets the policy. Like <see cref="Email"/>, it can only exist in a valid state.</summary>
 public sealed record Password

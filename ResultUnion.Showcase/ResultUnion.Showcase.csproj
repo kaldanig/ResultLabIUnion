@@ -3,6 +3,14 @@
   <ItemGroup>
     <ProjectReference Include="..\ResultUnion\ResultUnion.csproj" />
     <ProjectReference Include="..\ResultUnion.AspNetCore\ResultUnion.AspNetCore.csproj" />
+    <ProjectReference Include="..\ResultUnion.Samples.Domain\ResultUnion.Samples.Domain.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- The shared sample domain, and this console app's own application layer (in-memory repository, services). -->
+    <Using Include="ResultUnion.Samples.Domain" />
+    <Using Include="ResultUnion.Samples.Domain.Localization" />
+    <Using Include="ResultUnion.Showcase.Application" />
   </ItemGroup>
 
   <PropertyGroup>

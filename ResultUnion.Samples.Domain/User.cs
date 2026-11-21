@@ -1,4 +1,4 @@
-namespace ResultUnion.Showcase.Domain;
+namespace ResultUnion.Samples.Domain;
 
 public sealed record User(Guid Id, Email Email, int Age)
 {
@@ -27,10 +27,16 @@ public sealed record User(Guid Id, Email Email, int Age)
                 .WithArgument("email", email.Value);
 
         public static Error NotFound(Email email) =>
-            Error.Create("user.not_found", $"No user with email {email}.", ErrorType.NotFound);
+            Error.Create("user.not_found", $"No user with email {email}.", ErrorType.NotFound)
+                .WithArgument("email", email.Value);
 
         public static Error AlreadyInactive(User user) =>
-            Error.Create("user.already_inactive", $"User {user.Email} is already inactive.", ErrorType.Conflict);
+            Error.Create("user.already_inactive", $"User {user.Email} is already inactive.", ErrorType.Conflict)
+                .WithArgument("email", user.Email.Value);
+
+        public static Error PasswordResetLimit(Email email, int retryAfterSeconds) =>
+            Error.Create("user.password_reset_limit", $"Too many password resets for {email}; retry in {retryAfterSeconds} s.", ErrorType.TooManyRequests)
+                .WithArgument("retryAfterSeconds", retryAfterSeconds);
     }
 
     public bool IsActive { get; private set; } = true;

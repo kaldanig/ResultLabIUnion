@@ -1,5 +1,3 @@
-using ResultUnion.Showcase.Domain;
-
 namespace ResultUnion.Showcase.Demos;
 
 /// <summary>Checking several independent results at once: Combine stops at the first failure, CombineAll reports them all.</summary>

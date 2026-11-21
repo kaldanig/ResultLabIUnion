@@ -182,6 +182,22 @@ public class ResultHttpExtensionsTests
     }
 
     [Fact]
+    public async Task Wire_NonValidationErrorWithField_HasTheTitleOfItsStatus()
+    {
+        // Found through the Web API demo: a NotFound with a field used to get the title "One or more validation errors occurred.".
+        var error = Error.NotFound("No user with email zoe@example.com.").WithField("customerEmail");
+
+        var (status, _, body) = await SendAsync(error.ToHttpResult());
+
+        Assert.Equal(404, status);
+        Assert.Equal("Not Found", body!.Value.GetProperty("title").GetString());
+        Assert.Equal("No user with email zoe@example.com.", body.Value.GetProperty("errors").GetProperty("customerEmail")[0].GetString());
+
+        var (_, _, validation) = await SendAsync(Error.Validation("Bad.").WithField("email").ToHttpResult());
+        Assert.Equal("One or more validation errors occurred.", validation!.Value.GetProperty("title").GetString());
+    }
+
+    [Fact]
     public async Task Wire_Success_IsJsonValue()
     {
         var (status, contentType, body) = await SendAsync(Result<UserDto>.Success(new UserDto(1, "ann@example.com")).ToHttpResult());

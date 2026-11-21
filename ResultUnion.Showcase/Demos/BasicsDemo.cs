@@ -1,5 +1,3 @@
-using ResultUnion.Showcase.Domain;
-
 namespace ResultUnion.Showcase.Demos;
 
 /// <summary>Creating results and reading their state.</summary>
