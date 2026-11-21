@@ -723,6 +723,12 @@ the result (`EnsureAsync`, `TapAsync`, `TapErrorAsync`) reuse their source task.
 - **Equality.** Results and errors compare by value. One quirk: `default(Result<int>)` is not equal to
   `Result<int>.Failure(Error.DefaultResult)`, although both carry the same error.
 
+## Documentation site
+
+This guide, the pages in `docs/` and an API reference for the three packages are also built as a website with DocFX
+(`docfx.json`, the landing page and navigation in `docs/site/`). How to build it locally and publish it on GitHub Pages:
+[docs/RELEASING.md](docs/RELEASING.md#documentation-site).
+
 ## Releases
 
 Changes per version are in [CHANGELOG.md](CHANGELOG.md); how a version is published is in
@@ -730,4 +736,4 @@ Changes per version are in [CHANGELOG.md](CHANGELOG.md); how a version is publis
 
 ## License
 
-MIT, see [LICENSE](LICENSE).
+MIT, see [LICENSE](https://github.com/kaldanig/ResultLabIUnion/blob/master/LICENSE).

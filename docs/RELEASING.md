@@ -1,7 +1,7 @@
 # Releasing
 
 The three packages (`ResultUnion`, `ResultUnion.AspNetCore`, `ResultUnion.Grpc`) are released together, with one version,
-by pushing a tag. [`publish.yml`](../.github/workflows/publish.yml) builds, tests, packs and pushes them to nuget.org
+by pushing a tag. [`publish.yml`](https://github.com/kaldanig/ResultLabIUnion/blob/master/.github/workflows/publish.yml) builds, tests, packs and pushes them to nuget.org
 with NuGet trusted publishing: no API key is stored anywhere.
 
 ## One-time setup
@@ -46,3 +46,27 @@ release the next version. Never delete and recreate a tag that has been publishe
   recorded), so a review sees it. Removing or changing a shipped member is a breaking change; before 1.0 it is allowed
   in a minor version and is listed in the changelog.
 - Add user-visible changes under `## [Unreleased]` in `CHANGELOG.md` as they are merged.
+
+## Documentation site
+
+The site (the README as the guide, the pages in `docs/`, and an API reference generated from the compiled packages) is
+built with [DocFX](https://dotnet.github.io/docfx/) by [`docs.yml`](https://github.com/kaldanig/ResultLabIUnion/blob/master/.github/workflows/docs.yml)
+on every push and pull request; a broken link or cross reference fails that build. It describes `master`, not the
+latest release.
+
+To publish it on GitHub Pages (once): **Settings → Pages → Source: GitHub Actions**, then **Settings → Secrets and
+variables → Actions → Variables** and add `PAGES_ENABLED` = `true`. Every push to master then deploys the site. Pages
+on a private repository needs a paid GitHub plan; without `PAGES_ENABLED` the site is still built and checked, just not
+deployed.
+
+Build and view it locally (the API reference is read from the Release build):
+
+```powershell
+dotnet build ResultLabIUnion.slnx -c Release
+```
+
+```powershell
+dotnet tool restore; dotnet docfx docfx.json --serve
+```
+
+The site is written to `artifacts/docs/_site` and served on <http://localhost:8080>.

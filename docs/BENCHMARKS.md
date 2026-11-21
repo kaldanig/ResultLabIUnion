@@ -1,7 +1,7 @@
 # Benchmarks
 
 Time and allocations of ResultUnion, measured with BenchmarkDotNet. The benchmarks are in
-[`ResultUnion.Benchmarks`](../ResultUnion.Benchmarks); every number below is from one run of the full suite.
+[`ResultUnion.Benchmarks`](https://github.com/kaldanig/ResultLabIUnion/tree/master/ResultUnion.Benchmarks); every number below is from one run of the full suite.
 
 | | |
 |---|---|

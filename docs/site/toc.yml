@@ -1,0 +1,12 @@
+- name: Guide
+  href: ../../README.md
+- name: Design
+  href: ../DESIGN.md
+- name: Analyzers
+  href: ../ANALYZERS.md
+- name: Benchmarks
+  href: ../BENCHMARKS.md
+- name: API
+  href: ../../artifacts/docs/api/
+- name: Changelog
+  href: ../../CHANGELOG.md

@@ -7,7 +7,7 @@ benchmarks and demos. `README.md` describes the API, `docs/DESIGN.md` the decisi
 
 Before writing, changing or reviewing C# that uses ResultUnion (the demos, the samples, a test that exercises a
 pipeline), read `.claude/skills/resultunion/SKILL.md` and the reference file it points to. The library's names and
-conventions differ from other Result libraries (`Bind`, not `Then`; `Task`, not `ValueTask`; error catalogs; who sets
+conventions differ from other Result libraries (`Bind`, not `Then`; `Task` delegates, never `ValueTask` ones; error catalogs; who sets
 `Field`), and code written from memory breaks them. Do this even when the task looks small.
 
 Changes to the library itself (`ResultUnion/`, `ResultUnion.AspNetCore/`, `ResultUnion.Grpc/`) follow
@@ -30,3 +30,6 @@ dotnet test --solution ResultLabIUnion.slnx
 - The public API of each package is recorded in `PublicAPI.Shipped.txt` / `PublicAPI.Unshipped.txt`; a new or changed
   public member must be added to `PublicAPI.Unshipped.txt` (RS0016/RS0017), and user-visible changes go under
   `## [Unreleased]` in `CHANGELOG.md`. Releasing is described in `docs/RELEASING.md`.
+- The documentation site is DocFX (`docfx.json`, `docs/site/`); CI builds it with `--warningsAsErrors`, so a link in
+  `README.md` or `docs/*.md` must point to another of those pages or to a full URL, never to a source file or folder.
+  Check locally after a Release build: `dotnet tool restore; dotnet docfx docfx.json` (output in `artifacts/docs/_site`).

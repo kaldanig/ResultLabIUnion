@@ -1,0 +1,63 @@
+name: Docs
+
+# Builds the documentation site (DocFX: the guide, the docs/ pages and the API reference generated from the compiled
+# packages) on every push to master and every pull request; a broken link or cross reference fails the build.
+# On master it is also deployed to GitHub Pages, once Pages is enabled for the repository and the repository variable
+# PAGES_ENABLED is set to true (docs/RELEASING.md, "Documentation site").
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: docs-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '11.0.x'
+
+      - name: Build the packages
+        shell: bash
+        run: |
+          for project in ResultUnion ResultUnion.AspNetCore ResultUnion.Grpc; do
+            dotnet build "$project/$project.csproj" --configuration Release
+          done
+
+      - name: Build the site
+        run: |
+          dotnet tool restore
+          dotnet docfx docfx.json --warningsAsErrors
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: artifacts/docs/_site
+
+  deploy:
+    needs: build
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/master' && vars.PAGES_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
