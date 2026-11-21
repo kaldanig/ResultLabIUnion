@@ -57,6 +57,7 @@ Why it is built this way, with the alternatives that were considered: [docs/DESI
 | `ResultUnion.Benchmarks` | BenchmarkDotNet measurements of matching, pipelines, failures against exceptions, `CombineAll` and async chains ([docs/BENCHMARKS.md](docs/BENCHMARKS.md)) |
 | `ResultUnion.Samples.Domain` | The sample domain shared by the demos: `Email`, `Password`, `User`, `OrderLine`, `Order` with their error catalogs, and a Georgian `ErrorLocalizer`. References only `ResultUnion`. |
 | `ResultUnion.Samples.Application` | The sample application layer shared by the Web API and the gRPC service: commands, use cases, in-memory storage. No HTTP, no gRPC. |
+| `ResultUnion.Articles` | The code of the articles in `docs/articles`, as a project that compiles; `ResultUnion.Articles.Tests` runs the testing article's samples and checks that every C# line of every article appears in one of the two |
 | `ResultUnion.Showcase` | A console app that demonstrates the API section by section |
 | `ResultUnion.WebApi` | A Minimal API demo with a browser UI, OpenAPI and a Scalar reference: real requests, real problem responses, and OpenTelemetry for the Aspire Dashboard |
 | `ResultUnion.WebApi.Tests` | Integration tests for the Web API: the real app in memory (`WebApplicationFactory`), real HTTP requests, the problem JSON a client receives, the Georgian translation and the OpenAPI document |
@@ -415,6 +416,7 @@ A failure becomes an RFC 9457 `application/problem+json` response:
   Conflict and Concurrency 409, BusinessRule 422, TooManyRequests 429, Unavailable 503, Unexpected 500
   (`ErrorType.ToStatusCode()`);
 - `detail` is the message, and the stable error `code` is an extension, so clients can switch on it;
+- `category` is the `ErrorType` name, which the status alone does not always give (Conflict and Concurrency are both 409);
 - `Arguments` become the `arguments` extension, and each entry of `details` carries its own (omitted when empty);
 - an error with a `Field` or `Details` becomes a validation problem: `errors` lists the messages per field, and
   `details` lists every error with its `code`, `field` and `message`;
@@ -428,6 +430,7 @@ A failure becomes an RFC 9457 `application/problem+json` response:
   "detail": "One or more validation errors occurred.",
   "errors": { "email": ["'dan@' is not a valid email."], "password": ["Password must be at least 8 characters."] },
   "code": "validation.failed",
+  "category": "Validation",
   "details": [
     { "code": "email.invalid_format", "field": "email", "message": "'dan@' is not a valid email." },
     { "code": "password.too_short", "field": "password", "message": "Password must be at least 8 characters." }

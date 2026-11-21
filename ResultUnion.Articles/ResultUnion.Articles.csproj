@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <!-- The code of the articles in docs/articles, as a project that compiles: every C# line of an article must appear
+       here or in ResultUnion.Articles.Tests (ArticleCodeTests checks it), so a sample can never stop compiling unnoticed. -->
+
+  <PropertyGroup>
+    <TargetFramework>net11.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>ResultUnion.Articles</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="11.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ResultUnion\ResultUnion.csproj" />
+    <ProjectReference Include="..\ResultUnion.AspNetCore\ResultUnion.AspNetCore.csproj" />
+  </ItemGroup>
+
+</Project>

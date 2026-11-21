@@ -1,6 +1,6 @@
 <Project>
 
-  <!-- Shared by every project. Only the three libraries are packed: they set IsPackable to true. -->
+  <!-- Shared by every project. Only the libraries are packed: they set IsPackable to true. -->
 
   <PropertyGroup>
     <IsPackable>false</IsPackable>

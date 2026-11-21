@@ -37,3 +37,5 @@ dotnet test --solution ResultLabIUnion.slnx
 - The documentation site is DocFX (`docfx.json`, `docs/site/`); CI builds it with `--warningsAsErrors`, so a link in
   `README.md` or `docs/*.md` must point to another of those pages or to a full URL, never to a source file or folder.
   Check locally after a Release build: `dotnet tool restore; dotnet docfx docfx.json` (output in `artifacts/docs/_site`).
+- Every line of C# in `docs/articles/*.md` must also be in `ResultUnion.Articles` or `ResultUnion.Articles.Tests`, where it
+  compiles and runs (`ArticleCodeTests`); change an article and its sample together.

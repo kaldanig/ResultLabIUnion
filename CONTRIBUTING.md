@@ -48,6 +48,10 @@ The build must finish without warnings; several checks turn a mistake into a war
   feature is described in the README; a design choice someone might question is recorded in `docs/DESIGN.md`. Links in
   `README.md` and `docs/*.md` must point to another of those pages or to a full URL, since they are also built into the
   [documentation site](https://kaldanig.github.io/ResultLabIUnion/).
+- **Articles.** The C# in `docs/articles/*.md` is compiled and run: every line must also appear in
+  `ResultUnion.Articles` (the samples) or `ResultUnion.Articles.Tests` (the testing article). `ArticleCodeTests` fails
+  when an article shows code that is not there, and checks the problem response Getting started shows against the
+  real endpoint.
 
 ## Style
 

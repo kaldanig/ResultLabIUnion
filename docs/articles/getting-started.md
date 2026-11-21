@@ -160,6 +160,7 @@ A request with an empty email and a password that is too short gets one `400 Bad
     "password": [ "Password must be at least 8 characters." ]
   },
   "code": "validation.failed",
+  "category": "Validation",
   "details": [
     { "code": "email.required", "field": "email", "message": "Email is required." },
     { "code": "password.too_short", "field": "password", "message": "Password must be at least 8 characters.",
@@ -170,7 +171,8 @@ A request with an empty email and a password that is too short gets one `400 Bad
 ```
 
 `errors` is what a form needs (messages per field), `details` what a client that translates needs (a code and
-arguments per field), and `code` identifies the whole failure.
+arguments per field), `code` identifies the whole failure, and `category` is its `ErrorType`, which a .NET client
+using `ResultUnion.Http` turns back into the same `Error`.
 
 The success response is documented in OpenAPI from the return type; `ProducesErrors` lists the problem responses the
 endpoint can return.
