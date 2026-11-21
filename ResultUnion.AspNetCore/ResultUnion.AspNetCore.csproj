@@ -5,6 +5,9 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <IsPackable>true</IsPackable>
+    <Description>ASP.NET Core integration for ResultUnion: typed Minimal API results (Results&lt;Ok&lt;T&gt;, ProblemHttpResult&gt;) and RFC 9457 problem details with field errors, codes and arguments.</Description>
+    <PackageTags>result;result-pattern;aspnetcore;minimal-api;problem-details;openapi</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>

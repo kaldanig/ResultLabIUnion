@@ -1,0 +1,10 @@
+<Project>
+
+  <!-- Imported after the project file, so IsPackable is already set. Each packable project ships its own short
+       README.md (next to its .csproj) as the package readme, and the repository's LICENSE file. -->
+  <ItemGroup Condition="'$(IsPackable)' == 'true'">
+    <None Include="README.md" Pack="true" PackagePath="\" />
+    <None Include="$(MSBuildThisFileDirectory)LICENSE" Pack="true" PackagePath="\" Visible="false" />
+  </ItemGroup>
+
+</Project>

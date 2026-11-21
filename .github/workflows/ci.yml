@@ -1,0 +1,65 @@
+name: CI
+
+# Builds, tests and packs on every push and pull request. The packages are uploaded as a run artifact; nothing is
+# published to nuget.org. A tag such as v0.2.0 packs that exact version; other builds get a ci.<run> suffix.
+
+on:
+  push:
+    branches: [master]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0          # full history for Source Link
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '11.0.x'
+
+      - name: Choose the package version
+        id: version
+        shell: bash
+        run: |
+          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then
+            echo "args=-p:Version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+          else
+            echo "args=-p:VersionSuffix=ci.${GITHUB_RUN_NUMBER}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Restore
+        run: dotnet restore ResultLabIUnion.slnx
+
+      - name: Build
+        run: dotnet build ResultLabIUnion.slnx --configuration Release --no-restore ${{ steps.version.outputs.args }}
+
+      - name: Test
+        run: dotnet test --solution ResultLabIUnion.slnx --configuration Release --no-build
+
+      - name: Pack
+        shell: bash
+        run: |
+          for project in ResultUnion ResultUnion.AspNetCore ResultUnion.Grpc; do
+            dotnet pack "$project/$project.csproj" --configuration Release --no-build \
+              --output artifacts ${{ steps.version.outputs.args }}
+          done
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: packages
+          path: |
+            artifacts/*.nupkg
+            artifacts/*.snupkg
+          if-no-files-found: error

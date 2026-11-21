@@ -564,3 +564,7 @@ as above, only that exception type becomes an error and everything else propagat
   `LangVersion` below 15 use `Result<T>.Success` and `Result<T>.Failure`.
 - **Equality.** Results and errors compare by value. One quirk: `default(Result<int>)` is not equal to
   `Result<int>.Failure(Error.DefaultResult)`, although both carry the same error.
+
+## License
+
+MIT, see [LICENSE](LICENSE).

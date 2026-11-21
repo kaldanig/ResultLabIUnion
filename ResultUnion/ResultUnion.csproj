@@ -5,6 +5,9 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <IsPackable>true</IsPackable>
+    <Description>A Result pattern for .NET built on C# 15 unions: Result&lt;T&gt;, Result and Error with typed categories, railway composition (Map, Bind, Ensure, Tap, Match), async pipelines, CombineAll validation and exception boundaries.</Description>
+    <PackageTags>result;result-pattern;railway;union;discriminated-union;error-handling;functional;ddd</PackageTags>
   </PropertyGroup>
 
 </Project>

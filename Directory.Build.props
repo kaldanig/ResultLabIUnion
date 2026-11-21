@@ -1,0 +1,35 @@
+<Project>
+
+  <!-- Shared by every project. Only the three libraries are packed: they set IsPackable to true. -->
+
+  <PropertyGroup>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <!-- Package metadata -->
+  <PropertyGroup>
+    <VersionPrefix>0.1.0</VersionPrefix>
+    <Authors>Giorgi Kaldani</Authors>
+    <Copyright>Copyright (c) 2026 Giorgi Kaldani</Copyright>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/kaldanig/ResultLabIUnion</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/kaldanig/ResultLabIUnion.git</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+  </PropertyGroup>
+
+  <!-- Source Link and symbols: the .NET SDK adds Source Link for GitHub itself; these make the packages debuggable
+       into the exact commit they were built from. -->
+  <PropertyGroup>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <Deterministic>true</Deterministic>
+    <!-- Normalizes paths in the PDBs on CI builds (GitHub Actions sets GITHUB_ACTIONS=true). -->
+    <ContinuousIntegrationBuild Condition="'$(GITHUB_ACTIONS)' == 'true'">true</ContinuousIntegrationBuild>
+  </PropertyGroup>
+
+  <!-- The package readme is added in Directory.Build.targets, after each project has set IsPackable. -->
+
+</Project>

@@ -7,6 +7,9 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <IsPackable>true</IsPackable>
+    <Description>gRPC integration for ResultUnion: Error to and from google.rpc.Status (ErrorInfo, BadRequest, RetryInfo), GetValueOrThrowRpc for services and RpcException.ToError for clients.</Description>
+    <PackageTags>result;result-pattern;grpc;rich-error-model;google-rpc-status</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>
