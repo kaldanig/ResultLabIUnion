@@ -105,3 +105,30 @@ dotnet tool restore; dotnet reportgenerator -reports:'artifacts/coverage/*.cober
 
 Then open `artifacts/coverage/report/index.html`. There is no coverage threshold: the number shows where tests are
 missing, not whether a change may be merged.
+
+## Mutation testing
+
+Code coverage says which lines the tests run; mutation testing says whether they would notice a bug there. Stryker.NET
+(a local tool, configured in `stryker-config.json`) makes small changes to a package, such as removing an argument
+check or flipping a condition, and runs that package's tests against each one. A change no test fails on (a
+*survivor*) usually means a missing assertion.
+
+`mutation.yml` runs it for the three packages every Monday and on demand, and uploads the HTML reports as artifacts;
+it never blocks a pull request. To run it locally for one package:
+
+```powershell
+cd ResultUnion.Tests; dotnet tool restore; dotnet stryker --config-file ../stryker-config.json --project ResultUnion.csproj --output ../artifacts/stryker/ResultUnion
+```
+
+The report is `artifacts/stryker/ResultUnion/reports/mutation-report.html`. Notes for reading it:
+
+- The tests run on Microsoft.Testing.Platform, so the configuration selects Stryker's `mtp` test runner, which Stryker
+  still marks as a preview; the default VSTest runner reports every mutant as surviving with this setup.
+- `ConfigureAwait(false)` → `true` is ignored: without a synchronization context the two behave the same.
+- A negated `IsCompletedSuccessfully` sends a completed task down the general path, which returns the same result, so
+  those survivors are expected unless a test checks that the source task is reused.
+- Stryker leaves its mutated build in the test project's `bin` folder; run `dotnet build --no-incremental` before testing
+  again, or the next `dotnet test --no-build` runs against a mutant.
+- The argument checks are covered by one contract test per package (`NullArgumentTests`, built on
+  `ResultUnion.Tests/Contracts/NullArgumentContract.cs`): it calls every public method with each non-nullable argument
+  set to `null`, once with completed and once with pending tasks, and expects an `ArgumentNullException` at once.

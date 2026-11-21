@@ -9,6 +9,14 @@ are in the diff of those files.
 
 ## [Unreleased]
 
+### ResultUnion.Grpc
+
+#### Changed
+
+- `GetValueOrThrowRpc` and `GetValueOrThrowRpcAsync` reject a `null`, empty or white-space `domain` when they are
+  called. Before, a bad domain was noticed only when a failure was turned into an `RpcException`, and in the async
+  forms only after the result had been awaited.
+
 ## [0.1.0] - 2026-11-21
 
 The first release. Requires .NET 11 (C# 15 unions).
