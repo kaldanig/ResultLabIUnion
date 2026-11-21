@@ -15,6 +15,17 @@
     <PackageReference Include="Microsoft.CodeAnalysis.PublicApiAnalyzers" Version="5.6.0" PrivateAssets="all" />
   </ItemGroup>
 
+  <!-- Package validation: dotnet pack compares each package with the last released version on nuget.org and fails on
+       a binary breaking change (CP0002 a removed member, CP0006 a member added to an interface, …). The PublicAPI files
+       catch source-level changes while you build; this catches what an already compiled caller would hit, in the
+       package as shipped. After a release, set the baseline to the version just published (docs/RELEASING.md).
+       A deliberate break before 1.0 is recorded with `dotnet pack -p:GenerateCompatibilitySuppressionFile=true`,
+       which writes CompatibilitySuppressions.xml next to the project. -->
+  <PropertyGroup Condition="'$(IsPackable)' == 'true'">
+    <EnablePackageValidation>true</EnablePackageValidation>
+    <PackageValidationBaselineVersion>0.1.0</PackageValidationBaselineVersion>
+  </PropertyGroup>
+
   <!-- Every project in this repository runs the ResultUnion analyzers and offers their code fixes, as a package consumer
        would. (The analyzer, code fix and test projects reference them in their own way.) For ResultUnion itself the
        references also make sure both are built before the package that ships them. -->

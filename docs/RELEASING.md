@@ -36,6 +36,10 @@ with NuGet trusted publishing: no API key is stored anywhere.
    git push origin v0.2.0
    ```
 
+6. **Baseline.** After the packages are on nuget.org, set `<PackageValidationBaselineVersion>` in
+   `Directory.Build.targets` to the version just released (for example `0.2.0`), delete any
+   `CompatibilitySuppressions.xml`, and commit. From then on `dotnet pack` compares every change with that version.
+
 `publish.yml` refuses a tag that does not match `VersionPrefix` or has no changelog entry. A prerelease is a tag with a
 suffix on the same prefix: `v0.2.0-preview.1` publishes `0.2.0-preview.1`.
 
@@ -48,6 +52,10 @@ release the next version. Never delete and recreate a tag that has been publishe
   recorded), so a review sees it. Removing or changing a shipped member is a breaking change; before 1.0 it is allowed
   in a minor version and is listed in the changelog.
 - Add user-visible changes under `## [Unreleased]` in `CHANGELOG.md` as they are merged.
+- `dotnet pack` (run by CI on every push) validates each package against the last release and fails on a binary
+  breaking change (CP0002, CP0006, …). If the break is intended, run
+  `dotnet pack <project> -c Release -p:GenerateCompatibilitySuppressionFile=true`, commit the generated
+  `CompatibilitySuppressions.xml`, and list the change in the changelog (DESIGN.md, 36).
 
 ## Documentation site
 

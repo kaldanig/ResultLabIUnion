@@ -30,6 +30,8 @@ dotnet test --solution ResultLabIUnion.slnx
 - The public API of each package is recorded in `PublicAPI.Shipped.txt` / `PublicAPI.Unshipped.txt`; a new or changed
   public member must be added to `PublicAPI.Unshipped.txt` (RS0016/RS0017), and user-visible changes go under
   `## [Unreleased]` in `CHANGELOG.md`. Releasing is described in `docs/RELEASING.md`.
+- `dotnet pack` validates each package against the last release on nuget.org (`PackageValidationBaselineVersion`);
+  a CP0002/CP0006 error is a binary breaking change. Avoid it, or, if it is intended, follow `docs/RELEASING.md`.
 - The documentation site is DocFX (`docfx.json`, `docs/site/`); CI builds it with `--warningsAsErrors`, so a link in
   `README.md` or `docs/*.md` must point to another of those pages or to a full URL, never to a source file or folder.
   Check locally after a Release build: `dotnet tool restore; dotnet docfx docfx.json` (output in `artifacts/docs/_site`).

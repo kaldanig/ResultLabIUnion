@@ -29,6 +29,7 @@ was checked with a small program, and the observed output is quoted.
   [34 Error JSON](#34-errors-have-a-fixed-json-format) ·
   [35 Telemetry](#35-failures-are-reported-through-systemdiagnostics)
 - **DDD:** [28 Error catalogs](#28-error-catalogs-per-domain-concept) · [29 Who sets Field](#29-whoever-knows-the-field-name-sets-it)
+- **Packages:** [36 Compatibility checked against the last release](#36-compatibility-is-checked-against-the-last-release)
 
 ---
 
@@ -500,3 +501,25 @@ must not change once published. Messages may change freely.
 (`WithField("email")`). A value object with several fields (`OrderLine`) names its own, and collections add the index
 (`lines[2].quantity`). Infrastructure errors stay generic (`Error.NotFound` from a repository) and the application layer
 translates them into domain errors with `MapError`.
+
+## Packages
+
+### 36. Compatibility is checked against the last release
+
+**Context.** Once a version is on nuget.org, code compiled against it runs against every later version a project
+upgrades to, directly or through another package. The `PublicAPI` files show every public change in review, but they
+are compared with the source, and nothing stops a pull request from editing them in the same commit as the change.
+
+**Decision.** Every package enables NuGet package validation with the last released version as its baseline
+(`PackageValidationBaselineVersion` in `Directory.Build.targets`). `dotnet pack`, in CI and in `publish.yml`, downloads
+that version from nuget.org and fails on a binary breaking change: a removed or changed member (CP0002), a member added
+to an interface (CP0006), a dependency or target framework dropped. The baseline moves to each new version right after
+it is released.
+
+**Alternatives.** The `PublicAPI` files alone catch changes at build time but compare the code with itself.
+ApiCompat against a hand-kept reference assembly does the same as package validation with more files to maintain.
+
+**Consequences.** Before 1.0 a breaking change is still allowed (CHANGELOG.md, *Changed* or *Removed*), but it has to
+be recorded on purpose: `dotnet pack -p:GenerateCompatibilitySuppressionFile=true` writes `CompatibilitySuppressions.xml`
+next to the project, and that file shows the break in review. Packing needs nuget.org to be reachable, because the
+baseline package is downloaded on the first pack.
