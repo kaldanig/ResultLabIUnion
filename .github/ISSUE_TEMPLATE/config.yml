@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Report a security vulnerability
+    url: https://github.com/kaldanig/ResultLabIUnion/security/advisories/new
+    about: Report it privately, not as a public issue (SECURITY.md).
+  - name: Documentation
+    url: https://kaldanig.github.io/ResultLabIUnion/
+    about: The guide, the design decisions and the API reference.

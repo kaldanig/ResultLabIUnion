@@ -1,0 +1,25 @@
+name: Feature request
+description: A new API, integration or analyzer rule, or a change to existing behaviour.
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: The problem
+      description: What are you trying to do, and why is it awkward or impossible today?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed API or behaviour
+      description: How you would like to write it. A short code sample helps most.
+      render: csharp
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives and the existing design
+      description: |
+        What you use today instead. If the proposal changes a decision in docs/DESIGN.md, say which one and why.

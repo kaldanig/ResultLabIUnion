@@ -1,0 +1,48 @@
+name: Bug report
+description: Something in ResultUnion, ResultUnion.AspNetCore, ResultUnion.Grpc or the analyzers does not work as documented.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting. For a security problem, please do not use this form: see SECURITY.md.
+  - type: dropdown
+    id: package
+    attributes:
+      label: Package
+      options:
+        - ResultUnion
+        - ResultUnion.AspNetCore
+        - ResultUnion.Grpc
+        - Analyzers or code fixes (RU0001–RU0004)
+        - Documentation
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Package version
+      placeholder: "0.1.0"
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Code that shows the problem
+      description: The smallest program, test or request that reproduces it.
+      render: csharp
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected, and what happened instead
+      description: Include the exception with its stack trace, the diagnostic, or the HTTP/gRPC response.
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: .NET SDK and OS
+      description: Output of `dotnet --version`, and the operating system.
+      placeholder: "11.0.100, Windows 11"
