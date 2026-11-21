@@ -50,9 +50,15 @@ public static class RpcErrorMapping
 
             var unexpected = error.Type == ErrorType.Unexpected;
 
-            var info = new ErrorInfo { Reason = ToReason(error.Code), Domain = domain };
-            info.Metadata[CodeKey] = error.Code;
-            info.Metadata[TypeKey] = error.Type.ToString();
+            var info = new ErrorInfo
+            {
+                Reason = ToReason(error.Code), Domain = domain,
+                Metadata =
+                {
+                    [CodeKey] = error.Code,
+                    [TypeKey] = error.Type.ToString()
+                }
+            };
 
             if (!unexpected)
             {
