@@ -23,4 +23,6 @@ FailedPrecondition, Concurrency → Aborted, TooManyRequests → ResourceExhaust
 Unexpected → Internal). The code, type and arguments travel in `ErrorInfo`, field errors in `BadRequest`, and a
 rate limit's delay in `RetryInfo`. Works on servers and clients; no ASP.NET Core dependency.
 
+A failure that leaves the service also tags the call's span (`resultunion.error.code`, `resultunion.error.category`).
+
 Documentation: https://github.com/kaldanig/ResultLabIUnion

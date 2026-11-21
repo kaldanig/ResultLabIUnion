@@ -1,4 +1,6 @@
+using System.Diagnostics;
 using Grpc.Core;
+using ResultUnion.Diagnostics;
 
 namespace ResultUnion.Grpc;
 
@@ -7,7 +9,8 @@ namespace ResultUnion.Grpc;
 /// <para>
 /// gRPC methods return the reply message itself, and the protocol reports failures through the status, so the boundary
 /// throws: <c>return await users.FindAsync(request.Email, ct).MapAsync(UserReply.From).GetValueOrThrowRpcAsync();</c>.
-/// The exception is built with <see cref="RpcErrorMapping.ToRpcException(Error, string)"/>.
+/// The exception is built with <see cref="RpcErrorMapping.ToRpcException(Error, string)"/>, and the current span (the
+/// call's server span) is tagged with the error code and category through <see cref="ResultTelemetry.TagActivity"/>.
 /// </para>
 /// <para>Use these only at the service boundary; inside the application, keep working with results.</para>
 /// </remarks>
@@ -22,7 +25,7 @@ public static class ResultRpcExtensions
         /// <param name="domain">The <c>ErrorInfo.domain</c>.</param>
         /// <exception cref="RpcException">The result is a failure.</exception>
         public T GetValueOrThrowRpc(string domain = RpcErrorMapping.DefaultDomain) =>
-            result.TryGetResultValue(out var value) ? value : throw result.Error.ToRpcException(domain);
+            result.TryGetResultValue(out var value) ? value : throw ToRpcFailure(result.Error, domain);
     }
 
     /// <param name="result">The result to end the call with.</param>
@@ -38,8 +41,17 @@ public static class ResultRpcExtensions
         {
             ArgumentNullException.ThrowIfNull(onSuccess);
 
-            return result.TryGetError(out var error) ? throw error.ToRpcException(domain) : onSuccess();
+            return result.TryGetError(out var error) ? throw ToRpcFailure(error, domain) : onSuccess();
         }
+    }
+
+    // The exception for a failure that leaves the service; tags the current span (the call's server span) with the
+    // error code and category, so a trace shows which error the call ended with.
+    private static RpcException ToRpcFailure(Error error, string domain)
+    {
+        var exception = error.ToRpcException(domain);
+        ResultTelemetry.TagActivity(Activity.Current, error);
+        return exception;
     }
 
     /// <typeparam name="T">The type of the success value, usually the reply message.</typeparam>

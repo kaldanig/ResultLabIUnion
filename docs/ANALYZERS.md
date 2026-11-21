@@ -30,8 +30,8 @@ _ = cache.Refresh(key);                  // best effort: a failure is acceptable
 ```
 
 Reported for calls that return `Result`, `Result<T>`, or a `Task`/`ValueTask` of one, whether awaited or not, including
-inside a lambda whose delegate returns nothing. Not reported for `Tap` / `TapError` (and their async forms) called on a
-variable, parameter, field or property: the result they return is the one the variable already holds.
+inside a lambda whose delegate returns nothing. Not reported for `Tap` / `TapError` / `Record` (and their async forms)
+called on a variable, parameter, field or property: the result they return is the one the variable already holds.
 
 ## RU0002
 

@@ -53,11 +53,13 @@ public sealed class ResultUsageAnalyzer : DiagnosticAnalyzer
             invocation.TargetMethod.Name));
     }
 
-    // "result.TapError(log);" returns the same result the variable still holds: nothing is lost.
+    // "result.TapError(log);" or "result.Record("users.register");" returns the same result the variable still holds:
+    // nothing is lost.
     private static bool IsTapOnAnExistingValue(IInvocationOperation invocation)
     {
         var method = invocation.TargetMethod;
-        if (!method.Name.StartsWith("Tap", System.StringComparison.Ordinal) || !ResultTypes.IsLibraryMember(method))
+        if (!(method.Name.StartsWith("Tap", System.StringComparison.Ordinal) || method.Name.StartsWith("Record", System.StringComparison.Ordinal))
+            || !ResultTypes.IsLibraryMember(method))
             return false;
 
         var receiver = invocation.Instance ?? (invocation.Arguments.Length > 0 && method.IsExtensionMethod

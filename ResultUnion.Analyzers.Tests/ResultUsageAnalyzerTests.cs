@@ -121,6 +121,24 @@ public sealed class DiscardedResultTests
     }
 
     [Fact]
+    public async Task Record_on_a_variable_is_not_reported_but_record_on_a_call_is()
+    {
+        var diagnostics = await AnalyzeAsync("""
+            class C
+            {
+                Result<int> Parse(string s) => Result<int>.Success(1);
+                void M(Result<int> parameter)
+                {
+                    parameter.Record("orders.parse");
+                    Parse("2").Record("orders.parse");
+                }
+            }
+            """);
+
+        Assert.Equal([("RU0001", 7)], diagnostics);
+    }
+
+    [Fact]
     public async Task Non_result_calls_are_not_reported()
     {
         var diagnostics = await AnalyzeAsync("""

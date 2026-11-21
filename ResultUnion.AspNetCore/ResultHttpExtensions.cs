@@ -1,5 +1,7 @@
+using System.Diagnostics;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
+using ResultUnion.Diagnostics;
 
 namespace ResultUnion.AspNetCore;
 
@@ -26,8 +28,18 @@ public static class ResultHttpExtensions
     extension(Error error)
     {
         /// <summary>Creates a problem response for the error.</summary>
+        /// <remarks>
+        /// Also tags the current span (the request's server span) with the error code and category through
+        /// <see cref="ResultTelemetry.TagActivity"/>, so a trace shows which error the request ended with. Nothing is
+        /// recorded when tracing is off.
+        /// </remarks>
         /// <exception cref="ArgumentNullException"><paramref name="error"/> is <see langword="null"/>.</exception>
-        public ProblemHttpResult ToHttpResult() => TypedResults.Problem(error.ToProblemDetails());
+        public ProblemHttpResult ToHttpResult()
+        {
+            var problem = TypedResults.Problem(error.ToProblemDetails());
+            ResultTelemetry.TagActivity(Activity.Current, error);
+            return problem;
+        }
     }
 
     /// <typeparam name="T">The type of the success value.</typeparam>

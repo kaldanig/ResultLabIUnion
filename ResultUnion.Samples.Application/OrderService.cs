@@ -17,5 +17,6 @@ public sealed class OrderService(InMemoryUserStore users, InMemoryOrderStore ord
             .EnsureAsync(order => users.FindAsync(order.Customer, cancellationToken)
                 .ToResultAsync(User.Errors.NotFound(order.Customer).WithField("customerEmail"))
                 .BindAsync(_ => Result.Success()))
-            .TapAsync(order => orders.AddAsync(order, cancellationToken));
+            .TapAsync(order => orders.AddAsync(order, cancellationToken))
+            .RecordAsync("orders.place");
 }

@@ -1,4 +1,9 @@
+using OpenTelemetry;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 using Scalar.AspNetCore;
+using ResultUnion.Diagnostics;
 using ResultUnion.Samples.Application;
 using ResultUnion.WebApi.Endpoints;
 using ResultUnion.WebApi.Localization;
@@ -17,6 +22,19 @@ builder.Services.AddOpenApi(options => options.AddDocumentTransformer((document,
 builder.Services.AddProblemDetails();                   // unhandled exceptions become problem responses too
 
 builder.Services.AddSampleApplication();                // use cases and in-memory storage, shared with the gRPC service
+
+// OpenTelemetry over OTLP to OTEL_EXPORTER_OTLP_ENDPOINT (http://localhost:4317 in launchSettings.json), for example the
+// standalone Aspire Dashboard (see the README). Adding ResultUnion's meter is the only ResultUnion-specific line: the
+// failure counter comes from RecordAsync in the use cases, and problem responses tag the request spans by themselves.
+builder.Services.AddOpenTelemetry()
+    .ConfigureResource(resource => resource.AddService("ResultUnion.WebApi"))
+    .WithTracing(tracing => tracing.AddAspNetCoreInstrumentation(options =>
+        options.Filter = context => IsApiRequest(context.Request.Path)))
+    .WithMetrics(metrics => metrics
+        .AddAspNetCoreInstrumentation()
+        .AddMeter(ResultTelemetry.MeterName))                                   // resultunion.errors
+    .WithLogging()
+    .UseOtlpExporter();
 
 var app = builder.Build();
 
@@ -38,6 +56,12 @@ api.MapAdminEndpoints();
 app.Services.SeedSampleData();                          // ann@example.com
 
 app.Run();
+
+// Traces show the API calls only, not the browser UI's files, Scalar or the OpenAPI document.
+static bool IsApiRequest(PathString path) =>
+    !Path.HasExtension(path.Value)
+    && !path.StartsWithSegments("/scalar")
+    && !path.StartsWithSegments("/openapi");
 
 /// <summary>The entry point, visible to integration tests (WebApplicationFactory).</summary>
 public partial class Program;

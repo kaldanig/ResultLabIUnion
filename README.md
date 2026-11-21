@@ -44,7 +44,7 @@ Why it is built this way, with the alternatives that were considered: [docs/DESI
 | `ResultUnion.Samples.Domain` | The sample domain shared by the demos: `Email`, `Password`, `User`, `OrderLine`, `Order` with their error catalogs, and a Georgian `ErrorLocalizer`. References only `ResultUnion`. |
 | `ResultUnion.Samples.Application` | The sample application layer shared by the Web API and the gRPC service: commands, use cases, in-memory storage. No HTTP, no gRPC. |
 | `ResultUnion.Showcase` | A console app that demonstrates the API section by section |
-| `ResultUnion.WebApi` | A Minimal API demo with a browser UI, OpenAPI and a Scalar reference: real requests, real problem responses |
+| `ResultUnion.WebApi` | A Minimal API demo with a browser UI, OpenAPI and a Scalar reference: real requests, real problem responses, and OpenTelemetry for the Aspire Dashboard |
 | `ResultUnion.GrpcService` | The same use cases as a gRPC service (`Protos/demo.proto`), failures as rich gRPC statuses |
 | `ResultUnion.GrpcClient` | A console client for the gRPC service that turns every `RpcException` back into an `Error` |
 
@@ -494,6 +494,70 @@ var received = JsonSerializer.Deserialize<RegistrationRejected>(json)!;    // re
   status, which hide it.
 
 Results themselves are still not serialized (see "Things to know"): send the value, or the error.
+
+## OpenTelemetry: which errors, how often, in which request
+
+ResultUnion reports failures through the .NET diagnostics APIs (`Meter`, `Activity`), so it needs no OpenTelemetry
+package; the application's OpenTelemetry setup picks them up:
+
+```csharp
+builder.Services.AddOpenTelemetry()
+    .WithMetrics(metrics => metrics.AddMeter(ResultTelemetry.MeterName).AddAspNetCoreInstrumentation())
+    .WithTracing(tracing => tracing.AddAspNetCoreInstrumentation());
+```
+
+**Metrics, per operation.** End a pipeline with `Record` (or `RecordAsync`): a failure increments the counter
+`resultunion.errors` and the result comes back unchanged.
+
+```csharp
+public Task<Result<User>> RegisterAsync(RegisterUser command, CancellationToken ct) =>
+    Result.CombineAll(/* … */)
+        .Bind(/* … */)
+        .TapAsync(user => users.AddAsync(user, ct))
+        .RecordAsync("users.register");
+```
+
+| Attribute | Value |
+|---|---|
+| `error.type` | the error code, e.g. `user.too_young` |
+| `resultunion.error.category` | the `ErrorType`, e.g. `BusinessRule` |
+| `resultunion.operation` | the name given to `Record`, e.g. `users.register` |
+
+**Traces, with no code.** `ToHttpResult` and `GetValueOrThrowRpc` tag the request's server span with
+`resultunion.error.code`, `resultunion.error.category` and `resultunion.error.field`, so a trace shows which error a
+request ended with. `Record` adds the same attributes, plus a `resultunion.error` event, to the current span. The span
+status becomes Error only for `Unexpected` and `Unavailable`: like a 4xx, the other categories are expected outcomes,
+not server failures.
+
+- The message and the arguments are never recorded: they may contain personal data (an email, a value the user typed),
+  and the code identifies the error. Codes come from catalogs, so the attributes stay low-cardinality; keep operation
+  names the same way (`users.register`, never an id).
+- When nothing listens (no OpenTelemetry, or the meter not added), recording costs a check and does nothing.
+- Where an error leaves by another way, such as a message consumer, call `ResultTelemetry.TagActivity(Activity.Current, error)`.
+
+### See it in the Aspire Dashboard
+
+`ResultUnion.WebApi` sends its traces, metrics and logs over OTLP to `http://localhost:4317` (set in
+`launchSettings.json`). Start the standalone [Aspire Dashboard](https://aspire.dev/dashboard/standalone/) there, then the
+API:
+
+```powershell
+docker run --rm -it -p 18888:18888 -p 4317:18889 --name aspire-dashboard mcr.microsoft.com/dotnet/aspire-dashboard:latest
+```
+
+```powershell
+dotnet run --project ResultUnion.WebApi
+```
+
+Open the login link the container prints (`http://localhost:18888/login?t=…`), then use the browser UI at
+`http://localhost:5258` (register a 15-year-old, an invalid email, a duplicate):
+
+- **Traces:** a `POST /users/` span with status 422 carries `resultunion.error.code = user.too_young`,
+  `resultunion.error.category = BusinessRule`, and a `resultunion.error` event with `resultunion.operation = users.register`.
+- **Metrics:** meter `ResultUnion`, instrument `resultunion.errors`, filterable by `error.type`, category and operation.
+- **Structured logs:** the use cases' own log lines, such as `Registration rejected: user.too_young`.
+
+The dashboard is a development tool. Without the container the API runs as before; the exporter just has nowhere to send.
 
 ## Using ResultUnion in a DDD application
 

@@ -26,7 +26,8 @@ was checked with a small program, and the observed output is quoted.
 - **Boundaries:** [25 Separate ASP.NET Core project](#25-aspnet-core-integration-is-a-separate-project) ·
   [26 Unexpected stays private](#26-unexpected-errors-never-reach-the-client) · [27 No JSON for results](#27-results-are-not-serialized-directly) ·
   [30 Typed HTTP responses](#30-http-responses-are-typed) · [31 gRPC rich errors](#31-grpc-errors-use-the-rich-error-model) ·
-  [34 Error JSON](#34-errors-have-a-fixed-json-format)
+  [34 Error JSON](#34-errors-have-a-fixed-json-format) ·
+  [35 Telemetry](#35-failures-are-reported-through-systemdiagnostics)
 - **DDD:** [28 Error catalogs](#28-error-catalogs-per-domain-concept) · [29 Who sets Field](#29-whoever-knows-the-field-name-sets-it)
 
 ---
@@ -456,6 +457,30 @@ need `InternalsVisibleTo` (and an exact version match) or a public factory to re
 **Consequences.** `Unexpected` messages are written as they are: unlike problem details and gRPC statuses, the format is
 for trusted services. An argument of a type JSON does not have (a `Guid`, a date, an enum) comes back as a string, so
 such an error is not equal to the original after a round trip.
+
+### 35. Failures are reported through System.Diagnostics
+
+**Context.** In production the useful questions are which errors happen, how often, and in which request. A result
+pattern makes this easy to answer, because every expected failure has a stable code, but only if someone records it.
+
+**Decision.** `ResultTelemetry` in the core library uses `Meter` and `Activity`, which are part of .NET, so no
+OpenTelemetry package is referenced; applications enable it with `AddMeter("ResultUnion")`. `Record(operation)` /
+`RecordAsync(operation)` count a failure in `resultunion.errors` (`error.type` = code, `resultunion.error.category`,
+`resultunion.operation`) and add attributes and an event to the current span. The HTTP and gRPC integrations tag the
+server span automatically when a failure leaves the service. The span status becomes Error only for `Unexpected` and
+`Unavailable`, following the OpenTelemetry HTTP conventions, in which a 4xx is not a server error.
+
+**Why explicit for metrics, automatic for traces.** An operation name makes the counter useful, and only the code knows
+it. Span attributes are idempotent (a later one overwrites), so the hosts can set them without double counting even
+when the handler also calls `Record`; a counter could not be deduplicated that way.
+
+**Alternatives.** Recording every failure automatically, wherever a `Result` is created, would count intermediate
+failures that a pipeline later handles, and would cost something on every failure even when nothing listens. Using the
+OpenTelemetry API package would add a dependency to every consumer for no gain.
+
+**Consequences.** The message and arguments are never recorded, since they may hold personal data. On spans the
+attributes are namespaced (`resultunion.error.code`), so they never clash with the `error.type` that the HTTP and gRPC
+instrumentations set from the status code. The RU0001 analyzer treats `Record` on a variable like `Tap`.
 
 ## DDD
 

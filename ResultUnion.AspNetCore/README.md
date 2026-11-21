@@ -24,4 +24,7 @@ Each `ErrorType` maps to a status code (Validation 400, NotFound 404, Conflict 4
 TooManyRequests 429, Unavailable 503, Unexpected 500), and the problem body carries `code`, `arguments`, and per-field
 `errors` and `details`.
 
+A problem response also tags the request's span (`resultunion.error.code`, `resultunion.error.category`), so traces
+show which error a request ended with.
+
 Documentation: https://github.com/kaldanig/ResultLabIUnion

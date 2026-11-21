@@ -18,7 +18,8 @@ public sealed class UserService(InMemoryUserStore users, PasswordResetQuota quot
             .EnsureAsync(user => users.EnsureEmailIsFreeAsync(user.Email, cancellationToken))
             .BindAsync(user => users.AddAsync(user, cancellationToken))             // also catches a concurrent duplicate
             .TapAsync(user => logger.LogInformation("Registered {Email}", user.Email.Value))
-            .TapErrorAsync(error => logger.LogInformation("Registration rejected: {Code}", error.Code));
+            .TapErrorAsync(error => logger.LogInformation("Registration rejected: {Code}", error.Code))
+            .RecordAsync("users.register");                                         // resultunion.errors, by code
 
     public Task<Result<User>> FindAsync(string? email, CancellationToken cancellationToken) =>
         Email.Create(email)

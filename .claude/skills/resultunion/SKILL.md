@@ -68,6 +68,11 @@ or a DTO. `Result` and `Result<T>` are not JSON contracts.
 An `Error` is: it serializes with System.Text.Json as-is, so put the `Error` itself in an event or queue
 message (`record OrderRejected(Guid OrderId, Error Reason)`) instead of copying its code and message into strings.
 
+**Record failures where the operation ends.** End a use case's pipeline with `.RecordAsync("users.register")`
+(or `Record`): it counts failures by code in OpenTelemetry and returns the result unchanged. The name is a metric
+attribute, so keep it stable and low-cardinality, never an id. HTTP and gRPC hosts tag spans by themselves; do not
+add `Activity` code for that.
+
 **Let generic behaviors use `IResultFactory<TSelf>`.** A pipeline behavior that wraps handlers returning any result type
 constrains `where TResponse : IResultFactory<TResponse>` and short-circuits with `TResponse.Failure(error)`.
 

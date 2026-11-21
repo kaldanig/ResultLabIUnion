@@ -16,5 +16,6 @@ await Demo.SectionAsync("7. From exceptions to results: Result.Try, Result.TryAs
 await Demo.SectionAsync("8. HTTP responses with ResultUnion.AspNetCore: ToHttpResult, ProblemDetails", HttpDemo.RunAsync);
 Demo.Section("9. Error arguments: translate by code, not by parsing the message", LocalizationDemo.Run);
 Demo.Section("10. Errors in messages between services: System.Text.Json", SerializationDemo.Run);
+Demo.Section("11. OpenTelemetry: counting failures and tagging spans with Record", TelemetryDemo.Run);
 
 Console.WriteLine();
