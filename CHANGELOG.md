@@ -9,7 +9,7 @@ are in the diff of those files.
 
 ## [Unreleased]
 
-## [0.1.0] - not yet released
+## [0.1.0] - 2026-11-21
 
 The first release. Requires .NET 11 (C# 15 unions).
 
@@ -34,7 +34,8 @@ The first release. Requires .NET 11 (C# 15 unions).
   the current span, through `System.Diagnostics`, without an OpenTelemetry dependency.
 - Analyzers in the package: RU0001 (a discarded result), RU0002 (asynchronous code in `Result.Try`), RU0003 (`Map`
   with a mapper that returns a result), each with a code fix (`_ =`, `TryAsync`, `Bind`), and RU0004 (`ResultValue`
-  or `Error` read without checking the result).
+  or `Error` read without checking the result). They also apply in a project that installs only `ResultUnion.AspNetCore`
+  or `ResultUnion.Grpc`.
 - Built with .NET 11 Runtime Async.
 
 ### ResultUnion.AspNetCore

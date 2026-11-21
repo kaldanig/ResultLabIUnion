@@ -15,7 +15,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ResultUnion\ResultUnion.csproj" />
+    <!-- PrivateAssets="none": a project that installs only this package still gets the ResultUnion analyzers. -->
+    <ProjectReference Include="..\ResultUnion\ResultUnion.csproj" PrivateAssets="none" />
   </ItemGroup>
 
 </Project>

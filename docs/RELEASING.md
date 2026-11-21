@@ -20,6 +20,8 @@ with NuGet trusted publishing: no API key is stored anywhere.
 
 1. **API.** Move the lines from each package's `PublicAPI.Unshipped.txt` into its `PublicAPI.Shipped.txt`, keeping
    `#nullable enable` at the top of both files.
+   Move the rules in `ResultUnion.Analyzers/AnalyzerReleases.Unshipped.md` into `AnalyzerReleases.Shipped.md` under
+   `## Release 0.2.0`.
 2. **Version.** Set `<VersionPrefix>` in `Directory.Build.props` (for example `0.2.0`).
 3. **Changelog.** In `CHANGELOG.md`, rename `## [Unreleased]` to `## [0.2.0] - YYYY-MM-DD`, add a new empty
    `## [Unreleased]` above it, and update the links at the bottom.
