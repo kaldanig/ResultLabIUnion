@@ -50,6 +50,29 @@ internal static class CombineDemo
 
             Demo.Show($"CombineAll(\"{email}\", \"{age}\").Map(...)", user.Map(u => $"{u.Email}, age {u.Age}"));
         }
+
+        // Collections: every element, or every error with the index of the element it came from.
+        Console.WriteLine();
+        Console.WriteLine("  Collections: lines.CombineAll(OrderLine.Create, field: \"lines\"):");
+        OrderLineInput[][] orders =
+        [
+            [new("apple", 2), new("pear", 1)],
+            [new("apple", 2), new("", 0), new("pear", -1)],
+        ];
+        foreach (var lines in orders)
+        {
+            var result = lines.CombineAll(OrderLine.Create, field: "lines");     // Result<IReadOnlyList<OrderLine>>
+
+            Demo.Show($"{lines.Length} lines", result.IsSuccess ? $"Success({string.Join(", ", result.ResultValue)})" : $"Failure({result.Error.Code})");
+
+            if (result.TryGetError(out var error))
+            {
+                foreach (var detail in error.Flatten())                         // innermost errors: one per invalid input
+                {
+                    Demo.Show($"    {detail.Field}", $"error {detail.Code}");
+                }
+            }
+        }
     }
 
     private static Result ValidateFirst(string email, string age) =>

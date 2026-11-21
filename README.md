@@ -173,6 +173,27 @@ Result<User> user = Result.CombineAll(
 Mixing `Result` and `Result<T>` arguments is not supported by these overloads; call `ToResult()` on the generic ones
 and use the plain `CombineAll`, or use the `IEnumerable<IResultState>` overload.
 
+### Collections
+
+For a list in a command, such as order lines, `CombineAll` on a sequence returns every value or every error.
+With `field`, each error's path gets the element index in front: `quantity` becomes `lines[2].quantity`.
+
+```csharp
+Result<IReadOnlyList<OrderLine>> lines = command.Lines.CombineAll(OrderLine.Create, field: "lines");
+
+Result<IReadOnlyList<int>> numbers = results.CombineAll();            // IEnumerable<Result<int>>
+
+Result<IReadOnlyList<Product>> products =
+    await command.ProductIds.CombineAllAsync(id => repository.FindAsync(id, ct), field: "productIds");
+```
+
+- Every element is processed, even after a failure, so every error is reported; the sequence is enumerated once.
+- `CombineAllAsync` runs the elements **one after another**, never concurrently, so it is safe with an EF Core `DbContext`.
+- An element can report several errors (a group); `error.Flatten()` returns the innermost errors, one per invalid input,
+  each with its full path (`lines[1].product`, `lines[1].quantity`). `ToProblemDetails()` uses it, so the HTTP response
+  lists them the same way.
+- `Error.WithFieldPrefix(prefix)` builds such paths yourself.
+
 ### Exceptions and `null`
 
 At the boundary with code that throws or returns `null`:

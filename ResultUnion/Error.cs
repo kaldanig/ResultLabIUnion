@@ -58,6 +58,33 @@ public sealed record Error
         return new Error(Code, Message, Type, field, (ReadOnlyCollection<Error>)Details);
     }
 
+    /// <summary>Returns a copy of this error whose field path, and the field paths of all its details, start with <paramref name="prefix"/>.</summary>
+    /// <remarks>
+    /// Builds paths for nested inputs: <c>quantity</c> becomes <c>lines[2].quantity</c> with the prefix <c>lines[2]</c>,
+    /// and an error without a field gets the prefix itself. Used by the collection overloads of <c>CombineAll</c>.
+    /// </remarks>
+    /// <exception cref="ArgumentException"><paramref name="prefix"/> is <see langword="null"/>, empty or white space.</exception>
+    public Error WithFieldPrefix(string prefix)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(prefix);
+
+        var details = Details.Count == 0
+            ? (ReadOnlyCollection<Error>)Details
+            : Array.AsReadOnly(Details.Select(detail => detail.WithFieldPrefix(prefix)).ToArray());
+
+        return new Error(Code, Message, Type, Field is null ? prefix : $"{prefix}.{Field}", details);
+    }
+
+    /// <summary>Returns the innermost errors, in order: this error when it has no details, otherwise the innermost errors of every detail.</summary>
+    /// <remarks>
+    /// Groups can nest, for example a collection whose elements each report several fields. Flattening gives one entry per
+    /// invalid input, each with its full field path, e.g. <c>lines[1].product</c> and <c>lines[1].quantity</c>.
+    /// </remarks>
+    public IEnumerable<Error> Flatten() =>
+        Details.Count == 0
+            ? [this]
+            : Details.SelectMany(detail => detail.Flatten());
+
     /// <summary>Creates a validation failure that groups several errors, for example one per invalid field.</summary>
     /// <param name="details">The grouped errors, in order. At least one is required.</param>
     /// <remarks>The group has the code <c>validation.failed</c> and type <see cref="ErrorType.Validation"/>, whatever the types of its details.</remarks>

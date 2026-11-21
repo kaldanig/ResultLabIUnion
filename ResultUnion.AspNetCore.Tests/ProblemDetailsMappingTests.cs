@@ -70,6 +70,24 @@ public class ProblemDetailsMappingTests
     }
 
     [Fact]
+    public void NestedDetails_AreFlattenedToTheInnermostErrors()
+    {
+        var quantity = Error.Create("line.quantity_invalid", "Quantity must be positive.", ErrorType.Validation).WithField("quantity");
+        var product = Error.Create("line.product_required", "Product is required.", ErrorType.Validation).WithField("product");
+
+        int[] quantities = [0, 5, -1];
+        var error = quantities.CombineAll(
+            q => q > 0 ? Result<int>.Success(q) : Error.Validation([product, quantity]),
+            field: "lines").Error;
+
+        var problem = Assert.IsType<HttpValidationProblemDetails>(error.ToProblemDetails());
+
+        Assert.Equal(["lines[0].product", "lines[0].quantity", "lines[2].product", "lines[2].quantity"], problem.Errors.Keys);
+        Assert.Equal(["Quantity must be positive."], problem.Errors["lines[2].quantity"]);
+        Assert.Equal(4, Assert.IsType<ProblemErrorDetail[]>(problem.Extensions["details"]).Length);
+    }
+
+    [Fact]
     public void Unexpected_HidesTheMessage()
     {
         var problem = Error.Unexpected("NullReferenceException at Foo.Bar()").ToProblemDetails();

@@ -50,6 +50,8 @@ public static class ProblemDetailsMapping
         /// An error with a <see cref="Error.Field"/> or <see cref="Error.Details"/> becomes an
         /// <see cref="HttpValidationProblemDetails"/>: <c>errors</c> holds the messages per field (<c>""</c> for errors
         /// without a field), and the <c>details</c> extension holds every <see cref="ProblemErrorDetail"/> with its code.
+        /// Nested details, such as a collection element that has several invalid fields, are flattened: only the
+        /// innermost errors are listed, each with its full field path (e.g. <c>lines[2].quantity</c>).
         /// </para>
         /// <para>
         /// For <see cref="ErrorType.Unexpected"/> the message is replaced by <see cref="UnexpectedDetail"/>: it often comes
@@ -61,7 +63,9 @@ public static class ProblemDetailsMapping
         {
             ArgumentNullException.ThrowIfNull(error);
 
-            var entries = error.Details.Count > 0 ? error.Details : (error.Field is null ? [] : [error]);
+            IReadOnlyList<Error> entries = error.Details.Count > 0
+                ? [.. error.Flatten()]
+                : (error.Field is null ? [] : [error]);
 
             var problem = entries.Count == 0
                 ? new ProblemDetails()

@@ -34,6 +34,10 @@ internal static class HttpDemo
             Password.Create("123").MapError(error => error.WithField("password")));
         await SendAsync("POST /users  (invalid form)", form.ToHttpResult());
 
+        // A collection: nested errors are flattened, each with its full field path.
+        OrderLineInput[] lines = [new("apple", 2), new("", 0), new("pear", -1)];
+        await SendAsync("POST /orders (invalid lines)", lines.CombineAll(OrderLine.Create, field: "lines").ToHttpResult());
+
         // Unexpected errors do not leak their message.
         await SendAsync("GET /reports (crash)", Result<int>.Failure(Error.Unexpected("NullReferenceException in ReportBuilder.Build()")).ToHttpResult());
     }
