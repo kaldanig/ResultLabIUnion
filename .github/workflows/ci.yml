@@ -77,7 +77,7 @@ jobs:
       - name: Pack
         shell: bash
         run: |
-          for project in ResultUnion ResultUnion.AspNetCore ResultUnion.Grpc ResultUnion.FluentValidation ResultUnion.Http; do
+          for project in ResultUnion ResultUnion.AspNetCore ResultUnion.Grpc ResultUnion.FluentValidation ResultUnion.Http ResultUnion.Testing; do
             dotnet pack "$project/$project.csproj" --configuration Release --no-build \
               --output artifacts ${{ steps.version.outputs.args }}
           done

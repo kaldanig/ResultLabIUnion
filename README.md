@@ -44,6 +44,7 @@ Why it is built this way, with the alternatives that were considered: [docs/DESI
 | `ResultUnion.Grpc` | gRPC integration: status codes, the `google.rpc` rich error model, `GetValueOrThrowRpc` for services, `ToError` for clients |
 | `ResultUnion.FluentValidation` | FluentValidation integration: a `ValidationResult` as a `Result` with one field error per failure, `ValidateToResultAsync` |
 | `ResultUnion.Http` | HTTP client integration: a response read back as a `Result`, a problem details body as an `Error` (the client side of `ResultUnion.AspNetCore`) |
+| `ResultUnion.Testing` | Test assertions for any test framework: `ShouldSucceed()`, `ShouldFail("code")`, `ShouldHaveFieldErrors(...)` |
 | `ResultUnion.Analyzers` | Roslyn analyzers shipped inside the `ResultUnion` package: a discarded `Result`, `async` code in `Result.Try`, `Map` that should be `Bind` ([docs/ANALYZERS.md](docs/ANALYZERS.md)) |
 | `ResultUnion.CodeFixes` | The code fixes for those rules (`_ =`, `TryAsync`, `Bind`), in a separate assembly because they need Roslyn's Workspaces; shipped next to the analyzers |
 | `ResultUnion.Tests` | xUnit v3 tests for `ResultUnion`; no ASP.NET Core dependency |
@@ -51,6 +52,7 @@ Why it is built this way, with the alternatives that were considered: [docs/DESI
 | `ResultUnion.Grpc.Tests` | xUnit v3 tests for `ResultUnion.Grpc`, including server-to-client round trips |
 | `ResultUnion.FluentValidation.Tests` | xUnit v3 tests for `ResultUnion.FluentValidation`, including the JSON round trip of the errors it creates |
 | `ResultUnion.Http.Tests` | xUnit v3 tests for `ResultUnion.Http`, including round trips through a real ASP.NET Core server and responses from other servers |
+| `ResultUnion.Testing.Tests` | xUnit v3 tests for `ResultUnion.Testing`, including the exact failure messages |
 | `ResultUnion.Analyzers.Tests` | Tests that compile snippets against the real library and check each rule's diagnostics |
 | `ResultUnion.Benchmarks` | BenchmarkDotNet measurements of matching, pipelines, failures against exceptions, `CombineAll` and async chains ([docs/BENCHMARKS.md](docs/BENCHMARKS.md)) |
 | `ResultUnion.Samples.Domain` | The sample domain shared by the demos: `Email`, `Password`, `User`, `OrderLine`, `Order` with their error catalogs, and a Georgian `ErrorLocalizer`. References only `ResultUnion`. |
@@ -638,6 +640,22 @@ Open the login link the container prints (`http://localhost:18888/login?t=…`),
 - **Structured logs:** the use cases' own log lines, such as `Registration rejected: user.too_young`.
 
 The dashboard is a development tool. Without the container the API runs as before; the exporter just has nowhere to send.
+
+## Testing: `ResultUnion.Testing`
+
+Assertions for tests of code that returns results, for any test framework. A success returns its value, a failure its
+error, and a failed assertion throws `ResultAssertionException` with the whole result in the message:
+
+```csharp
+using ResultUnion.Testing;
+
+var email = Email.Create("ann@example.com").ShouldSucceed();
+Email.Create("").ShouldFail("email.required").ShouldHaveType(ErrorType.Validation);
+await service.RegisterAsync(command, ct).ShouldFailAsync("user.email_taken");
+error.ShouldHaveFieldErrors(("email", "email.required"), ("password", "password.too_short"));
+```
+
+More in the [testing article](docs/articles/testing.md).
 
 ## Using ResultUnion in a DDD application
 

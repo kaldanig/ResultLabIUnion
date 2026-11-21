@@ -16,6 +16,8 @@
   <Project Path="ResultUnion.Samples.Application/ResultUnion.Samples.Application.csproj" />
   <Project Path="ResultUnion.Samples.Domain/ResultUnion.Samples.Domain.csproj" />
   <Project Path="ResultUnion.Showcase/ResultUnion.Showcase.csproj" />
+  <Project Path="ResultUnion.Testing.Tests/ResultUnion.Testing.Tests.csproj" />
+  <Project Path="ResultUnion.Testing/ResultUnion.Testing.csproj" />
   <Project Path="ResultUnion.Tests/ResultUnion.Tests.csproj" />
   <Project Path="ResultUnion.WebApi.Tests/ResultUnion.WebApi.Tests.csproj" />
   <Project Path="ResultUnion.WebApi/ResultUnion.WebApi.csproj" />

@@ -23,6 +23,7 @@ public Result<User> Register(string? email, string? age) =>
 | `ResultUnion.Grpc` | Results as gRPC statuses with the `google.rpc` rich error model, and `RpcException` back to `Error` |
 | `ResultUnion.FluentValidation` | FluentValidation results as `Result`, with one field error per failure |
 | `ResultUnion.Http` | HTTP responses read back as `Result`, problem details as `Error`: the client side of `ResultUnion.AspNetCore` |
+| `ResultUnion.Testing` | Test assertions: `ShouldSucceed()`, `ShouldFail("code")`, `ShouldHaveFieldErrors(...)` |
 
 ## Where to go next
 

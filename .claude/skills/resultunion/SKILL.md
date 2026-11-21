@@ -217,6 +217,9 @@ and never retry a BusinessRule or Unexpected error.
   `await http.GetAsync(url, ct).ReadResultAsync<Dto>(ct)` (or `ReadResultAsync()` without a value); it returns the
   server's `Error` from the problem details. Don't parse status codes or problem JSON by hand, and translate only the
   network exceptions you expect with `Result.TryAsync(..., (HttpRequestException ex) => ...)`.
+- **Tests** (`ResultUnion.Testing`, when the test project references it): `result.ShouldSucceed()` for the value,
+  `result.ShouldFail("code")` for the error, `error.ShouldHaveFieldErrors(("email", "email.required"), ...)` for
+  several; assert on codes, types, fields and arguments, never on messages.
 - **gRPC service or client** (`ResultUnion.Grpc`): read `references/grpc.md`. In short: the service method ends with
   `.GetValueOrThrowRpcAsync()`; a client wraps calls in `Result.TryAsync(call, (RpcException ex) => ex.ToError())`.
 

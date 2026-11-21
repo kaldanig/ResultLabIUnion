@@ -9,7 +9,8 @@
             "ResultUnion.AspNetCore/bin/Release/net11.0/ResultUnion.AspNetCore.dll",
             "ResultUnion.Grpc/bin/Release/net11.0/ResultUnion.Grpc.dll",
             "ResultUnion.FluentValidation/bin/Release/net11.0/ResultUnion.FluentValidation.dll",
-            "ResultUnion.Http/bin/Release/net11.0/ResultUnion.Http.dll"
+            "ResultUnion.Http/bin/Release/net11.0/ResultUnion.Http.dll",
+            "ResultUnion.Testing/bin/Release/net11.0/ResultUnion.Testing.dll"
           ]
         }
       ],

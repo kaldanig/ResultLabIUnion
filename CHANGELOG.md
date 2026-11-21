@@ -9,6 +9,13 @@ are in the diff of those files.
 
 ## [Unreleased]
 
+### ResultUnion.Testing (new package)
+
+- Test assertions that need no test framework: `ShouldSucceed()` returns the value, `ShouldFail()` /
+  `ShouldFail(code)` return the error (with `…Async` forms on tasks), and `ShouldHaveCode`, `ShouldHaveType`,
+  `ShouldHaveField`, `ShouldHaveArgument` (numbers compared by value) and `ShouldHaveFieldErrors` (every field error, in
+  any order) check it. A failed assertion throws `ResultAssertionException` with the whole result in its message.
+
 ### ResultUnion.Http (new package)
 
 - `HttpResponseMessage.ReadResultAsync<T>()` / `ReadResultAsync()` and the same on `Task<HttpResponseMessage>` (which

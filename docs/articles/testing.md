@@ -118,6 +118,53 @@ public sealed class RegisterEndpointTests(WebApplicationFactory<Program> factory
 }
 ```
 
+## Shorter with ResultUnion.Testing
+
+The `ResultUnion.Testing` package wraps these checks in assertions that return what the next line needs and, when they
+fail, print the whole result. It works with any test framework: a failed assertion throws `ResultAssertionException`.
+
+```powershell
+dotnet add package ResultUnion.Testing
+```
+
+The tests above become:
+
+```csharp
+using ResultUnion.Testing;
+
+[Fact]
+public void An_empty_email_is_required() =>
+    Email.Create("  ").ShouldFail("email.required").ShouldHaveType(ErrorType.Validation);
+
+[Fact]
+public void A_valid_email_is_normalized() =>
+    Assert.Equal("ann@example.com", Email.Create(" Ann@Example.com ").ShouldSucceed().Value);
+
+[Fact]
+public void Several_errors_are_reported_at_once() =>
+    UserService.Validate(new RegisterUser(Email: "", Password: "short", Age: "34")).ShouldFail()
+        .ShouldHaveFieldErrors(("email", "email.required"), ("password", "password.too_short"));
+
+[Fact]
+public async Task A_taken_email_is_a_conflict()
+{
+    var service = new UserService(new FakeUserRepository(existing: "ann@example.com"));
+
+    await service.RegisterAsync(new RegisterUser("ann@example.com", "secret123", "34"), CancellationToken.None)
+        .ShouldFailAsync("user.email_taken");
+}
+```
+
+A failure names what differs and shows the error in full. `Email.Create("ann").ShouldFail("email.required")` reports:
+
+```text
+Expected the error code 'email.required', but the error is email.invalid_format: 'ann' is not a valid email. (Validation, arguments value="ann").
+```
+
+`ShouldHaveArgument("minimumLength", 8)` compares numbers by value, so an argument that came back from JSON as a
+`long` or a `double` still matches. `ShouldHaveFieldErrors` compares the innermost errors as a set, in any order, and
+lists both the missing and the unexpected ones.
+
 ## Analyzers in test projects
 
 Analyzer RU0004 warns when `ResultValue` or `Error` is read without checking the result first. In tests such a read is

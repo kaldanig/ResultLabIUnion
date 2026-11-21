@@ -31,7 +31,8 @@ was checked with a small program, and the observed output is quoted.
 - **DDD:** [28 Error catalogs](#28-error-catalogs-per-domain-concept) · [29 Who sets Field](#29-whoever-knows-the-field-name-sets-it)
 - **Packages:** [36 Compatibility checked against the last release](#36-compatibility-is-checked-against-the-last-release) ·
   [37 FluentValidation failures become field errors](#37-fluentvalidation-failures-become-field-errors) ·
-  [38 HTTP clients read problems back as errors](#38-http-clients-read-problems-back-as-errors)
+  [38 HTTP clients read problems back as errors](#38-http-clients-read-problems-back-as-errors) ·
+  [39 Test assertions need no test framework](#39-test-assertions-need-no-test-framework)
 
 ---
 
@@ -574,3 +575,23 @@ caller choosing to; like `Result.TryAsync` (15), the client leaves that decision
 `HttpResponseMessage` leave it to the caller. A successful response without a usable body for `T` is a contract
 violation and throws, as other bugs do. `category` is an addition to the problem body, so existing clients are not
 affected.
+
+### 39. Test assertions need no test framework
+
+**Context.** Tests of code that returns results repeat the same lines: check the track, read the value or the error,
+compare the code. With plain `Assert.True(result.TryGetError(out var error))`, a failing test says only "expected True",
+so the reader has to debug to see which error came back.
+
+**Decision.** A small package, `ResultUnion.Testing`. `ShouldSucceed()` returns the value and `ShouldFail()` /
+`ShouldFail(code)` the error, so a test continues on the next line; `ShouldHaveCode`, `ShouldHaveType`,
+`ShouldHaveField`, `ShouldHaveArgument` and `ShouldHaveFieldErrors` check an error and return it for chaining. A failed
+assertion throws its own `ResultAssertionException` with the expectation and the whole error (code, message, field,
+type, arguments, details), which every test framework reports as a failure, so the package depends on none.
+
+**Alternatives.** Extensions for one framework (xUnit's `Assert`, FluentAssertions) would tie the package to it and
+leave the others out. Comparing argument values with `Equals` alone would fail when a number comes back from JSON as a
+`long` instead of an `int` (34), so numbers compare by value.
+
+**Consequences.** The assertions are about what clients depend on (code, type, field, arguments), not about messages;
+there is deliberately no `ShouldHaveMessage`. `ShouldHaveFieldErrors` compares the innermost errors as a set, so it
+works the same for one error and for a group.

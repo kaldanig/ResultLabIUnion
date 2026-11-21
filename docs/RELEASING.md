@@ -1,6 +1,6 @@
 # Releasing
 
-The packages (`ResultUnion`, `ResultUnion.AspNetCore`, `ResultUnion.Grpc`, `ResultUnion.FluentValidation`, `ResultUnion.Http`) are released together, with one version,
+The packages (`ResultUnion`, `ResultUnion.AspNetCore`, `ResultUnion.Grpc`, `ResultUnion.FluentValidation`, `ResultUnion.Http`, `ResultUnion.Testing`) are released together, with one version,
 by pushing a tag. [`publish.yml`](https://github.com/kaldanig/ResultLabIUnion/blob/master/.github/workflows/publish.yml) builds, tests, packs and pushes them to nuget.org
 with NuGet trusted publishing: no API key is stored anywhere.
 
