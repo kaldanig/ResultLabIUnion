@@ -1,0 +1,6 @@
+schema_version: "1.1"
+name: wrap-grpc-and-payment-sdk
+expected_outcome: |
+  Both adapters return Task of Result. The gRPC call is wrapped with Result.TryAsync and a mapper typed as RpcException
+  that calls ex.ToError(); the payment call uses a mapper typed as PaymentDeclinedException so other exceptions and
+  cancellation propagate; no hand-written catch-all.

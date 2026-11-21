@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: add-lines-and-generic-behavior
+expected_outcome: |
+  An OrderLine value object reports its own fields, the handler validates the list with the collection CombineAll so field names carry the index (lines[2].quantity), and a generic behavior constrained on IResultFactory short-circuits with TResponse.Failure. The project builds.

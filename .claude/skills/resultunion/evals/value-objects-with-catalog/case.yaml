@@ -1,0 +1,6 @@
+schema_version: "1.1"
+name: value-objects-with-catalog
+expected_outcome: |
+  Two value objects whose Create methods return Result of the type instead of throwing, with their errors declared in
+  nested Errors catalogs with stable concept.case codes, values attached as arguments, and no Field set inside the
+  single-field value objects.

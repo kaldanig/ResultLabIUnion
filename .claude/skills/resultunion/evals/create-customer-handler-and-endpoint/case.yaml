@@ -1,0 +1,7 @@
+schema_version: "1.1"
+name: create-customer-handler-and-endpoint
+expected_outcome: |
+  A command and handler that validates every field at once with CombineAll (each error named with WithField at the
+  call site), checks the duplicate phone with a catalog Conflict error, saves through an async pipeline that uses
+  Bind/Ensure/Tap with Task, and a Minimal API endpoint that maps the value to a DTO and returns a typed 201 with
+  ToHttpResultAsync and ProducesErrors.
