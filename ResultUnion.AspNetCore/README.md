@@ -27,4 +27,5 @@ TooManyRequests 429, Unavailable 503, Unexpected 500), and the problem body carr
 A problem response also tags the request's span (`resultunion.error.code`, `resultunion.error.category`), so traces
 show which error a request ended with.
 
-Documentation: https://github.com/kaldanig/ResultLabIUnion
+- Documentation: <https://kaldanig.github.io/ResultLabIUnion/>
+- Source: <https://github.com/kaldanig/ResultLabIUnion>

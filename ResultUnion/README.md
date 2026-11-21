@@ -36,4 +36,5 @@ var message = await RegisterAsync(command, ct) switch
 Requires `net11.0` (C# 15). Integrations: **ResultUnion.AspNetCore** (typed Minimal API results, problem details) and
 **ResultUnion.Grpc** (gRPC rich error model).
 
-Documentation and design notes: https://github.com/kaldanig/ResultLabIUnion
+- Documentation, design notes and API reference: <https://kaldanig.github.io/ResultLabIUnion/>
+- Source: <https://github.com/kaldanig/ResultLabIUnion>

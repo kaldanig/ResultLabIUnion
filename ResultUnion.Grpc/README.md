@@ -25,4 +25,5 @@ rate limit's delay in `RetryInfo`. Works on servers and clients; no ASP.NET Core
 
 A failure that leaves the service also tags the call's span (`resultunion.error.code`, `resultunion.error.category`).
 
-Documentation: https://github.com/kaldanig/ResultLabIUnion
+- Documentation: <https://kaldanig.github.io/ResultLabIUnion/>
+- Source: <https://github.com/kaldanig/ResultLabIUnion>
