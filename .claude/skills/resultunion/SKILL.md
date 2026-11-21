@@ -1,6 +1,6 @@
 ---
 name: resultunion
-description: How to write application code with the ResultUnion library (Result of T, Result, Error, ErrorType) — value objects with error catalogs, command handlers as Map/Bind/Ensure pipelines, async chains, CombineAll validation, Minimal API endpoints with ToHttpResult/ProducesErrors, gRPC services with GetValueOrThrowRpcAsync, and turning exceptions or nulls into results. Use this skill whenever you write, change or review C# code in a project that references ResultUnion, ResultUnion.AspNetCore or ResultUnion.Grpc, or whenever the user asks for a handler, endpoint, value object, validation or error handling "with Result", "returning a Result", "Result pattern" or "ResultUnion" — even if they don't name the library and only mention Error, ErrorType or a Result type.
+description: 'ResultUnion conventions for C#/.NET. Load this skill BEFORE writing or reviewing any C# that touches ResultUnion, ResultUnion.AspNetCore or ResultUnion.Grpc. The library''s API and naming differ from FluentResults/ErrorOr, so code written from memory is usually wrong. Use it for any task in such a project, even a small one where the library is mentioned only in passing: domain value objects and their error codes, use-case/command handlers, MediatR-style behaviors over Result / Result of T, Minimal API endpoints (status codes, OpenAPI error responses), gRPC service methods and status codes, adapters that turn third-party SDK or HTTP exceptions into failures (retryable vs. user-facing vs. bug), validation, and reviews of code that reads IsSuccess / ResultValue / Error. Also use it when the user says "Result pattern", "return a Result" or uses Error/ErrorType in C#. Skip it for other languages, comparisons of Result libraries, and .NET work that has nothing to do with results or errors.'
 ---
 
 # Writing code with ResultUnion
@@ -74,7 +74,11 @@ attribute, so keep it stable and low-cardinality, never an id. HTTP and gRPC hos
 add `Activity` code for that.
 
 **Let generic behaviors use `IResultFactory<TSelf>`.** A pipeline behavior that wraps handlers returning any result type
-constrains `where TResponse : IResultFactory<TResponse>` and short-circuits with `TResponse.Failure(error)`.
+constrains `where TResponse : IResultFactory<TResponse>` and short-circuits with `TResponse.Failure(error)`; the
+interface extends `IResultState`, so the same constraint lets it read `IsSuccess` and `Error`. A behavior only works if
+the call goes through it: wire it where the handler is called (the endpoint, a DI decorator) rather than only
+registering it, and if a host has nothing to plug in yet (no authentication for an authorization behavior), say so
+instead of leaving it out silently.
 
 ## Template: value object with an error catalog
 

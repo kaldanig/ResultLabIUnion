@@ -664,6 +664,25 @@ The `ResultUnion` package includes Roslyn analyzers, so mistakes show up as comp
 
 Details, examples and how to change a rule's severity: [docs/ANALYZERS.md](docs/ANALYZERS.md).
 
+## AI coding assistants: the ResultUnion skill
+
+`.claude/skills/resultunion` is a [Claude skill](https://docs.claude.com/en/docs/claude-code/skills) that teaches an
+assistant the library's conventions: error catalogs, who sets `Field`, `Bind` pipelines on `Task`, typed `TryAsync`,
+adapters over external APIs, endpoints with `ProducesErrors`. To use it in your own project:
+
+1. Copy `.claude/skills/resultunion/SKILL.md` and `.claude/skills/resultunion/references/` into your repository's
+   `.claude/skills/resultunion/` (the `evals/` folder is only for testing the skill).
+2. Add a line to your repository's `CLAUDE.md`:
+
+   ```markdown
+   Before writing or reviewing C# that uses ResultUnion, read `.claude/skills/resultunion/SKILL.md`.
+   ```
+
+The second step matters. In tests, assistants with the skill followed every convention checked (6 of 6 runs), while
+without it 5 of 6 runs broke one or two, but an assistant rarely loads a skill on its own for code it thinks it can
+write: with only the skill's description, it loaded in at most 17% of the requests that needed it. `CLAUDE.md` is read
+in every session, so the pointer there makes it reliable.
+
 ## Performance
 
 Measured with BenchmarkDotNet on .NET 11 ([docs/BENCHMARKS.md](docs/BENCHMARKS.md)):
