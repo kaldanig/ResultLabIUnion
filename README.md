@@ -317,6 +317,106 @@ A failure becomes an RFC 9457 `application/problem+json` response:
 
 `Error.ToProblemDetails()` gives the `ProblemDetails` object itself, for controllers or exception handlers.
 
+## Using ResultUnion in a DDD application
+
+### Result or exception?
+
+| Situation | Use | Why |
+|---|---|---|
+| Invalid input: a malformed email, a negative quantity | `Result` | Expected; the caller should show it to the user |
+| A business rule says no: too young, already shipped, insufficient funds | `Result` | Part of the domain; it belongs in the signature |
+| Not found, conflict, concurrency | `Result` | Expected outcomes the API maps to 404 / 409 |
+| A programming error: a `null` argument, a state that cannot happen | exception | A bug; fail fast, do not hide it in a result |
+| Infrastructure failure: the database or a service is down | exception, or `Result` at the boundary | Translate it only where you can say something useful (`Error.Unavailable`, `Error.Concurrency`) |
+| Cancellation | exception | Not a failure of the operation; `Try` / `TryAsync` never catch it |
+
+A rule of thumb: if the user can fix it or should be told about it, return a `Result`; if a developer has to fix it,
+throw.
+
+### Per layer
+
+- **Domain.** Value object factories and entity methods return `Result` / `Result<T>`. Each concept has its own error
+  catalog. Guard clauses for programming errors (`ArgumentNullException.ThrowIfNull`) stay exceptions. No HTTP, no
+  ASP.NET Core: the domain references only `ResultUnion`.
+- **Application.** Command handlers compose the domain: `CombineAll` for the value objects of a command,
+  `Bind` / `Ensure` for the rules, `MapError` to translate infrastructure errors into domain ones. Cross-cutting
+  behaviors (validation, authorisation, transactions) use `IResultFactory<TSelf>`.
+- **Infrastructure.** Repositories return `T?` (turned into results with `FromNullable` / `ToResultAsync`) or `Result`.
+  Exceptions that mean something to the domain are caught and translated here.
+- **API.** `ToHttpResult` / `ToHttpResultAsync` from `ResultUnion.AspNetCore`, nothing else.
+
+### Error catalog convention
+
+```csharp
+public sealed record Email
+{
+    public static class Errors
+    {
+        public static readonly Error Required =
+            Error.Create("email.required", "Email is required.", ErrorType.Validation);
+
+        public static Error InvalidFormat(string value) =>
+            Error.Create("email.invalid_format", $"'{value}' is not a valid email.", ErrorType.Validation)
+                .WithArgument("value", value);
+    }
+
+    public static Result<Email> Create(string? input) => /* … */;
+}
+```
+
+- **One nested `Errors` class per concept**, next to the code that raises the errors: `Email.Errors.Required`.
+- **Codes are `<concept>.<case>`** in snake_case, e.g. `user.too_young`, `order_line.quantity_not_positive`. They are
+  a contract with clients: never change a published code, add a new one instead. Messages may change freely.
+- **`static readonly` for fixed errors, a method for errors that carry values**, with those values as arguments
+  (`WithArgument`), so clients can translate by code.
+- **Whoever knows the field name sets it.** A value object that is itself one field (`Email`) does not set `Field`;
+  the caller does, with `WithField("email")`. A value object with several fields (`OrderLine`) names its own
+  (`product`, `quantity`), and collections add the index (`lines[1].quantity`).
+- **Generic factories for generic errors.** Infrastructure-level errors (`Error.NotFound` from a repository) stay
+  generic and are translated by the application layer, e.g. into `User.Errors.NotFound(email)`.
+
+### A command, end to end
+
+```csharp
+// Domain
+public sealed class User
+{
+    public static Result<User> Create(Email email, Password password) => /* invariants, returns User or an error */;
+}
+
+// Infrastructure: catch only what means something to the domain.
+public async Task<Result> SaveChangesAsync(CancellationToken ct)
+{
+    try
+    {
+        await db.SaveChangesAsync(ct);
+        return Result.Success();
+    }
+    catch (DbUpdateConcurrencyException)
+    {
+        return Error.Concurrency("The data was changed by someone else; reload and retry.");
+    }
+}
+
+// Application
+public Task<Result<Guid>> Handle(RegisterUser command, CancellationToken ct) =>
+    Result.CombineAll(
+            Email.Create(command.Email).MapError(e => e.WithField("email")),
+            Password.Create(command.Password).MapError(e => e.WithField("password")))
+        .Bind(User.Create)                                                   // Result<User>
+        .EnsureAsync(user => users.EnsureEmailIsFreeAsync(user.Email, ct))   // Task<Result<User>>
+        .TapAsync(user => users.AddAsync(user, ct))
+        .EnsureAsync(_ => unitOfWork.SaveChangesAsync(ct))                   // keeps the user on success
+        .MapAsync(user => user.Id);
+
+// API
+app.MapPost("/users", (RegisterUser command, RegisterUserHandler handler, CancellationToken ct) =>
+    handler.Handle(command, ct).ToHttpResultAsync(id => TypedResults.Created($"/users/{id}", new { id })));
+```
+
+`Result.TryAsync` catches every exception except cancellation, so it fits code where every failure means the same
+thing (a remote call, a parser). To translate one specific exception, as above, write the `try`/`catch` yourself.
+
 ## Things to know
 
 - **Do not pass `async` lambdas to `Result.Try`.** They compile, but exceptions after the first `await` are not
