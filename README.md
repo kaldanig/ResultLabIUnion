@@ -740,6 +740,12 @@ This guide, the pages in `docs/` and an API reference for the three packages are
 Changes per version are in [CHANGELOG.md](CHANGELOG.md); how a version is published is in
 [docs/RELEASING.md](docs/RELEASING.md).
 
+## Security
+
+Report a vulnerability privately through GitHub (**Security → Report a vulnerability**); what is in scope and how it is
+handled is in [SECURITY.md](https://github.com/kaldanig/ResultLabIUnion/blob/master/SECURITY.md). The code is scanned by
+CodeQL on every push and pull request, and Dependabot reports vulnerable dependencies.
+
 ## License
 
 MIT, see [LICENSE](https://github.com/kaldanig/ResultLabIUnion/blob/master/LICENSE).

@@ -60,6 +60,10 @@ release the next version. Never delete and recreate a tag that has been publishe
   versions, with related packages grouped (Roslyn, ASP.NET Core, gRPC, OpenTelemetry, testing, actions). CI and Docs
   run on each one. Merge a green PR as it is; a dependency of a package (`Grpc.StatusProto`) changes what consumers
   get, so note it in the changelog.
+- Security: CodeQL (`codeql.yml`) scans the C# code and the workflows on every push, pull request and weekly;
+  findings are under **Security → Code scanning**. Dependabot alerts and security updates, secret scanning with push
+  protection, and private vulnerability reporting are enabled in the repository settings. A reported vulnerability is
+  fixed in a new version of all three packages and announced as a GitHub security advisory (`SECURITY.md`).
 
 ## Documentation site
 

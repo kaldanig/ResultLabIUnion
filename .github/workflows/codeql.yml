@@ -1,0 +1,59 @@
+name: CodeQL
+
+# Static security analysis of the C# code and of the workflows themselves, on every push to master, every pull request
+# and once a week (new queries find issues in unchanged code). Findings appear under Security → Code scanning.
+# C# is built manually with the .NET 11 SDK, so CodeQL sees exactly what the compiler compiles (unions, extension
+# blocks, Runtime Async); the demos and tests are analysed too, since they show how the library is meant to be used.
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+  schedule:
+    - cron: '23 4 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+jobs:
+  analyze:
+    name: Analyze (${{ matrix.language }})
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      contents: read
+      actions: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - language: csharp
+            build-mode: manual
+          - language: actions
+            build-mode: none
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        if: matrix.language == 'csharp'
+        with:
+          dotnet-version: '11.0.x'
+
+      - uses: github/codeql-action/init@v4
+        with:
+          languages: ${{ matrix.language }}
+          build-mode: ${{ matrix.build-mode }}
+          queries: security-extended
+
+      - name: Build
+        if: matrix.build-mode == 'manual'
+        run: dotnet build ResultLabIUnion.slnx --configuration Release
+
+      - uses: github/codeql-action/analyze@v4
+        with:
+          category: /language:${{ matrix.language }}
