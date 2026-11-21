@@ -46,6 +46,7 @@ Why it is built this way, with the alternatives that were considered: [docs/DESI
 | `ResultUnion.Samples.Application` | The sample application layer shared by the Web API and the gRPC service: commands, use cases, in-memory storage. No HTTP, no gRPC. |
 | `ResultUnion.Showcase` | A console app that demonstrates the API section by section |
 | `ResultUnion.WebApi` | A Minimal API demo with a browser UI, OpenAPI and a Scalar reference: real requests, real problem responses, and OpenTelemetry for the Aspire Dashboard |
+| `ResultUnion.WebApi.Tests` | Integration tests for the Web API: the real app in memory (`WebApplicationFactory`), real HTTP requests, the problem JSON a client receives, the Georgian translation and the OpenAPI document |
 | `ResultUnion.GrpcService` | The same use cases as a gRPC service (`Protos/demo.proto`), failures as rich gRPC statuses |
 | `ResultUnion.GrpcClient` | A console client for the gRPC service that turns every `RpcException` back into an `Error` |
 
