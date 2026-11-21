@@ -461,6 +461,40 @@ From a ResultUnion service, the type, code, message, arguments and field violati
 as strings, and the arguments of individual field violations are not transmitted. From any other server, the error
 code is `grpc.<status>` (e.g. `grpc.deadline_exceeded`) with the type mapped from the status code.
 
+## JSON: errors in messages between services
+
+`Error` serializes with System.Text.Json out of the box (it carries `[JsonConverter]`), so an error can travel in an
+event or a queue message where HTTP problem details and gRPC statuses do not apply:
+
+```csharp
+public sealed record RegistrationRejected(string Email, Error Reason);
+
+var json = JsonSerializer.Serialize(new RegistrationRejected(email, error));
+var received = JsonSerializer.Deserialize<RegistrationRejected>(json)!;    // received.Reason == error
+```
+
+```json
+{
+  "code": "user.too_young",
+  "message": "Users must be at least 18; bob@example.com is 15.",
+  "type": "BusinessRule",
+  "field": "age",
+  "arguments": { "minimumAge": 18, "age": 15 }
+}
+```
+
+- The property names are fixed: they are a contract between services, so a naming policy does not change them.
+- `type` is the `ErrorType` name (a number is accepted when reading); `field`, `arguments` and `details` are left out
+  when empty, and details nest. Unknown properties are skipped, so a newer sender can add some.
+- Arguments come back as JSON values: whole numbers as `int` (or `long`), other numbers as `decimal`, strings,
+  booleans, `null`, and `JsonElement` for objects and arrays. A `Guid`, a date or an enum argument comes back as its
+  string, so keep arguments to numbers and strings when the error must compare equal after the round trip.
+- Malformed input (no code, message or type, an unknown type, wrong value kinds) throws `JsonException`.
+- An `Unexpected` error keeps its message: this format is for trusted services. Clients get problem details or a gRPC
+  status, which hide it.
+
+Results themselves are still not serialized (see "Things to know"): send the value, or the error.
+
 ## Using ResultUnion in a DDD application
 
 ### Result or exception?
@@ -588,7 +622,8 @@ the result (`EnsureAsync`, `TapAsync`, `TapErrorAsync`) reuse their source task.
   observed. Use `Result.TryAsync`.
 - **Do not serialize results directly.** `System.Text.Json` writes only the case of a `Result<T>` (the value, or the
   error object), and throws for a successful `Result` because its `Error` getter throws. Map results to a DTO or a
-  ProblemDetails response at the API boundary.
+  ProblemDetails response at the API boundary; in a message, send the value or the `Error`, which has its own JSON
+  format.
 - **`Result<Error>` is not supported.** Both cases would have the type `Error`, so conversions are ambiguous (CS0457).
 - **Union members are hidden from IntelliSense.** `Value`, `HasValue` and the two `TryGetValue` overloads exist for
   the compiler's pattern matching. Use `TryGetResultValue` and `TryGetError`; `TryGetValue(out var x)` does not compile

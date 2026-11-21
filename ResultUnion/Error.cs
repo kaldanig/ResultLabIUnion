@@ -1,5 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Text.Json.Serialization;
+using ResultUnion.Serialization;
 
 namespace ResultUnion;
 
@@ -20,8 +22,13 @@ namespace ResultUnion;
 /// have the same names and equal values, and their details are equal element by element, in order.
 /// </para>
 /// <para>Every factory throws <see cref="ArgumentException"/> when the code or message is <see langword="null"/>, empty or white space.</para>
+/// <para>
+/// System.Text.Json serializes an error with <see cref="Serialization.ErrorJsonConverter"/>, for messages and events
+/// between services: <c>{ "code", "message", "type", "field", "arguments", "details" }</c>.
+/// </para>
 /// </remarks>
 [DebuggerDisplay("{ToString(),nq}")]
+[JsonConverter(typeof(ErrorJsonConverter))]
 public sealed record Error
 {
     /// <summary>Gets the stable, machine-readable error code.</summary>
@@ -68,6 +75,22 @@ public sealed record Error
         Details = details ?? [];
         Arguments = arguments ?? ReadOnlyDictionary<string, object?>.Empty;
     }
+
+    /// <summary>Rebuilds an error exactly as it was, for deserialization: any code, with its details and arguments.</summary>
+    internal static Error Restore(
+        string code,
+        string message,
+        ErrorType type,
+        string? field,
+        IReadOnlyList<Error>? details,
+        IReadOnlyDictionary<string, object?>? arguments) =>
+        new(
+            code,
+            message,
+            type,
+            field,
+            details is { Count: > 0 } ? Array.AsReadOnly([.. details]) : null,
+            arguments is { Count: > 0 } ? new ReadOnlyDictionary<string, object?>(new Dictionary<string, object?>(arguments, StringComparer.Ordinal)) : null);
 
     private ReadOnlyCollection<Error> DetailsCollection => (ReadOnlyCollection<Error>)Details;
 

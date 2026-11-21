@@ -65,6 +65,8 @@ after the first `await` escape): use `TryAsync`. For no value, give `TryAsync` a
 
 **Never serialize a `Result`.** Map it at the boundary: `ToHttpResult` for HTTP, `GetValueOrThrowRpcAsync` for gRPC,
 or a DTO. `Result` and `Result<T>` are not JSON contracts.
+An `Error` is: it serializes with System.Text.Json as-is, so put the `Error` itself in an event or queue
+message (`record OrderRejected(Guid OrderId, Error Reason)`) instead of copying its code and message into strings.
 
 **Let generic behaviors use `IResultFactory<TSelf>`.** A pipeline behavior that wraps handlers returning any result type
 constrains `where TResponse : IResultFactory<TResponse>` and short-circuits with `TResponse.Failure(error)`.

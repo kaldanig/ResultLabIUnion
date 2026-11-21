@@ -25,7 +25,8 @@ was checked with a small program, and the observed output is quoted.
   [23 Closed enum](#23-errortype-is-a-closed-enum) · [24 Concurrency is transient](#24-concurrency-is-transient)
 - **Boundaries:** [25 Separate ASP.NET Core project](#25-aspnet-core-integration-is-a-separate-project) ·
   [26 Unexpected stays private](#26-unexpected-errors-never-reach-the-client) · [27 No JSON for results](#27-results-are-not-serialized-directly) ·
-  [30 Typed HTTP responses](#30-http-responses-are-typed) · [31 gRPC rich errors](#31-grpc-errors-use-the-rich-error-model)
+  [30 Typed HTTP responses](#30-http-responses-are-typed) · [31 gRPC rich errors](#31-grpc-errors-use-the-rich-error-model) ·
+  [34 Error JSON](#34-errors-have-a-fixed-json-format)
 - **DDD:** [28 Error catalogs](#28-error-catalogs-per-domain-concept) · [29 Who sets Field](#29-whoever-knows-the-field-name-sets-it)
 
 ---
@@ -384,6 +385,7 @@ object, and a successful `Result` throws `InvalidOperationException` because its
 **Decision.** No JSON converter. Results are mapped at the API boundary, to a DTO or to problem details.
 
 **Consequences.** The README warns against returning results from controllers or storing them as JSON.
+An `Error` on its own does have a JSON format ([34](#34-errors-have-a-fixed-json-format)).
 
 ### 30. HTTP responses are typed
 
@@ -428,6 +430,32 @@ per-item errors in a stream, where a status would end the stream.
 **Consequences.** `ErrorInfo.metadata` is a string map, so argument values arrive as strings. `FieldViolation` has no
 metadata, so the arguments of individual field violations are not transmitted. A status from a non-ResultUnion server
 still becomes an `Error`, with the code `grpc.<status>`.
+
+### 34. Errors have a fixed JSON format
+
+**Context.** Between services that talk through events or queues there is no HTTP status or gRPC status to carry an
+error: the error is part of the message, and the receiver should get back the same code, type, field, arguments and
+details.
+
+**Decision.** `Error` carries `[JsonConverter(typeof(ErrorJsonConverter))]`, in the core library (System.Text.Json is
+part of .NET, so no dependency is added). The format is `{ code, message, type, field, arguments, details }` with fixed
+names, `type` as the enum name, empty parts left out, and unknown properties skipped. Arguments are read back as JSON
+values (`int`, `long`, `decimal`, `string`, `bool`, `null`, otherwise `JsonElement`). The converter rebuilds the error
+exactly, through an internal factory, so a group keeps its own code.
+
+**Alternatives.** Default serialization of the record would need a public constructor, would turn `Arguments` into
+`JsonElement`s anyway, and would follow the caller's naming policy, so two services could disagree on the names. A
+converter for `Result<T>` was left out for the same reasons as [27](#27-results-are-not-serialized-directly).
+
+A separate `ResultUnion.Json` package, like `ResultUnion.AspNetCore`, was considered and rejected. ASP.NET Core is
+separate because it is a large framework dependency; System.Text.Json is part of .NET, so the core library gains no
+dependency. A separate package could not put `[JsonConverter]` on `Error`, so every service would have to register the
+converter, and one that forgot would silently write a different format and fail to read the others'. It would also
+need `InternalsVisibleTo` (and an exact version match) or a public factory to rebuild errors exactly.
+
+**Consequences.** `Unexpected` messages are written as they are: unlike problem details and gRPC statuses, the format is
+for trusted services. An argument of a type JSON does not have (a `Guid`, a date, an enum) comes back as a string, so
+such an error is not equal to the original after a round trip.
 
 ## DDD
 

@@ -15,5 +15,6 @@ await Demo.SectionAsync("6. Async pipelines: MapAsync, BindAsync, EnsureAsync, T
 await Demo.SectionAsync("7. From exceptions to results: Result.Try, Result.TryAsync", TryDemo.RunAsync);
 await Demo.SectionAsync("8. HTTP responses with ResultUnion.AspNetCore: ToHttpResult, ProblemDetails", HttpDemo.RunAsync);
 Demo.Section("9. Error arguments: translate by code, not by parsing the message", LocalizationDemo.Run);
+Demo.Section("10. Errors in messages between services: System.Text.Json", SerializationDemo.Run);
 
 Console.WriteLine();
