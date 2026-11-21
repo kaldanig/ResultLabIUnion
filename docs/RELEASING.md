@@ -39,8 +39,8 @@ with NuGet trusted publishing: no API key is stored anywhere.
 6. **Baseline.** After the packages are on nuget.org, set `<PackageValidationBaselineVersion>` in
    `Directory.Build.targets` to the version just released (for example `0.2.0`), delete any
    `CompatibilitySuppressions.xml`, and commit. From then on `dotnet pack` compares every change with that version.
-   A package released for the first time (`<IsNewPackage>true</IsNewPackage>` in its project, such as
-   `ResultUnion.FluentValidation`) had no baseline until now: remove that property in the same commit.
+   A package released for the first time (`<IsNewPackage>true</IsNewPackage>` in its project, as
+   `ResultUnion.FluentValidation` had until 0.2.0) had no baseline until now: remove that property in the same commit.
 
 Before the first release of a new package, check the trusted publishing policy on nuget.org: its scope must allow
 pushing *new* packages (not only new versions), with a glob pattern that matches the new ID (`*` or `ResultUnion*`).
