@@ -84,9 +84,18 @@ Factories set a stable code and a category:
 | `Error.Conflict` | `conflict` | `Conflict` | 409 |
 | `Error.Concurrency` | `concurrency.conflict` | `Concurrency` | 409 / 412 |
 | `Error.BusinessRule` | `business_rule.violated` | `BusinessRule` | 422 |
+| `Error.TooManyRequests` | `rate_limit.exceeded` | `TooManyRequests` | 429 |
 | `Error.Unexpected` | `unexpected` | `Unexpected` | 500 |
 | `Error.Unavailable` | `dependency.unavailable` | `Unavailable` | 503 |
 | `Error.Create(code, message, type)` | your own | any | |
+
+A category says what the caller should *do* (fix the input, sign in, wait and retry, reload); the specific reason is
+the `Code`. `IsTransient` tells whether running the operation again may succeed: true for `Unavailable`,
+`TooManyRequests` and `Concurrency` (retry the whole operation, so it reads fresh data first).
+
+```csharp
+if (result.TryGetError(out var error) && error.IsTransient) { /* retry with backoff */ }
+```
 
 Name the input an error is about with `WithField`, and group several errors with `Error.Validation(details)`:
 
@@ -296,7 +305,8 @@ app.MapDelete("/users/{email}", (string email, AsyncRegistrationService service,
 A failure becomes an RFC 9457 `application/problem+json` response:
 
 - the status comes from `ErrorType`: Validation 400, Unauthorized 401, Forbidden 403, NotFound 404,
-  Conflict and Concurrency 409, BusinessRule 422, Unavailable 503, Unexpected 500 (`ErrorType.ToStatusCode()`);
+  Conflict and Concurrency 409, BusinessRule 422, TooManyRequests 429, Unavailable 503, Unexpected 500
+  (`ErrorType.ToStatusCode()`);
 - `detail` is the message, and the stable error `code` is an extension, so clients can switch on it;
 - `Arguments` become the `arguments` extension, and each entry of `details` carries its own (omitted when empty);
 - an error with a `Field` or `Details` becomes a validation problem: `errors` lists the messages per field, and

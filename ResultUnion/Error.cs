@@ -204,6 +204,11 @@ public sealed record Error
     public static Error BusinessRule(string message) =>
         new("business_rule.violated", message, ErrorType.BusinessRule);
 
+    /// <summary>Creates a rate-limit failure: too many requests or a quota is used up. Callers may retry later.</summary>
+    /// <remarks>Add the wait as an argument when it is known, e.g. <c>.WithArgument("retryAfterSeconds", 30)</c>.</remarks>
+    public static Error TooManyRequests(string message) =>
+        new("rate_limit.exceeded", message, ErrorType.TooManyRequests);
+
     /// <summary>Creates an error with an application-specific code.</summary>
     /// <remarks>For example, <c>Create("deposit.already_closed", "Deposit is closed.", ErrorType.Conflict)</c>.</remarks>
     /// <exception cref="ArgumentException"><paramref name="code"/> or <paramref name="message"/> is <see langword="null"/>, empty or white space.</exception>
@@ -229,6 +234,10 @@ public sealed record Error
 }
 
 /// <summary>The category of an <see cref="Error"/>, used to decide how a failure is handled, for example which HTTP status to return or whether to retry.</summary>
+/// <remarks>
+/// A category describes what the caller should <em>do</em> (fix the input, sign in, retry later, reload); the specific
+/// reason is the <see cref="Error.Code"/>. <see cref="ErrorTypeExtensions.IsTransient(ErrorType)"/> tells whether a retry may succeed.
+/// </remarks>
 public enum ErrorType
 {
     /// <summary>An unexpected or uncategorized failure, typically a defect (HTTP 500).</summary>
@@ -256,5 +265,8 @@ public enum ErrorType
     Concurrency = 7,
 
     /// <summary>A required dependency is unavailable or timed out (HTTP 503). Transient and retryable.</summary>
-    Unavailable = 8
+    Unavailable = 8,
+
+    /// <summary>Too many requests, or a quota is used up (HTTP 429). Transient: retryable after waiting.</summary>
+    TooManyRequests = 9
 }

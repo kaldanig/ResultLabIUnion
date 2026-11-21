@@ -1,3 +1,4 @@
+using ResultUnion.AspNetCore;
 using ResultUnion.Showcase.Domain;
 
 namespace ResultUnion.Showcase.Demos;
@@ -35,10 +36,10 @@ internal static class PatternMatchingDemo
         Demo.Show("missing is int", missing is int);
         Demo.Show("missing is Error { Type: NotFound }", missing is Error { Type: ErrorType.NotFound });
 
-        // A common use: mapping an error category to an HTTP status code.
+        // Each category tells the caller what to do: the HTTP status (ResultUnion.AspNetCore), and whether a retry may succeed.
         foreach (var type in Enum.GetValues<ErrorType>())
         {
-            Demo.Show($"ToStatusCode({type})", ToStatusCode(Error.Create("demo", "Demo.", type)));
+            Demo.Show($"{type}", $"HTTP {type.ToStatusCode()}{(type.IsTransient() ? ", transient: retry may succeed" : "")}");
         }
     }
 
@@ -49,17 +50,5 @@ internal static class PatternMatchingDemo
         User user => $"user {user.Email}, age {user.Age}",
         Error { Type: ErrorType.NotFound } error => $"error: not found ({error.Message})",
         Error error => $"error: {error.Code}",
-    };
-
-    private static int ToStatusCode(Error error) => error.Type switch
-    {
-        ErrorType.Validation => 400,
-        ErrorType.Unauthorized => 401,
-        ErrorType.Forbidden => 403,
-        ErrorType.NotFound => 404,
-        ErrorType.Conflict or ErrorType.Concurrency => 409,
-        ErrorType.BusinessRule => 422,
-        ErrorType.Unavailable => 503,
-        _ => 500,
     };
 }

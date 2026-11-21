@@ -13,6 +13,7 @@ public class ErrorTests
         { Error.Concurrency, "concurrency.conflict", ErrorType.Concurrency },
         { Error.Unavailable, "dependency.unavailable", ErrorType.Unavailable },
         { Error.BusinessRule, "business_rule.violated", ErrorType.BusinessRule },
+        { Error.TooManyRequests, "rate_limit.exceeded", ErrorType.TooManyRequests },
     };
 
     [Theory]

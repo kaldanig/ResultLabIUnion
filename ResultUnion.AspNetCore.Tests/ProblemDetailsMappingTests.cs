@@ -14,6 +14,7 @@ public class ProblemDetailsMappingTests
     [InlineData(ErrorType.Conflict, 409)]
     [InlineData(ErrorType.Concurrency, 409)]
     [InlineData(ErrorType.BusinessRule, 422)]
+    [InlineData(ErrorType.TooManyRequests, 429)]
     [InlineData(ErrorType.Unavailable, 503)]
     [InlineData(ErrorType.Unexpected, 500)]
     [InlineData((ErrorType)99, 500)]

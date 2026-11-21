@@ -48,7 +48,7 @@ public static class ProblemDetailsMapping
         /// <summary>Gets the HTTP status code for the category.</summary>
         /// <remarks>
         /// Validation 400, Unauthorized 401, Forbidden 403, NotFound 404, Conflict and Concurrency 409, BusinessRule 422,
-        /// Unavailable 503, Unexpected (and any unknown value) 500.
+        /// TooManyRequests 429, Unavailable 503, Unexpected (and any unknown value) 500.
         /// </remarks>
         public int ToStatusCode() => type switch
         {
@@ -58,6 +58,7 @@ public static class ProblemDetailsMapping
             ErrorType.NotFound => StatusCodes.Status404NotFound,
             ErrorType.Conflict or ErrorType.Concurrency => StatusCodes.Status409Conflict,
             ErrorType.BusinessRule => StatusCodes.Status422UnprocessableEntity,
+            ErrorType.TooManyRequests => StatusCodes.Status429TooManyRequests,
             ErrorType.Unavailable => StatusCodes.Status503ServiceUnavailable,
             _ => StatusCodes.Status500InternalServerError,
         };
