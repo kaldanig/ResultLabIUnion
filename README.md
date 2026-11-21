@@ -290,19 +290,34 @@ A separate project, so the core library and your domain stay free of ASP.NET Cor
 using ResultUnion.AspNetCore;
 
 app.MapPost("/users", (RegisterUser command, RegistrationService service) =>
-    service.Register(command.Email, command.Age)
-        .ToHttpResult(user => TypedResults.Created($"/users/{user.Id}", user)));
+        service.Register(command.Email, command.Age)
+            .ToHttpResult(user => TypedResults.Created($"/users/{user.Id}", user)))
+    .ProducesErrors(ErrorType.Validation, ErrorType.Conflict, ErrorType.BusinessRule);
 
 app.MapDelete("/users/{email}", (string email, AsyncRegistrationService service, CancellationToken ct) =>
-    service.DeactivateAsync(email, ct).ToHttpResultAsync());    // 204 No Content, or a problem
+        service.DeactivateAsync(email, ct).ToHttpResultAsync())    // 204 No Content, or a problem
+    .ProducesErrors(ErrorType.NotFound, ErrorType.Conflict);
 ```
 
-| Call | Success | Failure |
-|---|---|---|
-| `Result<T>.ToHttpResult()` | `200 OK` with the value | problem response |
-| `Result<T>.ToHttpResult(value => …)` | the response you build | problem response |
-| `Result.ToHttpResult()` | `204 No Content` | problem response |
-| `Task<Result…>.ToHttpResultAsync(…)` | same, after `await` | same |
+| Call | Returns | Success | Failure |
+|---|---|---|---|
+| `Result<T>.ToHttpResult()` | `Results<Ok<T>, ProblemHttpResult>` | `200 OK` with the value | problem |
+| `Result<T>.ToHttpResult(v => TypedResults.Created(…))` | `Results<Created<T>, ProblemHttpResult>` | the response you build | problem |
+| `Result.ToHttpResult()` | `Results<NoContent, ProblemHttpResult>` | `204 No Content` | problem |
+| `Error.ToHttpResult()` | `ProblemHttpResult` | | problem |
+| `Task<Result…>.ToHttpResultAsync(…)` | `Task<…>` of the same | same, after `await` | same |
+
+**OpenAPI.** The responses are typed, so OpenAPI / Swagger documents the success response of each endpoint by itself.
+A problem's status is only known at run time, so declare the categories an endpoint can fail with:
+`.ProducesErrors(ErrorType.Validation, ErrorType.NotFound)` documents 400 (as a validation problem) and 404, using the
+same mapping as the responses. It works on endpoints and on route groups. When the success can be one of several
+responses (for example `Ok` or `Redirect`), return `IResult` from the lambda; that overload is untyped, so add
+`.Produces<T>()` yourself.
+
+```text
+POST /users             201 UserResponse, 400 HttpValidationProblemDetails, 409 ProblemDetails, 422 ProblemDetails
+DELETE /users/{email}   204, 404 ProblemDetails, 409 ProblemDetails
+```
 
 A failure becomes an RFC 9457 `application/problem+json` response:
 

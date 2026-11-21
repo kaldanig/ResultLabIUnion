@@ -1,6 +1,9 @@
 using System.Text.Encodings.Web;
 using System.Text.Json;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Metadata;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using ResultUnion.AspNetCore;
 using ResultUnion.Showcase.Domain;
@@ -40,7 +43,36 @@ internal static class HttpDemo
 
         // Unexpected errors do not leak their message.
         await SendAsync("GET /reports (crash)", Result<int>.Failure(Error.Unexpected("NullReferenceException in ReportBuilder.Build()")).ToHttpResult());
+
+        ShowOpenApiMetadata();
     }
+
+    // What OpenAPI / Swagger sees: typed responses document the success, ProducesErrors documents the problems.
+    private static void ShowOpenApiMetadata()
+    {
+        var app = WebApplication.CreateSlimBuilder().Build();
+        var service = new RegistrationService(new UserRepository());
+
+        app.MapPost("/users", (string email, string age) => service.Register(email, age)
+                .Map(user => new UserResponse(user.Id, user.Email.Value))
+                .ToHttpResult(user => TypedResults.Created($"/users/{user.Id}", user)))
+            .ProducesErrors(ErrorType.Validation, ErrorType.Conflict, ErrorType.BusinessRule);
+
+        app.MapDelete("/users/{email}", (string email) => service.Deactivate(email).ToHttpResult())
+            .ProducesErrors(ErrorType.NotFound, ErrorType.Conflict);
+
+        Console.WriteLine();
+        Console.WriteLine("  OpenAPI metadata (what Swagger documents):");
+        foreach (var endpoint in ((IEndpointRouteBuilder)app).DataSources.SelectMany(source => source.Endpoints))
+        {
+            var responses = endpoint.Metadata.GetOrderedMetadata<IProducesResponseTypeMetadata>()
+                .Select(metadata => $"{metadata.StatusCode} {metadata.Type?.Name}".TrimEnd());
+
+            Demo.Show($"    {endpoint.DisplayName?.Replace("HTTP: ", "")}", string.Join(", ", responses));
+        }
+    }
+
+    private sealed record UserResponse(Guid Id, string Email);
 
     private static async Task SendAsync(string request, IResult response)
     {

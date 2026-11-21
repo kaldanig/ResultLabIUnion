@@ -23,7 +23,8 @@ was checked with a small program, and the observed output is quoted.
 - **ErrorType:** [22 Categories describe actions](#22-a-category-describes-what-the-caller-should-do) ·
   [23 Closed enum](#23-errortype-is-a-closed-enum) · [24 Concurrency is transient](#24-concurrency-is-transient)
 - **Boundaries:** [25 Separate ASP.NET Core project](#25-aspnet-core-integration-is-a-separate-project) ·
-  [26 Unexpected stays private](#26-unexpected-errors-never-reach-the-client) · [27 No JSON for results](#27-results-are-not-serialized-directly)
+  [26 Unexpected stays private](#26-unexpected-errors-never-reach-the-client) · [27 No JSON for results](#27-results-are-not-serialized-directly) ·
+  [30 Typed HTTP responses](#30-http-responses-are-typed)
 - **DDD:** [28 Error catalogs](#28-error-catalogs-per-domain-concept) · [29 Who sets Field](#29-whoever-knows-the-field-name-sets-it)
 
 ---
@@ -344,6 +345,26 @@ object, and a successful `Result` throws `InvalidOperationException` because its
 **Decision.** No JSON converter. Results are mapped at the API boundary, to a DTO or to problem details.
 
 **Consequences.** The README warns against returning results from controllers or storing them as JSON.
+
+### 30. HTTP responses are typed
+
+**Context.** The first `ToHttpResult` returned `IResult`. Observed: Minimal API endpoints returning `IResult` get no
+response metadata, so OpenAPI documents nothing, while `Results<Ok<Dto>, ProblemHttpResult>` yields `200 Dto`
+(also through `Task<…>`), `Results<Created<Dto>, …>` yields `201 Dto` and `Results<NoContent, …>` yields `204`.
+`ProblemHttpResult` contributes no metadata, because its status is only known at run time.
+
+**Decision.** `ToHttpResult` / `ToHttpResultAsync` return `Results<TSuccess, ProblemHttpResult>`, with `TSuccess`
+inferred from the success lambda (`Ok<T>` and `NoContent` by default). An untyped overload taking `Func<…, IResult>`
+remains for successes that can be one of several responses. `ProducesErrors(params ErrorType[])` declares the problem
+responses with the same status mapping as the responses themselves (`HttpValidationProblemDetails` for 400).
+
+**Alternatives.** Keeping `IResult` and asking for `.Produces<T>()` on every endpoint duplicates the success type and
+drifts from the code. Typing the problems per `ErrorType` (e.g. `Results<Ok<T>, NotFound<ProblemDetails>, Conflict<…>>`)
+would make every signature long and still not match the runtime choice.
+
+**Consequences.** This changed the return types of existing methods: code that compared the result to a concrete type
+now unwraps `.Result`. `Results<…>` still implements `IResult`, so endpoints compile unchanged. A lambda that returns two
+different response types infers no `TSuccess` and falls back to the untyped overload.
 
 ## DDD
 

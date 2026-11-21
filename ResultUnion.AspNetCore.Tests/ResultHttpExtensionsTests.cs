@@ -32,27 +32,39 @@ public class ResultHttpExtensionsTests
 
     // Result<T>
 
+    // Responses are typed Results<TSuccess, ProblemHttpResult>; .Result is the response that was chosen.
+
     [Fact]
     public void ResultOfT_Success_IsOkWithTheValue()
     {
-        var ok = Assert.IsType<Ok<UserDto>>(Result<UserDto>.Success(new UserDto(1, "ann@example.com")).ToHttpResult());
+        Results<Ok<UserDto>, ProblemHttpResult> response = Result<UserDto>.Success(new UserDto(1, "ann@example.com")).ToHttpResult();
 
-        Assert.Equal(new UserDto(1, "ann@example.com"), ok.Value);
+        Assert.Equal(new UserDto(1, "ann@example.com"), Assert.IsType<Ok<UserDto>>(response.Result).Value);
     }
 
     [Fact]
-    public void ResultOfT_CustomSuccess_UsesTheGivenResponse()
+    public void ResultOfT_CustomSuccess_IsTypedWithTheGivenResponse()
     {
-        var response = Result<UserDto>.Success(new UserDto(7, "ann@example.com"))
+        Results<Created<UserDto>, ProblemHttpResult> response = Result<UserDto>.Success(new UserDto(7, "ann@example.com"))
             .ToHttpResult(user => TypedResults.Created($"/users/{user.Id}", user));
 
-        Assert.Equal("/users/7", Assert.IsType<Created<UserDto>>(response).Location);
+        Assert.Equal("/users/7", Assert.IsType<Created<UserDto>>(response.Result).Location);
+    }
+
+    [Fact]
+    public void ResultOfT_SeveralPossibleSuccessResponses_UseTheUntypedOverload()
+    {
+        // Two different response types: TSuccess cannot be inferred, so the IResult overload is chosen.
+        IResult response = Result<UserDto>.Success(new UserDto(7, "ann@example.com"))
+            .ToHttpResult(user => user.Id > 5 ? TypedResults.Redirect("/elsewhere") : (IResult)TypedResults.Ok(user));
+
+        Assert.IsType<RedirectHttpResult>(response);
     }
 
     [Fact]
     public void ResultOfT_Failure_IsProblemWithTheMappedStatus()
     {
-        var problem = Assert.IsType<ProblemHttpResult>(Result<UserDto>.Failure(Taken).ToHttpResult(_ => TypedResults.Ok()));
+        var problem = Assert.IsType<ProblemHttpResult>(Result<UserDto>.Failure(Taken).ToHttpResult(_ => TypedResults.Ok()).Result);
 
         Assert.Equal(409, problem.StatusCode);
         Assert.Equal("conflict", problem.ProblemDetails.Extensions["code"]);
@@ -61,7 +73,15 @@ public class ResultHttpExtensionsTests
     [Fact]
     public void ResultOfT_Default_IsProblem500()
     {
-        Assert.Equal(500, Assert.IsType<ProblemHttpResult>(default(Result<int>).ToHttpResult()).StatusCode);
+        Assert.Equal(500, Assert.IsType<ProblemHttpResult>(default(Result<int>).ToHttpResult().Result).StatusCode);
+    }
+
+    [Fact]
+    public void Error_IsATypedProblem()
+    {
+        ProblemHttpResult problem = Taken.ToHttpResult();
+
+        Assert.Equal(409, problem.StatusCode);
     }
 
     // Result
@@ -69,9 +89,12 @@ public class ResultHttpExtensionsTests
     [Fact]
     public void Result_SuccessIsNoContent_FailureIsProblem()
     {
-        Assert.IsType<NoContent>(Result.Success().ToHttpResult());
-        Assert.IsType<Accepted>(Result.Success().ToHttpResult(() => TypedResults.Accepted((string?)null)));
-        Assert.Equal(409, Assert.IsType<ProblemHttpResult>(Result.Failure(Taken).ToHttpResult()).StatusCode);
+        Results<NoContent, ProblemHttpResult> noContent = Result.Success().ToHttpResult();
+        Results<Accepted, ProblemHttpResult> accepted = Result.Success().ToHttpResult(() => TypedResults.Accepted((string?)null));
+
+        Assert.IsType<NoContent>(noContent.Result);
+        Assert.IsType<Accepted>(accepted.Result);
+        Assert.Equal(409, Assert.IsType<ProblemHttpResult>(Result.Failure(Taken).ToHttpResult().Result).StatusCode);
     }
 
     // Async
@@ -79,10 +102,15 @@ public class ResultHttpExtensionsTests
     [Fact]
     public async Task Async_AwaitsTheResultFirst()
     {
-        Assert.IsType<Ok<int>>(await Task.FromResult(Result<int>.Success(1)).ToHttpResultAsync());
-        Assert.IsType<Created<int>>(await Task.FromResult(Result<int>.Success(1)).ToHttpResultAsync(id => TypedResults.Created($"/x/{id}", id)));
-        Assert.IsType<NoContent>(await Task.FromResult(Result.Success()).ToHttpResultAsync());
-        Assert.IsType<ProblemHttpResult>(await Task.FromResult(Result.Failure(Taken)).ToHttpResultAsync(() => TypedResults.Ok()));
+        Results<Ok<int>, ProblemHttpResult> ok = await Task.FromResult(Result<int>.Success(1)).ToHttpResultAsync();
+        Results<Created<int>, ProblemHttpResult> created = await Task.FromResult(Result<int>.Success(1)).ToHttpResultAsync(id => TypedResults.Created($"/x/{id}", id));
+        Results<NoContent, ProblemHttpResult> noContent = await Task.FromResult(Result.Success()).ToHttpResultAsync();
+        Results<Ok, ProblemHttpResult> problem = await Task.FromResult(Result.Failure(Taken)).ToHttpResultAsync(() => TypedResults.Ok());
+
+        Assert.IsType<Ok<int>>(ok.Result);
+        Assert.IsType<Created<int>>(created.Result);
+        Assert.IsType<NoContent>(noContent.Result);
+        Assert.IsType<ProblemHttpResult>(problem.Result);
     }
 
     // Argument validation
