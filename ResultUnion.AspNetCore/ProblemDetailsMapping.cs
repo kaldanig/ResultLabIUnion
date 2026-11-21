@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -7,7 +8,33 @@ namespace ResultUnion.AspNetCore;
 /// <param name="Code">The error code, e.g. <c>email.invalid_format</c>.</param>
 /// <param name="Field">The input the error is about, or <see langword="null"/>.</param>
 /// <param name="Message">The human-readable message.</param>
-public sealed record ProblemErrorDetail(string Code, string? Field, string Message);
+/// <param name="Arguments">The values behind the message (<see cref="Error.Arguments"/>), or <see langword="null"/> when there are none; omitted from JSON then.</param>
+public sealed record ProblemErrorDetail(
+    string Code,
+    string? Field,
+    string Message,
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] IReadOnlyDictionary<string, object?>? Arguments = null)
+{
+    /// <inheritdoc/>
+    public bool Equals(ProblemErrorDetail? other)
+    {
+        if (other is null || Code != other.Code || Field != other.Field || Message != other.Message)
+        {
+            return false;
+        }
+
+        var left = Arguments ?? EmptyArguments;
+        var right = other.Arguments ?? EmptyArguments;
+
+        return left.Count == right.Count
+            && left.All(pair => right.TryGetValue(pair.Key, out var value) && Equals(pair.Value, value));
+    }
+
+    /// <inheritdoc/>
+    public override int GetHashCode() => HashCode.Combine(Code, Field, Message, Arguments?.Count ?? 0);
+
+    private static readonly IReadOnlyDictionary<string, object?> EmptyArguments = new Dictionary<string, object?>();
+}
 
 /// <summary>Maps <see cref="Error"/> and <see cref="ErrorType"/> to HTTP: status codes and RFC 9457 problem details.</summary>
 public static class ProblemDetailsMapping
@@ -54,8 +81,12 @@ public static class ProblemDetailsMapping
         /// innermost errors are listed, each with its full field path (e.g. <c>lines[2].quantity</c>).
         /// </para>
         /// <para>
-        /// For <see cref="ErrorType.Unexpected"/> the message is replaced by <see cref="UnexpectedDetail"/>: it often comes
-        /// from an exception and should not reach the client. Log the error on the server instead.
+        /// <see cref="Error.Arguments"/> go to the <c>arguments</c> extension, and each entry of <c>details</c> carries its own,
+        /// so a client can show a translated message per <c>code</c>.
+        /// </para>
+        /// <para>
+        /// For <see cref="ErrorType.Unexpected"/> the message is replaced by <see cref="UnexpectedDetail"/> and the arguments
+        /// are not sent: both often come from an exception and should not reach the client. Log the error on the server instead.
         /// </para>
         /// </remarks>
         /// <exception cref="ArgumentNullException"><paramref name="error"/> is <see langword="null"/>.</exception>
@@ -74,14 +105,25 @@ public static class ProblemDetailsMapping
                         .GroupBy(entry => entry.Field ?? string.Empty, StringComparer.Ordinal)
                         .ToDictionary(group => group.Key, group => group.Select(entry => entry.Message).ToArray(), StringComparer.Ordinal));
 
+            var unexpected = error.Type == ErrorType.Unexpected;
+
             problem.Status = error.Type.ToStatusCode();
-            problem.Detail = error.Type == ErrorType.Unexpected ? UnexpectedDetail : error.Message;
+            problem.Detail = unexpected ? UnexpectedDetail : error.Message;
             problem.Extensions["code"] = error.Code;
+
+            if (!unexpected && error.Arguments.Count > 0)
+            {
+                problem.Extensions["arguments"] = error.Arguments;
+            }
 
             if (entries.Count > 0)
             {
                 problem.Extensions["details"] = entries
-                    .Select(entry => new ProblemErrorDetail(entry.Code, entry.Field, entry.Message))
+                    .Select(entry => new ProblemErrorDetail(
+                        entry.Code,
+                        entry.Field,
+                        entry.Message,
+                        entry.Arguments.Count > 0 && entry.Type != ErrorType.Unexpected ? entry.Arguments : null))
                     .ToArray();
             }
 

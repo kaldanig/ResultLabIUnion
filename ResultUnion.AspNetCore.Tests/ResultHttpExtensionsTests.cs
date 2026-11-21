@@ -135,6 +135,25 @@ public class ResultHttpExtensionsTests
     }
 
     [Fact]
+    public async Task Wire_ArgumentsAreSent_AndOmittedWhenEmpty()
+    {
+        var error = Error.Validation(
+        [
+            Error.Create("password.too_short", "Too short.", ErrorType.Validation).WithArgument("minimumLength", 8).WithField("password"),
+            Error.Create("email.required", "Required.", ErrorType.Validation).WithField("email"),
+        ]);
+
+        var (_, _, body) = await SendAsync(error.ToHttpResult());
+        var details = body!.Value.GetProperty("details");
+
+        Assert.Equal(8, details[0].GetProperty("arguments").GetProperty("minimumLength").GetInt32());
+        Assert.False(details[1].TryGetProperty("arguments", out _));
+
+        var (_, _, single) = await SendAsync(Error.BusinessRule("Too young.").WithArgument("minimumAge", 18).ToHttpResult());
+        Assert.Equal(18, single!.Value.GetProperty("arguments").GetProperty("minimumAge").GetInt32());
+    }
+
+    [Fact]
     public async Task Wire_Success_IsJsonValue()
     {
         var (status, contentType, body) = await SendAsync(Result<UserDto>.Success(new UserDto(1, "ann@example.com")).ToHttpResult());

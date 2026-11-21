@@ -8,16 +8,23 @@ public sealed record User(Guid Id, Email Email, int Age)
     public static class Errors
     {
         public static Error AgeNotANumber(string? input) =>
-            Error.Create("user.age_not_a_number", $"'{input}' is not a number.", ErrorType.Validation);
+            Error.Create("user.age_not_a_number", $"'{input}' is not a number.", ErrorType.Validation)
+                .WithArgument("input", input);
 
         public static Error AgeOutOfRange(int age) =>
-            Error.Create("user.age_out_of_range", $"Age {age} is out of range.", ErrorType.Validation);
+            Error.Create("user.age_out_of_range", $"Age {age} is out of range.", ErrorType.Validation)
+                .WithArgument("age", age)
+                .WithArgument("minimum", 0)
+                .WithArgument("maximum", 150);
 
         public static Error TooYoung(User user) =>
-            Error.Create("user.too_young", $"Users must be at least {MinimumAge}; {user.Email} is {user.Age}.", ErrorType.BusinessRule);
+            Error.Create("user.too_young", $"Users must be at least {MinimumAge}; {user.Email} is {user.Age}.", ErrorType.BusinessRule)
+                .WithArgument("minimumAge", MinimumAge)
+                .WithArgument("age", user.Age);
 
         public static Error EmailAlreadyRegistered(Email email) =>
-            Error.Create("user.email_already_registered", $"Email {email} is already registered.", ErrorType.Conflict);
+            Error.Create("user.email_already_registered", $"Email {email} is already registered.", ErrorType.Conflict)
+                .WithArgument("email", email.Value);
 
         public static Error NotFound(Email email) =>
             Error.Create("user.not_found", $"No user with email {email}.", ErrorType.NotFound);

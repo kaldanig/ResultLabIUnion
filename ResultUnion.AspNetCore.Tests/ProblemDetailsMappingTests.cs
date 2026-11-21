@@ -88,6 +88,36 @@ public class ProblemDetailsMappingTests
     }
 
     [Fact]
+    public void Arguments_AreAnExtension_AndPartOfEachDetail()
+    {
+        var tooYoung = Error.Create("user.too_young", "Too young.", ErrorType.BusinessRule).WithArgument("minimumAge", 18).WithArgument("age", 15);
+        var tooShort = Error.Create("password.too_short", "Too short.", ErrorType.Validation).WithArgument("minimumLength", 8).WithField("password");
+        var noArguments = Error.Create("email.required", "Required.", ErrorType.Validation).WithField("email");
+
+        var single = tooYoung.ToProblemDetails();
+        var arguments = Assert.IsAssignableFrom<IReadOnlyDictionary<string, object?>>(single.Extensions["arguments"]);
+        Assert.Equal(18, arguments["minimumAge"]);
+
+        var details = Assert.IsType<ProblemErrorDetail[]>(Error.Validation([tooShort, noArguments]).ToProblemDetails().Extensions["details"]);
+        Assert.Equal(8, details[0].Arguments!["minimumLength"]);
+        Assert.Null(details[1].Arguments);
+    }
+
+    [Fact]
+    public void ErrorWithoutArguments_HasNoArgumentsExtension()
+    {
+        Assert.False(Error.NotFound("x").ToProblemDetails().Extensions.ContainsKey("arguments"));
+    }
+
+    [Fact]
+    public void Unexpected_DoesNotSendArguments()
+    {
+        var problem = Error.Unexpected("Failed at row 7.").WithArgument("row", 7).ToProblemDetails();
+
+        Assert.False(problem.Extensions.ContainsKey("arguments"));
+    }
+
+    [Fact]
     public void Unexpected_HidesTheMessage()
     {
         var problem = Error.Unexpected("NullReferenceException at Foo.Bar()").ToProblemDetails();

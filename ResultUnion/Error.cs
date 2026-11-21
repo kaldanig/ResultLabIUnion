@@ -12,8 +12,12 @@ namespace ResultUnion;
 /// every invalid field of a form.
 /// </para>
 /// <para>
-/// Errors compare by value: two errors are equal when their code, message, type and field are equal and their
-/// details are equal element by element, in order.
+/// An error can also carry named <see cref="Arguments"/> (set with <see cref="WithArgument(string, object)"/>), the values
+/// behind its message, so a client can show a translated message for <see cref="Code"/> without parsing <see cref="Message"/>.
+/// </para>
+/// <para>
+/// Errors compare by value: two errors are equal when their code, message, type and field are equal, their arguments
+/// have the same names and equal values, and their details are equal element by element, in order.
 /// </para>
 /// <para>Every factory throws <see cref="ArgumentException"/> when the code or message is <see langword="null"/>, empty or white space.</para>
 /// </remarks>
@@ -36,7 +40,23 @@ public sealed record Error
     /// <remarks>The list is read-only. Details can themselves have details.</remarks>
     public IReadOnlyList<Error> Details { get; }
 
-    private Error(string code, string message, ErrorType type, string? field = null, ReadOnlyCollection<Error>? details = null)
+    /// <summary>Gets the named values behind the message, such as <c>minimumAge</c> = 18; empty, never <see langword="null"/>, when there are none.</summary>
+    /// <remarks>
+    /// <para>
+    /// Meant for localization: a client looks up a template for <see cref="Code"/>, for example
+    /// "მომხმარებელი უნდა იყოს მინიმუმ {minimumAge} წლის", and fills it from these values.
+    /// </para>
+    /// <para>The dictionary is read-only. Names are compared ordinally. Keep values simple (numbers, strings, dates) so they serialize.</para>
+    /// </remarks>
+    public IReadOnlyDictionary<string, object?> Arguments { get; }
+
+    private Error(
+        string code,
+        string message,
+        ErrorType type,
+        string? field = null,
+        ReadOnlyCollection<Error>? details = null,
+        ReadOnlyDictionary<string, object?>? arguments = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(code);
         ArgumentException.ThrowIfNullOrWhiteSpace(message);
@@ -46,7 +66,12 @@ public sealed record Error
         Type = type;
         Field = field;
         Details = details ?? ReadOnlyCollection<Error>.Empty;
+        Arguments = arguments ?? ReadOnlyDictionary<string, object?>.Empty;
     }
+
+    private ReadOnlyCollection<Error> DetailsCollection => (ReadOnlyCollection<Error>)Details;
+
+    private ReadOnlyDictionary<string, object?> ArgumentsDictionary => (ReadOnlyDictionary<string, object?>)Arguments;
 
     /// <summary>Returns a copy of this error that names the input it is about.</summary>
     /// <remarks>For example, <c>Error.Validation("Email is required.").WithField("email")</c>.</remarks>
@@ -55,7 +80,23 @@ public sealed record Error
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(field);
 
-        return new Error(Code, Message, Type, field, (ReadOnlyCollection<Error>)Details);
+        return new Error(Code, Message, Type, field, DetailsCollection, ArgumentsDictionary);
+    }
+
+    /// <summary>Returns a copy of this error with the named value <paramref name="name"/> = <paramref name="value"/> in its <see cref="Arguments"/>.</summary>
+    /// <remarks>
+    /// Chain calls to add several values:
+    /// <c>Error.Create("user.too_young", $"…", ErrorType.BusinessRule).WithArgument("minimumAge", 18).WithArgument("age", age)</c>.
+    /// A value with the same name replaces the previous one.
+    /// </remarks>
+    /// <exception cref="ArgumentException"><paramref name="name"/> is <see langword="null"/>, empty or white space.</exception>
+    public Error WithArgument(string name, object? value)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(name);
+
+        var arguments = new Dictionary<string, object?>(Arguments, StringComparer.Ordinal) { [name] = value };
+
+        return new Error(Code, Message, Type, Field, DetailsCollection, new ReadOnlyDictionary<string, object?>(arguments));
     }
 
     /// <summary>Returns a copy of this error whose field path, and the field paths of all its details, start with <paramref name="prefix"/>.</summary>
@@ -69,10 +110,10 @@ public sealed record Error
         ArgumentException.ThrowIfNullOrWhiteSpace(prefix);
 
         var details = Details.Count == 0
-            ? (ReadOnlyCollection<Error>)Details
+            ? DetailsCollection
             : Array.AsReadOnly(Details.Select(detail => detail.WithFieldPrefix(prefix)).ToArray());
 
-        return new Error(Code, Message, Type, Field is null ? prefix : $"{prefix}.{Field}", details);
+        return new Error(Code, Message, Type, Field is null ? prefix : $"{prefix}.{Field}", details, ArgumentsDictionary);
     }
 
     /// <summary>Returns the innermost errors, in order: this error when it has no details, otherwise the innermost errors of every detail.</summary>
@@ -117,10 +158,15 @@ public sealed record Error
                 && Message == other.Message
                 && Type == other.Type
                 && Field == other.Field
+                && ArgumentsEqual(Arguments, other.Arguments)
                 && Details.SequenceEqual(other.Details)));
 
     /// <inheritdoc/>
-    public override int GetHashCode() => HashCode.Combine(Code, Message, Type, Field, Details.Count);
+    public override int GetHashCode() => HashCode.Combine(Code, Message, Type, Field, Details.Count, Arguments.Count);
+
+    private static bool ArgumentsEqual(IReadOnlyDictionary<string, object?> left, IReadOnlyDictionary<string, object?> right) =>
+        left.Count == right.Count
+        && left.All(pair => right.TryGetValue(pair.Key, out var value) && Equals(pair.Value, value));
 
     /// <summary>Creates an unexpected, uncategorized failure, typically a defect.</summary>
     public static Error Unexpected(string message) =>

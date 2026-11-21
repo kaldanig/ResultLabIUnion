@@ -96,6 +96,20 @@ var group = Error.Validation([error, Error.Validation("Too short.").WithField("p
 // group.Details: both errors, in order
 ```
 
+Attach the values behind a message with `WithArgument`, so a client can show a translated message for the `code`
+without parsing the English text:
+
+```csharp
+Error.Create("user.too_young", $"Users must be at least 18; {email} is {age}.", ErrorType.BusinessRule)
+    .WithArgument("minimumAge", 18)
+    .WithArgument("age", age);
+// error.Arguments: { minimumAge: 18, age: 15 }
+// template "მომხმარებელი უნდა იყოს მინიმუმ {minimumAge} წლის, არის {age}." → filled from the arguments
+```
+
+`Arguments` is read-only, survives `WithField`, `WithFieldPrefix` and grouping, and takes part in equality. Keep the
+values simple (numbers, strings, dates) so they serialize. The library does no localization itself.
+
 The library does not map errors to HTTP itself; `ErrorType` is meant for that mapping in your API layer.
 
 ## Using results
@@ -281,9 +295,10 @@ A failure becomes an RFC 9457 `application/problem+json` response:
 - the status comes from `ErrorType`: Validation 400, Unauthorized 401, Forbidden 403, NotFound 404,
   Conflict and Concurrency 409, BusinessRule 422, Unavailable 503, Unexpected 500 (`ErrorType.ToStatusCode()`);
 - `detail` is the message, and the stable error `code` is an extension, so clients can switch on it;
+- `Arguments` become the `arguments` extension, and each entry of `details` carries its own (omitted when empty);
 - an error with a `Field` or `Details` becomes a validation problem: `errors` lists the messages per field, and
   `details` lists every error with its `code`, `field` and `message`;
-- `Unexpected` errors never send their message to the client (it often comes from an exception); log them instead.
+- `Unexpected` errors never send their message or arguments to the client (they often come from an exception); log them instead.
 
 ```json
 {

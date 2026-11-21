@@ -10,7 +10,8 @@ public sealed record Email
             Error.Create("email.required", "Email is required.", ErrorType.Validation);
 
         public static Error InvalidFormat(string value) =>
-            Error.Create("email.invalid_format", $"'{value}' is not a valid email.", ErrorType.Validation);
+            Error.Create("email.invalid_format", $"'{value}' is not a valid email.", ErrorType.Validation)
+                .WithArgument("value", value);
     }
 
     public string Value { get; }

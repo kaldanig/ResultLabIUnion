@@ -12,7 +12,8 @@ public sealed record OrderLine
             Error.Create("order_line.product_required", "Product is required.", ErrorType.Validation);
 
         public static Error QuantityNotPositive(int quantity) =>
-            Error.Create("order_line.quantity_not_positive", $"Quantity must be positive, was {quantity}.", ErrorType.Validation);
+            Error.Create("order_line.quantity_not_positive", $"Quantity must be positive, was {quantity}.", ErrorType.Validation)
+                .WithArgument("quantity", quantity);
     }
 
     public string Product { get; }

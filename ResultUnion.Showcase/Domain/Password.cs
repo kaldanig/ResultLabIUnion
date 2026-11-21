@@ -12,7 +12,8 @@ public sealed record Password
             Error.Create("password.required", "Password is required.", ErrorType.Validation);
 
         public static readonly Error TooShort =
-            Error.Create("password.too_short", $"Password must be at least {MinimumLength} characters.", ErrorType.Validation);
+            Error.Create("password.too_short", $"Password must be at least {MinimumLength} characters.", ErrorType.Validation)
+                .WithArgument("minimumLength", MinimumLength);
     }
 
     public string Value { get; }
