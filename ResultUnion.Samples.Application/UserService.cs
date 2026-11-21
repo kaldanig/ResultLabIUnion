@@ -1,17 +1,18 @@
 using ResultUnion.Samples.Domain;
-using ResultUnion.WebApi.Infrastructure;
+using Microsoft.Extensions.Logging;
+using ResultUnion.Samples.Application.Infrastructure;
 
-namespace ResultUnion.WebApi.Application;
+namespace ResultUnion.Samples.Application;
 
-/// <summary>User use cases, each one a single pipeline. Endpoints only turn the result into HTTP.</summary>
+/// <summary>User use cases, each one a single pipeline. Hosts (Web API, gRPC) only map their contract to a command and the result to their protocol.</summary>
 public sealed class UserService(InMemoryUserStore users, PasswordResetQuota quota, ILogger<UserService> logger)
 {
     /// <summary>Validates every field at once, applies the domain rule, then stores the user.</summary>
-    public Task<Result<User>> RegisterAsync(RegisterUserRequest request, CancellationToken cancellationToken) =>
+    public Task<Result<User>> RegisterAsync(RegisterUser command, CancellationToken cancellationToken) =>
         Result.CombineAll(
-                Email.Create(request.Email).MapError(error => error.WithField("email")),
-                Password.Create(request.Password).MapError(error => error.WithField("password")),
-                User.ParseAge(request.Age).MapError(error => error.WithField("age")))
+                Email.Create(command.Email).MapError(error => error.WithField("email")),
+                Password.Create(command.Password).MapError(error => error.WithField("password")),
+                User.ParseAge(command.Age).MapError(error => error.WithField("age")))
             .Map((email, _, age) => new User(Guid.NewGuid(), email, age))           // the demo stores no password
             .Ensure(user => user.IsAdult, User.Errors.TooYoung)
             .EnsureAsync(user => users.EnsureEmailIsFreeAsync(user.Email, cancellationToken))

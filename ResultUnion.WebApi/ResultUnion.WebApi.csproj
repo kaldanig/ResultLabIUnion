@@ -14,6 +14,7 @@
   <ItemGroup>
     <ProjectReference Include="..\ResultUnion.AspNetCore\ResultUnion.AspNetCore.csproj" />
     <ProjectReference Include="..\ResultUnion.Samples.Domain\ResultUnion.Samples.Domain.csproj" />
+    <ProjectReference Include="..\ResultUnion.Samples.Application\ResultUnion.Samples.Application.csproj" />
   </ItemGroup>
 
 </Project>

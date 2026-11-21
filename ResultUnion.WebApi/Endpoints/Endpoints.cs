@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using ResultUnion.AspNetCore;
-using ResultUnion.WebApi.Application;
+using ResultUnion.Samples.Application;
 
 namespace ResultUnion.WebApi.Endpoints;
 
@@ -14,7 +14,7 @@ public static class UserEndpoints
         var users = routes.MapGroup("/users").WithTags("Users");
 
         users.MapPost("/", (RegisterUserRequest request, UserService service, CancellationToken ct) =>
-                service.RegisterAsync(request, ct)
+                service.RegisterAsync(new RegisterUser(request.Email, request.Password, request.Age), ct)
                     .MapAsync(UserResponse.From)
                     .ToHttpResultAsync(user => TypedResults.Created($"/users/{user.Email}", user)))
             .WithName("RegisterUser")
@@ -55,7 +55,7 @@ public static class OrderEndpoints
     public static IEndpointRouteBuilder MapOrderEndpoints(this IEndpointRouteBuilder routes)
     {
         routes.MapPost("/orders", (PlaceOrderRequest request, OrderService service, CancellationToken ct) =>
-                service.PlaceAsync(request, ct)
+                service.PlaceAsync(new PlaceOrder(request.CustomerEmail, request.Lines), ct)
                     .MapAsync(OrderResponse.From)
                     .ToHttpResultAsync(order => TypedResults.Created($"/orders/{order.Id}", order)))
             .WithTags("Orders")

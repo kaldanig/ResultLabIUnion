@@ -36,9 +36,12 @@ Why it is built this way, with the alternatives that were considered: [docs/DESI
 | `ResultUnion.Tests` | xUnit v3 tests for `ResultUnion`; no ASP.NET Core dependency |
 | `ResultUnion.AspNetCore.Tests` | xUnit v3 tests for `ResultUnion.AspNetCore`, including the JSON a client receives |
 | `ResultUnion.Grpc.Tests` | xUnit v3 tests for `ResultUnion.Grpc`, including server-to-client round trips |
-| `ResultUnion.Samples.Domain` | The sample domain shared by both demos: `Email`, `Password`, `User`, `OrderLine`, `Order` with their error catalogs, and a Georgian `ErrorLocalizer`. References only `ResultUnion`. |
+| `ResultUnion.Samples.Domain` | The sample domain shared by the demos: `Email`, `Password`, `User`, `OrderLine`, `Order` with their error catalogs, and a Georgian `ErrorLocalizer`. References only `ResultUnion`. |
+| `ResultUnion.Samples.Application` | The sample application layer shared by the Web API and the gRPC service: commands, use cases, in-memory storage. No HTTP, no gRPC. |
 | `ResultUnion.Showcase` | A console app that demonstrates the API section by section |
 | `ResultUnion.WebApi` | A Minimal API demo with OpenAPI and a Scalar UI: real requests, real problem responses |
+| `ResultUnion.GrpcService` | The same use cases as a gRPC service (`Protos/demo.proto`), failures as rich gRPC statuses |
+| `ResultUnion.GrpcClient` | A console client for the gRPC service that turns every `RpcException` back into an `Error` |
 
 ```bash
 dotnet build ResultLabIUnion.slnx
@@ -54,6 +57,14 @@ dotnet run --project ResultUnion.Showcase
 
 ```bash
 dotnet run --project ResultUnion.WebApi
+```
+
+```bash
+dotnet run --project ResultUnion.GrpcService
+```
+
+```bash
+dotnet run --project ResultUnion.GrpcClient
 ```
 
 `global.json` opts `dotnet test` into Microsoft.Testing.Platform, which the .NET 10+ SDK requires for xUnit v3.
@@ -76,6 +87,29 @@ Send `Accept-Language: ka` to get Georgian messages: an endpoint filter translat
 `arguments`, without reading the English text. Every response is documented in OpenAPI from the typed results and
 `.ProducesErrors(…)`; no endpoint declares its responses by hand. Storage is in memory, with `ann@example.com`
 registered at startup.
+
+### The gRPC demo
+
+`ResultUnion.GrpcService` runs the same use cases (`ResultUnion.Samples.Application`) behind `Protos/demo.proto`, on
+<http://localhost:5259> (HTTP/2 only, with gRPC reflection for grpcurl or Postman). Each method maps the request to a
+command and ends with `GetValueOrThrowRpcAsync`. Start it, then run `ResultUnion.GrpcClient` in another terminal:
+every call goes through `Result.TryAsync(…, (RpcException ex) => ex.ToError())`, and the client prints what came back.
+
+```text
+RegisterUser (too young)  ->  FailedPrecondition (BusinessRule)
+    user.too_young: Users must be at least 18; kid@example.com is 15.
+    arguments: minimumAge=18, age=15
+
+PlaceOrder (invalid lines)  ->  InvalidArgument (Validation)
+    lines[1].product     order_line.product_required: Product is required.
+    lines[1].quantity    order_line.quantity_not_positive: Quantity must be positive, was 0.
+
+RequestPasswordReset #4  ->  ResourceExhausted (TooManyRequests, transient)
+```
+
+The Web API and the gRPC service share the domain and the application layer; they differ only in how they map their
+contract to a command and the result to their protocol. The role for `ListUsers` comes from the call metadata
+`x-role: admin`.
 
 ## The types
 

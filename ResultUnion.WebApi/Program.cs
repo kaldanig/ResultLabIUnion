@@ -1,8 +1,6 @@
 using Scalar.AspNetCore;
-using ResultUnion.Samples.Domain;
-using ResultUnion.WebApi.Application;
+using ResultUnion.Samples.Application;
 using ResultUnion.WebApi.Endpoints;
-using ResultUnion.WebApi.Infrastructure;
 using ResultUnion.WebApi.Localization;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -18,12 +16,7 @@ builder.Services.AddOpenApi(options => options.AddDocumentTransformer((document,
 }));
 builder.Services.AddProblemDetails();                   // unhandled exceptions become problem responses too
 
-builder.Services.AddSingleton(TimeProvider.System);
-builder.Services.AddSingleton<InMemoryUserStore>();
-builder.Services.AddSingleton<InMemoryOrderStore>();
-builder.Services.AddSingleton<PasswordResetQuota>();
-builder.Services.AddScoped<UserService>();
-builder.Services.AddScoped<OrderService>();
+builder.Services.AddSampleApplication();                // use cases and in-memory storage, shared with the gRPC service
 
 var app = builder.Build();
 
@@ -39,9 +32,7 @@ api.MapUserEndpoints();
 api.MapOrderEndpoints();
 api.MapAdminEndpoints();
 
-// A user to look up, deactivate and order for.
-app.Services.GetRequiredService<InMemoryUserStore>()
-    .Seed(new User(Guid.NewGuid(), Email.Create("ann@example.com").ResultValue, 34));
+app.Services.SeedSampleData();                          // ann@example.com
 
 app.Run();
 

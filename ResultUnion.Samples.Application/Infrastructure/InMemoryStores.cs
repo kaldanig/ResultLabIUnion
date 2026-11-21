@@ -1,7 +1,7 @@
 using System.Collections.Concurrent;
 using ResultUnion.Samples.Domain;
 
-namespace ResultUnion.WebApi.Infrastructure;
+namespace ResultUnion.Samples.Application.Infrastructure;
 
 /// <summary>A thread-safe in-memory stand-in for a database table of users. Task.Delay simulates latency.</summary>
 public sealed class InMemoryUserStore

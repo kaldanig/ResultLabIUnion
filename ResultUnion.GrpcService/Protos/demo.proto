@@ -1,0 +1,71 @@
+// The gRPC contract of the demo: the same use cases as ResultUnion.WebApi.
+// Failures are not part of these messages: they travel in the call's status (google.rpc.Status with ErrorInfo,
+// BadRequest and RetryInfo), built by ResultUnion.Grpc.
+
+syntax = "proto3";
+
+package resultunion.demo.v1;
+
+option csharp_namespace = "ResultUnion.GrpcDemo";
+
+import "google/protobuf/empty.proto";
+
+service Users {
+  // INVALID_ARGUMENT (every invalid field), FAILED_PRECONDITION (duplicate email, too young).
+  rpc RegisterUser (RegisterUserRequest) returns (UserReply);
+
+  // INVALID_ARGUMENT, NOT_FOUND.
+  rpc GetUser (UserRequest) returns (UserReply);
+
+  // NOT_FOUND, FAILED_PRECONDITION (already inactive).
+  rpc DeactivateUser (UserRequest) returns (google.protobuf.Empty);
+
+  // NOT_FOUND, RESOURCE_EXHAUSTED with RetryInfo on the fourth call within a minute.
+  rpc RequestPasswordReset (UserRequest) returns (google.protobuf.Empty);
+
+  // PERMISSION_DENIED without the metadata "x-role: admin".
+  rpc ListUsers (google.protobuf.Empty) returns (UserList);
+}
+
+service Orders {
+  // INVALID_ARGUMENT with one field violation per invalid line (lines[1].quantity), NOT_FOUND for an unknown customer.
+  rpc PlaceOrder (PlaceOrderRequest) returns (OrderReply);
+}
+
+message RegisterUserRequest {
+  string email = 1;
+  string password = 2;
+  string age = 3;          // text on purpose: "abc" produces the domain error user.age_not_a_number
+}
+
+message UserRequest {
+  string email = 1;
+}
+
+message UserReply {
+  string id = 1;
+  string email = 2;
+  int32 age = 3;
+  bool is_active = 4;
+}
+
+message UserList {
+  repeated UserReply users = 1;
+}
+
+message OrderLine {
+  string product = 1;
+  int32 quantity = 2;
+}
+
+message PlaceOrderRequest {
+  string customer_email = 1;
+  repeated OrderLine lines = 2;
+}
+
+message OrderReply {
+  string id = 1;
+  string customer = 2;
+  repeated OrderLine lines = 3;
+  int32 total_quantity = 4;
+}

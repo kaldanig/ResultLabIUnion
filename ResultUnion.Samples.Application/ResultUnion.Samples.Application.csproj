@@ -1,0 +1,16 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- The sample application layer, shared by ResultUnion.WebApi and ResultUnion.GrpcService: commands, use cases
+       and in-memory storage. No HTTP, no gRPC: each host maps its own contract to the commands. -->
+
+  <PropertyGroup>
+    <TargetFramework>net11.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ResultUnion.Samples.Domain\ResultUnion.Samples.Domain.csproj" />
+  </ItemGroup>
+
+</Project>

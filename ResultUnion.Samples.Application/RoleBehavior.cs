@@ -1,4 +1,4 @@
-namespace ResultUnion.WebApi.Application;
+namespace ResultUnion.Samples.Application;
 
 /// <summary>
 /// A pipeline behavior in the style of MediatR: one generic wrapper for handlers with any result type.
