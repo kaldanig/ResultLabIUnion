@@ -107,8 +107,8 @@ public class ResultTests
     {
         var calls = new List<string>();
 
-        Result.Success().Tap(() => calls.Add("tap")).TapError(_ => calls.Add("tapError"));
-        Result.Failure(First).Tap(() => calls.Add("tap")).TapError(e => calls.Add($"tapError:{e.Code}"));
+        _ = Result.Success().Tap(() => calls.Add("tap")).TapError(_ => calls.Add("tapError"));
+        _ = Result.Failure(First).Tap(() => calls.Add("tap")).TapError(e => calls.Add($"tapError:{e.Code}"));
 
         Assert.Equal(["tap", "tapError:validation.failed"], calls);
     }

@@ -33,9 +33,11 @@ Why it is built this way, with the alternatives that were considered: [docs/DESI
 | `ResultUnion` | The library: `Result<T>`, `Result`, `Error`, `ErrorType` and the async extensions in `Async/`. No dependencies. |
 | `ResultUnion.AspNetCore` | ASP.NET Core integration: status codes, RFC 9457 problem details, `ToHttpResult` for Minimal APIs |
 | `ResultUnion.Grpc` | gRPC integration: status codes, the `google.rpc` rich error model, `GetValueOrThrowRpc` for services, `ToError` for clients |
+| `ResultUnion.Analyzers` | Roslyn analyzers shipped inside the `ResultUnion` package: a discarded `Result`, `async` code in `Result.Try`, `Map` that should be `Bind` ([docs/ANALYZERS.md](docs/ANALYZERS.md)) |
 | `ResultUnion.Tests` | xUnit v3 tests for `ResultUnion`; no ASP.NET Core dependency |
 | `ResultUnion.AspNetCore.Tests` | xUnit v3 tests for `ResultUnion.AspNetCore`, including the JSON a client receives |
 | `ResultUnion.Grpc.Tests` | xUnit v3 tests for `ResultUnion.Grpc`, including server-to-client round trips |
+| `ResultUnion.Analyzers.Tests` | Tests that compile snippets against the real library and check each rule's diagnostics |
 | `ResultUnion.Samples.Domain` | The sample domain shared by the demos: `Email`, `Password`, `User`, `OrderLine`, `Order` with their error catalogs, and a Georgian `ErrorLocalizer`. References only `ResultUnion`. |
 | `ResultUnion.Samples.Application` | The sample application layer shared by the Web API and the gRPC service: commands, use cases, in-memory storage. No HTTP, no gRPC. |
 | `ResultUnion.Showcase` | A console app that demonstrates the API section by section |
@@ -548,6 +550,18 @@ app.MapPost("/users", (RegisterUser command, RegisterUserHandler handler, Cancel
 `Result.TryAsync` with an untyped mapper (`ex => …`) catches every exception except cancellation, so it fits code
 where every failure means the same thing (a remote call, a parser). With a typed mapper (`(DbUpdateConcurrencyException ex) => …`),
 as above, only that exception type becomes an error and everything else propagates.
+
+## Analyzers
+
+The `ResultUnion` package includes Roslyn analyzers, so mistakes show up as compiler warnings:
+
+| Rule | Finds |
+|---|---|
+| `RU0001` | a `Result` that is discarded, so a failure would go unnoticed (use it, or discard it with `_ = ...`) |
+| `RU0002` | an `async` lambda or a task-returning method passed to `Result.Try` (use `Result.TryAsync`) |
+| `RU0003` | `Map` / `MapAsync` with a mapper that returns a `Result` (use `Bind` / `BindAsync`) |
+
+Details, examples and how to change a rule's severity: [docs/ANALYZERS.md](docs/ANALYZERS.md).
 
 ## Things to know
 

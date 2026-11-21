@@ -117,7 +117,7 @@ public class CollectionTests
     {
         var source = new CountingEnumerable<Result<int>>([1, 2, QuantityInvalid]);
 
-        source.CombineAll();
+        _ = source.CombineAll();
 
         Assert.Equal(1, source.Enumerations);
     }

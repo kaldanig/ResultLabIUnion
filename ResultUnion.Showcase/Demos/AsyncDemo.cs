@@ -75,7 +75,7 @@ internal static class AsyncDemo
         await cancellation.CancelAsync();
         try
         {
-            await service.RegisterAsync("dan@example.com", "30", cancellation.Token);
+            _ = await service.RegisterAsync("dan@example.com", "30", cancellation.Token);
         }
         catch (OperationCanceledException exception)
         {

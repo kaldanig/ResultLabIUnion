@@ -1,4 +1,6 @@
 <Solution>
+  <Project Path="ResultUnion.Analyzers.Tests/ResultUnion.Analyzers.Tests.csproj" />
+  <Project Path="ResultUnion.Analyzers/ResultUnion.Analyzers.csproj" />
   <Project Path="ResultUnion.AspNetCore.Tests/ResultUnion.AspNetCore.Tests.csproj" />
   <Project Path="ResultUnion.AspNetCore/ResultUnion.AspNetCore.csproj" />
   <Project Path="ResultUnion.Grpc.Tests/ResultUnion.Grpc.Tests.csproj" />

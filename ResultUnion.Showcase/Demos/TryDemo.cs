@@ -55,7 +55,7 @@ internal static class TryDemo
         await cancellation.CancelAsync();
         try
         {
-            await Result.TryAsync(
+            _ = await Result.TryAsync(
                 () => Task.Delay(1000, cancellation.Token),
                 exception => Error.Unexpected(exception.Message));
         }

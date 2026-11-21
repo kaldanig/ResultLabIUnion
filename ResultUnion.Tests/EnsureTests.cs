@@ -53,7 +53,7 @@ public class EnsureTests
     {
         var called = false;
 
-        Result<int>.Success(1).Ensure(_ => true, _ => { called = true; return Negative; });
+        _ = Result<int>.Success(1).Ensure(_ => true, _ => { called = true; return Negative; });
 
         Assert.False(called);
     }

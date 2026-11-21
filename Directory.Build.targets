@@ -7,4 +7,12 @@
     <None Include="$(MSBuildThisFileDirectory)LICENSE" Pack="true" PackagePath="\" Visible="false" />
   </ItemGroup>
 
+  <!-- Every project in this repository runs the ResultUnion analyzers, as a package consumer would. (The analyzer
+       project and its tests reference it in their own way.) For ResultUnion itself the reference also makes sure the
+       analyzer is built before the package that ships it. -->
+  <ItemGroup Condition="'$(MSBuildProjectName)' != 'ResultUnion.Analyzers' and '$(MSBuildProjectName)' != 'ResultUnion.Analyzers.Tests'">
+    <ProjectReference Include="$(MSBuildThisFileDirectory)ResultUnion.Analyzers\ResultUnion.Analyzers.csproj"
+                      OutputItemType="Analyzer" ReferenceOutputAssembly="false" PrivateAssets="all" />
+  </ItemGroup>
+
 </Project>

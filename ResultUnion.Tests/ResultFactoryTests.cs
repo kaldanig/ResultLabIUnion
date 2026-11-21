@@ -61,8 +61,8 @@ public class ResultFactoryTests
     {
         var log = new List<string>();
 
-        InTransaction(() => Result<string>.Success("ok"), log);
-        InTransaction(() => Result.Failure(Error.Conflict("Taken.")), log);
+        _ = InTransaction(() => Result<string>.Success("ok"), log);
+        _ = InTransaction(() => Result.Failure(Error.Conflict("Taken.")), log);
 
         Assert.Equal(["commit", "rollback:conflict"], log);
     }

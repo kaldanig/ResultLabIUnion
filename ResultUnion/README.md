@@ -26,6 +26,8 @@ var message = await RegisterAsync(command, ct) switch
 - `Result.CombineAll` for tuples and collections (`lines[2].quantity`), `Result.Try` / `TryAsync` for exceptions,
   `FromNullable` / `ToResultAsync` for lookups
 - `IResultFactory<TSelf>` for generic pipeline behaviors
+- Analyzers included: a discarded `Result` (RU0001), `async` code in `Result.Try` (RU0002), `Map` that should be
+  `Bind` (RU0003)
 
 Requires `net11.0` (C# 15). Integrations: **ResultUnion.AspNetCore** (typed Minimal API results, problem details) and
 **ResultUnion.Grpc** (gRPC rich error model).

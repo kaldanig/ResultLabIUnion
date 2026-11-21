@@ -67,12 +67,12 @@ public class TaskOfResultOfTAsyncTests
     {
         var calls = new List<string>();
 
-        await Five().TapAsync(n => calls.Add($"tap:{n}"));
-        await Five().TapAsync(async n => { await Task.Yield(); calls.Add($"tapAsync:{n}"); });
-        await Missing().TapErrorAsync(e => calls.Add($"tapError:{e.Code}"));
-        await Missing().TapErrorAsync(async e => { await Task.Yield(); calls.Add($"tapErrorAsync:{e.Code}"); });
-        await Missing().TapAsync(_ => calls.Add("must not run"));
-        await Five().TapErrorAsync(_ => calls.Add("must not run"));
+        _ = await Five().TapAsync(n => calls.Add($"tap:{n}"));
+        _ = await Five().TapAsync(async n => { await Task.Yield(); calls.Add($"tapAsync:{n}"); });
+        _ = await Missing().TapErrorAsync(e => calls.Add($"tapError:{e.Code}"));
+        _ = await Missing().TapErrorAsync(async e => { await Task.Yield(); calls.Add($"tapErrorAsync:{e.Code}"); });
+        _ = await Missing().TapAsync(_ => calls.Add("must not run"));
+        _ = await Five().TapErrorAsync(_ => calls.Add("must not run"));
 
         Assert.Equal(["tap:5", "tapAsync:5", "tapError:resource.not_found", "tapErrorAsync:resource.not_found"], calls);
     }

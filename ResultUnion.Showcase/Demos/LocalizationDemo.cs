@@ -6,7 +6,7 @@ internal static class LocalizationDemo
     public static void Run()
     {
         var service = new RegistrationService(new UserRepository());
-        service.Register("ann@example.com", "34");
+        _ = service.Register("ann@example.com", "34");
 
         Error[] errors =
         [
