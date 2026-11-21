@@ -5,14 +5,14 @@ public sealed class UserRepository
 {
     private readonly Dictionary<string, User> _users = new(StringComparer.Ordinal);
 
-    // A lookup that reports "not found" as null, turned into a Result.
+    // Infrastructure-level "not found": generic on purpose. The services translate it into User.Errors.NotFound.
     public Result<User> FindByEmail(Email email) =>
-        Result.FromNullable(_users.GetValueOrDefault(email.Value), Error.NotFound($"No user with email {email}."));
+        Result.FromNullable(_users.GetValueOrDefault(email.Value), Error.NotFound($"No row for key '{email}'."));
 
     /// <summary>A <see cref="Result"/>-returning check, reusable through <c>Ensure(Func&lt;T, Result&gt;)</c>.</summary>
     public Result EnsureEmailIsFree(Email email) =>
         _users.ContainsKey(email.Value)
-            ? Error.Conflict($"Email {email} is already registered.")
+            ? User.Errors.EmailAlreadyRegistered(email)
             : Result.Success();
 
     public void Add(User user) => _users[user.Email.Value] = user;
@@ -31,7 +31,7 @@ public sealed class UserRepository
 
     public Task<Result<User>> FindByEmailAsync(Email email, CancellationToken cancellationToken = default) =>
         FirstOrDefaultAsync(email, cancellationToken)
-            .ToResultAsync(Error.NotFound($"No user with email {email}."));
+            .ToResultAsync(Error.NotFound($"No row for key '{email}'."));
 
     public async Task<Result> EnsureEmailIsFreeAsync(Email email, CancellationToken cancellationToken = default)
     {

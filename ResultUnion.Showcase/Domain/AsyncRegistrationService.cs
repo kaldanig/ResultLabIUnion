@@ -11,19 +11,17 @@ public sealed class AsyncRegistrationService(UserRepository repository, WelcomeE
             .EnsureAsync(email => repository.EnsureEmailIsFreeAsync(email, cancellationToken))  // Task<Result<Email>>  (async check)
             .BindAsync(email => User.ParseAge(ageInput)                                 // sync step after await
                 .Map(age => new User(Guid.NewGuid(), email, age)))                      // Task<Result<User>>
-            .EnsureAsync(
-                user => user.Age >= RegistrationService.MinimumAge,
-                user => Error.BusinessRule($"Users must be at least {RegistrationService.MinimumAge}; {user.Email} is {user.Age}."))
+            .EnsureAsync(user => user.IsAdult, User.Errors.TooYoung)
             .TapAsync(user => repository.AddAsync(user, cancellationToken))             // async side effect, awaited
             .TapAsync(user => emailSender.SendAsync(user.Email, cancellationToken))
             .TapErrorAsync(error => Console.WriteLine($"    [log] registration rejected: {error}"));
 
     public Task<Result> DeactivateAsync(string? emailInput, CancellationToken cancellationToken = default) =>
         Email.Create(emailInput)
-            .BindAsync(email => repository.FindByEmailAsync(email, cancellationToken))  // Result<Email> -> Task<Result<User>>
-            .MapErrorAsync(error => error.Type == ErrorType.NotFound
-                ? Error.Create("user.not_found", error.Message, ErrorType.NotFound)
-                : error)
+            .BindAsync(email => repository.FindByEmailAsync(email, cancellationToken)   // Result<Email> -> Task<Result<User>>
+                .MapErrorAsync(error => error.Type == ErrorType.NotFound
+                    ? User.Errors.NotFound(email)                                       // infrastructure error -> domain error
+                    : error))
             .BindAsync(user => user.Deactivate());                                      // Task<Result<User>> -> Task<Result>
 
     /// <summary>Starts from a <c>Task&lt;Result&gt;</c> (no value) and continues into a value-producing step.</summary>

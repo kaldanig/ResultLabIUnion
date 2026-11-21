@@ -33,7 +33,7 @@ internal static class CombineDemo
 
                 foreach (var detail in perField)
                 {
-                    Demo.Show($"    {detail.Field}", $"error {detail.Message}");
+                    Demo.Show($"    {detail.Field}", $"error {detail.Code}: {detail.Message}");
                 }
             }
         }
@@ -47,8 +47,6 @@ internal static class CombineDemo
         [
             Email.Create(email).MapError(error => error.WithField("email")),
             User.ParseAge(age).MapError(error => error.WithField("age")),
-            password.Length >= 8
-                ? Result.Success()
-                : Error.Validation("Password must be at least 8 characters.").WithField("password"),
+            Password.Create(password).MapError(error => error.WithField("password")),
         ]);
 }
