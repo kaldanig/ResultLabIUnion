@@ -10,11 +10,9 @@
   <!-- The public API of each package is recorded in PublicAPI.Shipped.txt (released) and PublicAPI.Unshipped.txt (not
        yet released), next to its .csproj. Adding, changing or removing a public member without updating them is a
        build warning (RS0016, RS0017), so every API change, breaking ones included, shows in the diff. On a release,
-       the Unshipped lines move to Shipped. -->
+       the Unshipped lines move to Shipped. The package adds both files to AdditionalFiles itself when they exist. -->
   <ItemGroup Condition="'$(IsPackable)' == 'true'">
     <PackageReference Include="Microsoft.CodeAnalysis.PublicApiAnalyzers" Version="5.6.0" PrivateAssets="all" />
-    <AdditionalFiles Include="PublicAPI.Shipped.txt" />
-    <AdditionalFiles Include="PublicAPI.Unshipped.txt" />
   </ItemGroup>
 
   <!-- Every project in this repository runs the ResultUnion analyzers and offers their code fixes, as a package consumer
