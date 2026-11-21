@@ -19,6 +19,8 @@ var message = Register("ann@example.com", "34") switch
 };
 ```
 
+Why it is built this way, with the alternatives that were considered: [docs/DESIGN.md](docs/DESIGN.md).
+
 ## Requirements
 
 - .NET 11 SDK (`net11.0`)

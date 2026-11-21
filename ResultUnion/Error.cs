@@ -65,7 +65,7 @@ public sealed record Error
         Message = message;
         Type = type;
         Field = field;
-        Details = details ?? ReadOnlyCollection<Error>.Empty;
+        Details = details ?? [];
         Arguments = arguments ?? ReadOnlyDictionary<string, object?>.Empty;
     }
 
