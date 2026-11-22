@@ -65,6 +65,7 @@ Why it is built this way, with the alternatives that were considered: [docs/DESI
 | `ResultUnion.GrpcService` | The same use cases as a gRPC service (`Protos/demo.proto`), failures as rich gRPC statuses |
 | `ResultUnion.GrpcClient` | A console client for the gRPC service that turns every `RpcException` back into an `Error` |
 | `ResultUnion.AppHost` | Runs the Web API, the gRPC service and the client together under Aspire, with their telemetry in Aspire's dashboard |
+| `ResultUnion.AppHost.Tests` | Starts the AppHost with `Aspire.Hosting.Testing` and checks that the Web API answers and that the gRPC client runs every call against the service and exits cleanly |
 
 ```bash
 dotnet build ResultLabIUnion.slnx
