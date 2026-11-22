@@ -8,7 +8,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="11.0.0" />
-    <PackageReference Include="Scalar.AspNetCore" Version="3.1.1" />
+    <PackageReference Include="Scalar.AspNetCore" Version="3.2.0" />
     <!-- OpenTelemetry for the demo: traces, metrics (ResultUnion's included) and logs over OTLP, e.g. to the Aspire Dashboard. -->
     <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.21.0" />
     <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.21.0" />
