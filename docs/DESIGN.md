@@ -36,7 +36,8 @@ was checked with a small program, and the observed output is quoted.
   [40 Conventions are suggestions, mistakes are warnings](#40-conventions-are-suggestions-mistakes-are-warnings) ·
   [41 Result&lt;Error&gt; is an analyzer warning](#41-resulterror-is-an-analyzer-warning) ·
   [42 Results refuse to be serialized](#42-results-refuse-to-be-serialized) ·
-  [43 The API review before 1.0](#43-the-api-review-before-10)
+  [43 The API review before 1.0](#43-the-api-review-before-10) ·
+  [44 What 1.x promises](#44-what-1x-promises)
 
 ---
 
@@ -404,10 +405,10 @@ and no `arguments`.
 **Context.** Observed with System.Text.Json: a `Result<int>` success serializes as just `1`, a failure as the error
 object, and a successful `Result` throws `InvalidOperationException` because its `Error` getter throws.
 
-**Decision.** No JSON converter. Results are mapped at the API boundary, to a DTO or to problem details.
+**Decision.** No JSON format for results. Results are mapped at the API boundary, to a DTO or to problem details.
 
-**Consequences.** The README warns against returning results from controllers or storing them as JSON.
-An `Error` on its own does have a JSON format ([34](#34-errors-have-a-fixed-json-format)).
+**Consequences.** An `Error` on its own does have a JSON format ([34](#34-errors-have-a-fixed-json-format)). Since
+0.4.0 a converter enforces the decision: serializing a result throws ([42](#42-results-refuse-to-be-serialized)).
 
 ### 30. HTTP responses are typed
 
@@ -694,3 +695,22 @@ the first pipeline step turns a `ValueTask` into a `Task`, so they would rarely 
 break.
 
 **Consequences.** 1.0 removes `ToStatusCode()` and the two `GetValueOrThrowRpc(onSuccess)` overloads.
+
+### 44. What 1.x promises
+
+**Context.** Semantic versioning says what a major version may break, but not what counts as the API of a library
+whose errors travel as JSON, problem details and gRPC statuses, and whose analyzers can fail a build.
+
+**Decision.** 1.x keeps the public C# API, documented behavior, the wire formats (the `Error` JSON format, the error
+codes the library creates, the HTTP and gRPC mappings and their bodies, the telemetry names) and the analyzer rules'
+IDs and severities. New members and new parts of a wire format may be added in a minor version; a new analyzer rule
+arrives as a suggestion (Info) and can become a warning only in the next major version. 1.0 is released after a
+release candidate that has been out for four weeks. The full list is in [ROADMAP.md](ROADMAP.md).
+
+**Alternatives.** Covering only the C# API would let a minor version change a code that clients switch on, or a
+problem details member they read, without a compile error anywhere. Allowing new warnings in minor versions, as
+RU0005, RU0009 and RU0010 were added before 1.0, would fail builds that treat warnings as errors on an upgrade. Going
+straight to 1.0.0 would leave no time for feedback on the removal of the deprecated members.
+
+**Consequences.** A rule that finds real bugs starts as a suggestion in 1.x, so it is less visible until 2.0. Wire
+format changes are additive, and readers must ignore what they do not know, as ResultUnion's own readers do.

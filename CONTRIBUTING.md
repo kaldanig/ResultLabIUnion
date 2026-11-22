@@ -38,6 +38,8 @@ The build must finish without warnings; several checks turn a mistake into a war
   report instead of suppressing it; a deliberate exception gets a `#pragma warning disable` with the reason.
 - **Public API.** A new or changed public member must be listed in the package's `PublicAPI.Unshipped.txt` (the build
   reports RS0016/RS0017 until it is). Do not edit `PublicAPI.Shipped.txt`; it changes only when a version is released.
+- **Compatibility.** What a change may and may not alter (the API, documented behavior, the wire formats, analyzer
+  severities) is in [docs/ROADMAP.md](docs/ROADMAP.md), "Versioning in 1.x". A new analyzer rule starts as Info.
 - **Compatibility.** `dotnet pack` compares each package with the last release and fails on a binary breaking change
   (CP0002, CP0006, …). Before 1.0 a break can be accepted, but only on purpose: see
   [docs/RELEASING.md](docs/RELEASING.md).

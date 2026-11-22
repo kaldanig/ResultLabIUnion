@@ -860,7 +860,8 @@ This guide, the articles, the other pages in `docs/` and an API reference for th
 ## Releases
 
 Changes per version are in [CHANGELOG.md](CHANGELOG.md); how a version is published is in
-[docs/RELEASING.md](docs/RELEASING.md).
+[docs/RELEASING.md](docs/RELEASING.md). What is left before 1.0, and what 1.x promises (the C# API, documented
+behavior, the wire formats and the analyzer rules): [docs/ROADMAP.md](docs/ROADMAP.md).
 
 ## Contributing
 
