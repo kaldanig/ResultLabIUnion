@@ -41,8 +41,8 @@ builder.Services.AddOpenTelemetry()
 var app = builder.Build();
 
 // Creates the database on the first start. A real application uses migrations instead (dotnet ef migrations add).
-using (var scope = app.Services.CreateScope())
-    scope.ServiceProvider.GetRequiredService<ShopDbContext>().Database.EnsureCreated();
+await using (var scope = app.Services.CreateAsyncScope())
+    await scope.ServiceProvider.GetRequiredService<ShopDbContext>().Database.EnsureCreatedAsync();
 
 app.UseExceptionHandler();
 app.UseRequestLocalization(options => options

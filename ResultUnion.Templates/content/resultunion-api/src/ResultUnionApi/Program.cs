@@ -21,8 +21,8 @@ var app = builder.Build();
 #if (Sqlite)
 
 // Creates the database on the first start. A real application uses migrations instead (dotnet ef migrations add).
-using (var scope = app.Services.CreateScope())
-    scope.ServiceProvider.GetRequiredService<AppDbContext>().Database.EnsureCreated();
+await using (var scope = app.Services.CreateAsyncScope())
+    await scope.ServiceProvider.GetRequiredService<AppDbContext>().Database.EnsureCreatedAsync();
 #endif
 
 app.UseExceptionHandler();
