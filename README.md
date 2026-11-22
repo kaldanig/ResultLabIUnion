@@ -821,8 +821,8 @@ the result (`EnsureAsync`, `TapAsync`, `TapErrorAsync`) reuse their source task.
   because the two overloads make `out var` ambiguous.
 - **Other languages.** The `T` / `Error` → `Result<T>` conversion is a C# 15 union conversion. VB, F# and projects with
   `LangVersion` below 15 use `Result<T>.Success` and `Result<T>.Failure`.
-- **Equality.** Results and errors compare by value. One quirk: `default(Result<int>)` is not equal to
-  `Result<int>.Failure(Error.DefaultResult)`, although both carry the same error.
+- **Equality.** Results and errors compare by value: two successes by their values, two failures by their errors. A
+  `default(Result<int>)` equals `Result<int>.Failure(Error.DefaultResult)`, because both carry that error.
 
 ## Documentation site
 

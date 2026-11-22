@@ -87,9 +87,11 @@ on a failure.
 **Alternatives.** Treating `default` as "no case" would make every `switch` need a `null` arm and every caller check a
 third state.
 
-**Consequences.** One quirk remains: `default(Result<int>) == Result<int>.Failure(Error.DefaultResult)` is `false`,
-because record equality compares the backing field (`null`) rather than the `Error` property. It is documented and
-deliberately not locked in by a test.
+**Consequences.** The `Error` property turns the `null` backing field of a default result into `Error.DefaultResult`.
+Equality does the same: both result types write their own `Equals` and `GetHashCode`, which compare the case and then
+the value or the `Error` property, so `default(Result<int>) == Result<int>.Failure(Error.DefaultResult)`. Until 0.2.0
+the compiler-generated record equality compared the fields, and the two were not equal; the record struct stays, so
+`==`, `!=` and `Equals(object)` are still generated and call the hand-written `Equals`.
 
 ### 4. The union case is decided by IsSuccess
 

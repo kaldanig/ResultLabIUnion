@@ -349,6 +349,23 @@ public readonly record struct Result<T> : IUnion, IResultState<T>, IResultFactor
         return this;
     }
 
+    /// <summary>Indicates whether both results are successes with equal values, or failures with equal errors.</summary>
+    /// <remarks>
+    /// Compares what the result exposes, not its fields: a <see langword="default"/> result equals
+    /// <c>Failure(Error.DefaultResult)</c>, because both carry that error (DESIGN.md, 3).
+    /// </remarks>
+    public bool Equals(Result<T> other) =>
+        IsSuccess == other.IsSuccess
+        && (IsSuccess
+            ? EqualityComparer<T>.Default.Equals(_value!, other._value!)
+            : Error.Equals(other.Error));
+
+    /// <inheritdoc/>
+    public override int GetHashCode() =>
+        IsSuccess
+            ? HashCode.Combine(true, _value)
+            : HashCode.Combine(false, Error);
+
     /// <inheritdoc/>
     public override string ToString() =>
         IsSuccess
@@ -712,6 +729,21 @@ public readonly partial record struct Result : IResultFactory<Result>
 
     /// <summary>Wraps <paramref name="error"/> in a failed result, so a method returning <see cref="Result"/> can <c>return error;</c>.</summary>
     public static implicit operator Result(Error error) => Failure(error);
+
+    /// <summary>Indicates whether both results are successes, or failures with equal errors.</summary>
+    /// <remarks>
+    /// Compares what the result exposes, not its fields: a <see langword="default"/> result equals
+    /// <c>Failure(Error.DefaultResult)</c>, because both carry that error (DESIGN.md, 3).
+    /// </remarks>
+    public bool Equals(Result other) =>
+        IsSuccess == other.IsSuccess
+        && (IsSuccess || Error.Equals(other.Error));
+
+    /// <inheritdoc/>
+    public override int GetHashCode() =>
+        IsSuccess
+            ? HashCode.Combine(true)
+            : HashCode.Combine(false, Error);
 
     /// <inheritdoc/>
     public override string ToString() =>

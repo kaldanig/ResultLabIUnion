@@ -9,6 +9,14 @@ are in the diff of those files.
 
 ## [Unreleased]
 
+### ResultUnion
+
+#### Changed
+
+- `Result` and `Result<T>` compare by what they expose: the case, then the value of a success or the error of a
+  failure. A `default` result now equals `Failure(Error.DefaultResult)` (`==`, `Equals` and `GetHashCode`); before, the
+  record equality compared the fields, and the two were not equal.
+
 ### ResultUnion (analyzers)
 
 - RU0005 (Warning): a `catch` of `OperationCanceledException` / `TaskCanceledException` without a `when` filter that
