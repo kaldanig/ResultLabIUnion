@@ -9,6 +9,24 @@ are in the diff of those files.
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-11-22
+
+### Upgrading from 0.2.0
+
+- **`IResultState` is now `IAnyResult`.** Replace the name; the members are the same. `IResultState<T>` is gone: use
+  `Result<T>` itself, or `IAnyResult` where results of different value types are mixed
+  (`Result.Combine(IEnumerable<IAnyResult>)`). Code that only uses `Result`, `Result<T>`, `Error` and
+  `IResultFactory<TSelf>` compiles unchanged, but a library compiled against 0.2.0 that used `IResultState` must be
+  recompiled.
+- **Two new warnings may appear when you build.** RU0005 (a cancellation caught and returned as a result) and RU0009
+  (a `Result<Error>`, usually `Map` where `Bind` or `Ensure` was meant) are warnings; a project with
+  `TreatWarningsAsErrors` fails on them until they are fixed. Each one points at a real problem; the rules, with
+  examples, are in [docs/ANALYZERS.md](docs/ANALYZERS.md). RU0006–RU0008 are suggestions that show only in the IDE.
+- **Equality.** `default(Result<T>)` now equals `Result<T>.Failure(Error.DefaultResult)`, and the two have the same
+  hash code. Nothing else about equality changed.
+- **New, optional packages:** `ResultUnion.Http` (an HTTP response read back as a result), `ResultUnion.Testing` (test
+  assertions) and `ResultUnion.Templates` (`dotnet new resultunion-api`).
+
 ### ResultUnion
 
 #### Changed
@@ -124,6 +142,7 @@ The first release. Requires .NET 11 (C# 15 unions).
 - `RpcException.ToError()` for clients, restoring type, code, message, arguments and field violations.
 - Failures that leave a service tag the call's span with the error code and category.
 
-[Unreleased]: https://github.com/kaldanig/ResultLabIUnion/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/kaldanig/ResultLabIUnion/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/kaldanig/ResultLabIUnion/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/kaldanig/ResultLabIUnion/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/kaldanig/ResultLabIUnion/releases/tag/v0.1.0

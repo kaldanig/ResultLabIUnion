@@ -46,14 +46,12 @@ ResultUnion.ErrorTypeExtensions.extension(ResultUnion.Error!)
 ResultUnion.ErrorTypeExtensions.extension(ResultUnion.Error!).IsTransient.get -> bool
 ResultUnion.ErrorTypeExtensions.extension(ResultUnion.ErrorType)
 ResultUnion.ErrorTypeExtensions.extension(ResultUnion.ErrorType).IsTransient() -> bool
+ResultUnion.IAnyResult
+ResultUnion.IAnyResult.Error.get -> ResultUnion.Error!
+ResultUnion.IAnyResult.IsFailure.get -> bool
+ResultUnion.IAnyResult.IsSuccess.get -> bool
 ResultUnion.IResultFactory<TSelf>
 ResultUnion.IResultFactory<TSelf>.Failure(ResultUnion.Error! error) -> TSelf
-ResultUnion.IResultState
-ResultUnion.IResultState.Error.get -> ResultUnion.Error!
-ResultUnion.IResultState.IsFailure.get -> bool
-ResultUnion.IResultState.IsSuccess.get -> bool
-ResultUnion.IResultState<T>
-ResultUnion.IResultState<T>.ResultValue.get -> T
 ResultUnion.Result
 ResultUnion.Result.Bind(System.Func<ResultUnion.Result>! next) -> ResultUnion.Result
 ResultUnion.Result.Bind<T>(System.Func<ResultUnion.Result<T>>! next) -> ResultUnion.Result<T>
@@ -260,9 +258,9 @@ static ResultUnion.Error.Validation(System.Collections.Generic.IEnumerable<Resul
 static ResultUnion.ErrorTypeExtensions.get_IsTransient(ResultUnion.Error! error) -> bool
 static ResultUnion.ErrorTypeExtensions.IsTransient(this ResultUnion.ErrorType type) -> bool
 static ResultUnion.Result.Combine(params System.ReadOnlySpan<ResultUnion.Result> results) -> ResultUnion.Result
-static ResultUnion.Result.Combine(System.Collections.Generic.IEnumerable<ResultUnion.IResultState!>! results) -> ResultUnion.Result
+static ResultUnion.Result.Combine(System.Collections.Generic.IEnumerable<ResultUnion.IAnyResult!>! results) -> ResultUnion.Result
 static ResultUnion.Result.CombineAll(params System.ReadOnlySpan<ResultUnion.Result> results) -> ResultUnion.Result
-static ResultUnion.Result.CombineAll(System.Collections.Generic.IEnumerable<ResultUnion.IResultState!>! results) -> ResultUnion.Result
+static ResultUnion.Result.CombineAll(System.Collections.Generic.IEnumerable<ResultUnion.IAnyResult!>! results) -> ResultUnion.Result
 static ResultUnion.Result.CombineAll<T1, T2, T3, T4>(ResultUnion.Result<T1> first, ResultUnion.Result<T2> second, ResultUnion.Result<T3> third, ResultUnion.Result<T4> fourth) -> ResultUnion.Result<(T1, T2, T3, T4)>
 static ResultUnion.Result.CombineAll<T1, T2, T3>(ResultUnion.Result<T1> first, ResultUnion.Result<T2> second, ResultUnion.Result<T3> third) -> ResultUnion.Result<(T1, T2, T3)>
 static ResultUnion.Result.CombineAll<T1, T2>(ResultUnion.Result<T1> first, ResultUnion.Result<T2> second) -> ResultUnion.Result<(T1, T2)>

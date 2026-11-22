@@ -1,1 +1,43 @@
 #nullable enable
+ResultUnion.Testing.ResultAssertionException
+ResultUnion.Testing.ResultAssertionException.ResultAssertionException(string! message) -> void
+ResultUnion.Testing.ResultAssertions
+ResultUnion.Testing.ResultAssertions.extension(ResultUnion.Error!)
+ResultUnion.Testing.ResultAssertions.extension(ResultUnion.Error!).ShouldHaveArgument(string! name, object? value) -> ResultUnion.Error!
+ResultUnion.Testing.ResultAssertions.extension(ResultUnion.Error!).ShouldHaveCode(string! code) -> ResultUnion.Error!
+ResultUnion.Testing.ResultAssertions.extension(ResultUnion.Error!).ShouldHaveField(string? field) -> ResultUnion.Error!
+ResultUnion.Testing.ResultAssertions.extension(ResultUnion.Error!).ShouldHaveFieldErrors(params System.Collections.Generic.IEnumerable<(string? Field, string! Code)>! expected) -> ResultUnion.Error!
+ResultUnion.Testing.ResultAssertions.extension(ResultUnion.Error!).ShouldHaveType(ResultUnion.ErrorType type) -> ResultUnion.Error!
+ResultUnion.Testing.ResultAssertions.extension(ResultUnion.Result)
+ResultUnion.Testing.ResultAssertions.extension(ResultUnion.Result).ShouldFail() -> ResultUnion.Error!
+ResultUnion.Testing.ResultAssertions.extension(ResultUnion.Result).ShouldFail(string! code) -> ResultUnion.Error!
+ResultUnion.Testing.ResultAssertions.extension(ResultUnion.Result).ShouldSucceed() -> void
+ResultUnion.Testing.ResultAssertions.extension(System.Threading.Tasks.Task<ResultUnion.Result>!)
+ResultUnion.Testing.ResultAssertions.extension(System.Threading.Tasks.Task<ResultUnion.Result>!).ShouldFailAsync() -> System.Threading.Tasks.Task<ResultUnion.Error!>!
+ResultUnion.Testing.ResultAssertions.extension(System.Threading.Tasks.Task<ResultUnion.Result>!).ShouldFailAsync(string! code) -> System.Threading.Tasks.Task<ResultUnion.Error!>!
+ResultUnion.Testing.ResultAssertions.extension(System.Threading.Tasks.Task<ResultUnion.Result>!).ShouldSucceedAsync() -> System.Threading.Tasks.Task!
+ResultUnion.Testing.ResultAssertions.extension<T>(ResultUnion.Result<T>)
+ResultUnion.Testing.ResultAssertions.extension<T>(ResultUnion.Result<T>).ShouldFail() -> ResultUnion.Error!
+ResultUnion.Testing.ResultAssertions.extension<T>(ResultUnion.Result<T>).ShouldFail(string! code) -> ResultUnion.Error!
+ResultUnion.Testing.ResultAssertions.extension<T>(ResultUnion.Result<T>).ShouldSucceed() -> T
+ResultUnion.Testing.ResultAssertions.extension<T>(System.Threading.Tasks.Task<ResultUnion.Result<T>>!)
+ResultUnion.Testing.ResultAssertions.extension<T>(System.Threading.Tasks.Task<ResultUnion.Result<T>>!).ShouldFailAsync() -> System.Threading.Tasks.Task<ResultUnion.Error!>!
+ResultUnion.Testing.ResultAssertions.extension<T>(System.Threading.Tasks.Task<ResultUnion.Result<T>>!).ShouldFailAsync(string! code) -> System.Threading.Tasks.Task<ResultUnion.Error!>!
+ResultUnion.Testing.ResultAssertions.extension<T>(System.Threading.Tasks.Task<ResultUnion.Result<T>>!).ShouldSucceedAsync() -> System.Threading.Tasks.Task<T>!
+static ResultUnion.Testing.ResultAssertions.ShouldFail(this ResultUnion.Result result) -> ResultUnion.Error!
+static ResultUnion.Testing.ResultAssertions.ShouldFail(this ResultUnion.Result result, string! code) -> ResultUnion.Error!
+static ResultUnion.Testing.ResultAssertions.ShouldFail<T>(this ResultUnion.Result<T> result) -> ResultUnion.Error!
+static ResultUnion.Testing.ResultAssertions.ShouldFail<T>(this ResultUnion.Result<T> result, string! code) -> ResultUnion.Error!
+static ResultUnion.Testing.ResultAssertions.ShouldFailAsync(this System.Threading.Tasks.Task<ResultUnion.Result>! source) -> System.Threading.Tasks.Task<ResultUnion.Error!>!
+static ResultUnion.Testing.ResultAssertions.ShouldFailAsync(this System.Threading.Tasks.Task<ResultUnion.Result>! source, string! code) -> System.Threading.Tasks.Task<ResultUnion.Error!>!
+static ResultUnion.Testing.ResultAssertions.ShouldFailAsync<T>(this System.Threading.Tasks.Task<ResultUnion.Result<T>>! source) -> System.Threading.Tasks.Task<ResultUnion.Error!>!
+static ResultUnion.Testing.ResultAssertions.ShouldFailAsync<T>(this System.Threading.Tasks.Task<ResultUnion.Result<T>>! source, string! code) -> System.Threading.Tasks.Task<ResultUnion.Error!>!
+static ResultUnion.Testing.ResultAssertions.ShouldHaveArgument(this ResultUnion.Error! error, string! name, object? value) -> ResultUnion.Error!
+static ResultUnion.Testing.ResultAssertions.ShouldHaveCode(this ResultUnion.Error! error, string! code) -> ResultUnion.Error!
+static ResultUnion.Testing.ResultAssertions.ShouldHaveField(this ResultUnion.Error! error, string? field) -> ResultUnion.Error!
+static ResultUnion.Testing.ResultAssertions.ShouldHaveFieldErrors(this ResultUnion.Error! error, params System.Collections.Generic.IEnumerable<(string? Field, string! Code)>! expected) -> ResultUnion.Error!
+static ResultUnion.Testing.ResultAssertions.ShouldHaveType(this ResultUnion.Error! error, ResultUnion.ErrorType type) -> ResultUnion.Error!
+static ResultUnion.Testing.ResultAssertions.ShouldSucceed(this ResultUnion.Result result) -> void
+static ResultUnion.Testing.ResultAssertions.ShouldSucceed<T>(this ResultUnion.Result<T> result) -> T
+static ResultUnion.Testing.ResultAssertions.ShouldSucceedAsync(this System.Threading.Tasks.Task<ResultUnion.Result>! source) -> System.Threading.Tasks.Task!
+static ResultUnion.Testing.ResultAssertions.ShouldSucceedAsync<T>(this System.Threading.Tasks.Task<ResultUnion.Result<T>>! source) -> System.Threading.Tasks.Task<T>!

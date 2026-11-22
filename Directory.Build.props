@@ -19,7 +19,7 @@
 
   <!-- Package metadata -->
   <PropertyGroup>
-    <VersionPrefix>0.2.0</VersionPrefix>
+    <VersionPrefix>0.3.0</VersionPrefix>
     <Authors>Giorgi Kaldani</Authors>
     <Copyright>Copyright (c) 2026 Giorgi Kaldani</Copyright>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>

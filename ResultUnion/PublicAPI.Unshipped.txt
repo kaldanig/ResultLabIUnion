@@ -1,15 +1,1 @@
 #nullable enable
-ResultUnion.IAnyResult
-ResultUnion.IAnyResult.Error.get -> ResultUnion.Error!
-ResultUnion.IAnyResult.IsFailure.get -> bool
-ResultUnion.IAnyResult.IsSuccess.get -> bool
-static ResultUnion.Result.Combine(System.Collections.Generic.IEnumerable<ResultUnion.IAnyResult!>! results) -> ResultUnion.Result
-static ResultUnion.Result.CombineAll(System.Collections.Generic.IEnumerable<ResultUnion.IAnyResult!>! results) -> ResultUnion.Result
-*REMOVED*ResultUnion.IResultState
-*REMOVED*ResultUnion.IResultState.Error.get -> ResultUnion.Error!
-*REMOVED*ResultUnion.IResultState.IsFailure.get -> bool
-*REMOVED*ResultUnion.IResultState.IsSuccess.get -> bool
-*REMOVED*ResultUnion.IResultState<T>
-*REMOVED*ResultUnion.IResultState<T>.ResultValue.get -> T
-*REMOVED*static ResultUnion.Result.Combine(System.Collections.Generic.IEnumerable<ResultUnion.IResultState!>! results) -> ResultUnion.Result
-*REMOVED*static ResultUnion.Result.CombineAll(System.Collections.Generic.IEnumerable<ResultUnion.IResultState!>! results) -> ResultUnion.Result
