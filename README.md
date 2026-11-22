@@ -710,10 +710,12 @@ OrderLine`, in the test project, its tests.
 
 `dotnet new resultunion-grpc -n Catalog` creates the same feature behind gRPC: a `.proto` contract, a service whose
 methods end with `GetValueOrThrowRpcAsync` (a failure becomes a status with `ErrorInfo` and `BadRequest`), and tests
-that call it through the generated client and read failures back with `ToError()`.
+that call it through the generated client and read failures back with `ToError()`; the feature templates take
+`--grpc` for a feature in such a project.
 
 A walk-through of the generated code, the responses it sends and how to add a feature of your own:
-[Starting a project from the template](docs/articles/templates.md).
+[Starting a project from the template](docs/articles/templates.md), and for gRPC
+[Starting a gRPC service from the template](docs/articles/grpc-template.md).
 
 ## Using ResultUnion in a DDD application
 

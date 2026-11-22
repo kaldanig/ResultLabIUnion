@@ -2,6 +2,8 @@
   href: getting-started.md
 - name: Starting from the template
   href: templates.md
+- name: Starting a gRPC service
+  href: grpc-template.md
 - name: EF Core
   href: ef-core.md
 - name: Pipeline behaviors

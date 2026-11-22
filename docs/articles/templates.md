@@ -255,56 +255,5 @@ on the assertions, [testing](testing.md).
 
 ## A gRPC service
 
-The same feature behind gRPC instead of HTTP:
-
-```powershell
-dotnet new resultunion-grpc -n Catalog
-```
-
-The domain and the use cases are the ones `resultunion-api` creates; `Protos/products.proto` is the contract, and
-`ProductCatalogService` the host. Each method maps the request to the same command and ends the pipeline with
-`GetValueOrThrowRpcAsync`, which returns the reply or throws an `RpcException`:
-
-```csharp
-    public override Task<ProductReply> CreateProduct(CreateProductRequest request, ServerCallContext context) =>
-        service.CreateAsync(new CreateProduct(request.Name, request.HasPrice ? (decimal)request.Price : null), context.CancellationToken)
-            .MapAsync(ToReply)
-            .GetValueOrThrowRpcAsync(Domain);
-```
-
-The status code comes from the error's type (Validation is `INVALID_ARGUMENT`, NotFound `NOT_FOUND`, Conflict
-`FAILED_PRECONDITION`), and the status details carry the rest: an `ErrorInfo` with the code and arguments and, for
-validation, a `BadRequest` with every invalid field. The price is `optional double` in the contract, so a missing price
-is `price.required` and not a price of 0; the id is text, since protobuf has no GUID, and one that does not parse is
-`product.invalid_id` on the field `id`.
-
-The tests call the service through the generated client over `WebApplicationFactory`'s in-memory server. A .NET client
-turns a failed call back into an `Error`, with the same codes and fields, and only an `RpcException` becomes one:
-
-```csharp
-        return Result.TryAsync(() => _client.CreateProductAsync(request, cancellationToken: Ct).ResponseAsync, (RpcException ex) => ex.ToError());
-```
-
-The service has reflection, so `grpcurl -plaintext localhost:5090 list` shows it. `AddGrpcReflectionWithErrorDetails`
-describes every service mapped with `MapGrpcService`, and `error_details.proto` as well, so grpcurl and Postman show a
-failure's `ErrorInfo` and `BadRequest` as JSON; the project's README has a grpcurl call for each outcome.
-`--database sqlite` stores the products in SQLite through EF Core, as `resultunion-api` does, and `--no-tests` leaves
-the test project out. `resultunion-valueobject` works in this project as in any other.
-
-A second gRPC feature comes from the feature templates with `--grpc`, from the solution folder after a `dotnet restore`:
-
-```powershell
-dotnet new resultunion-feature -n Supplier -o src/Catalog --grpc
-```
-
-```powershell
-dotnet new resultunion-feature-tests -n Supplier -o tests/Catalog.Tests --grpc
-```
-
-Instead of endpoints, the feature gets its contract in `Protos/suppliers.proto` (the project compiles every file in
-`Protos/`) and `SupplierCatalogService`, whose methods end with `GetValueOrThrowRpcAsync`; the id arrives as text and
-`Supplier.ParseId` turns one that is not a GUID into `supplier.invalid_id` on the field `id`. Register it with
-`builder.Services.AddSuppliers()` and `app.MapSuppliers()`; reflection finds the new service by itself. `--crud` adds
-`RenameSupplier` and `RemoveSupplier` with the version, a stale one being `ABORTED` with
-`supplier.changed_concurrently`, and `--database sqlite` stores it in the application's DbContext. The tests call the
-service through the generated client and read each failure back with `ToError()`.
+`dotnet new resultunion-grpc` creates the same feature behind gRPC, and the feature templates take `--grpc`: see
+[Starting a gRPC service from the template](grpc-template.md).
