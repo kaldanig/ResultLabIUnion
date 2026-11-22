@@ -47,8 +47,9 @@ BenchmarkDotNet exits with 0 even when a benchmark fails; the project returns 1 
 - **Against other libraries, ResultUnion and ErrorOr are in the same range, and FluentResults and exceptions are
   not.** For one use case with every failure reported: 16–87 ns for ResultUnion, 11–35 ns for ErrorOr, 127–405 ns
   for FluentResults (which allocates on success too), and about 930 ns for an exception at the first failure.
-- **A failed gRPC call costs about a microsecond more on each side.** Building the rich status and reading it back
-  take 0.6–1.3 µs and 2–5 KB per failure, with every field reported; a successful call pays nothing.
+- **A failure that crosses the wire costs up to about two microseconds on each side.** Writing an RFC 9457 problem as JSON
+  takes 1.1–2.3 µs and a client reads it back in 0.8–1.7 µs; the gRPC status and its reading take 0.6–1.3 µs. Each
+  allocates a few KB per failure, with every field reported; a success pays nothing.
 - **Async chains allocate a task per step that creates a value.** With Runtime Async the plain `async` baseline
   allocates nothing, so a chain's 256 B is the library's own cost: small next to any real I/O (a database call is
   100,000+ ns), but visible in a tight loop.
@@ -137,6 +138,22 @@ How to read it:
 
 None of these numbers matter next to a database call (100,000 ns and more). They matter in a loop that validates many
 values, and there the difference that counts is between results of either kind and exceptions.
+
+## HTTP errors
+
+A failure that leaves a Minimal API endpoint becomes an RFC 9457 problem (`ToHttpResult`), written as JSON with the
+error's code, arguments and, for validation, every field; ResultUnion.Http reads it back on the client
+(`ReadResultAsync`). The code is `HttpMappingBenchmarks.cs`; like the gRPC section below, these numbers are from a run
+of that class alone, on the same machine, on 2026-11-23.
+
+| Failure | `ToHttpResult` | written as JSON (endpoint) | `ReadResultAsync` (client) |
+|---|---:|---:|---:|
+| not found, one argument | 48 ns, 304 B | 1,118 ns, 2.9 KB | 750 ns, 1.6 KB |
+| two invalid fields, with arguments | 336 ns, 1.8 KB | 2,258 ns, 4.8 KB | 1,733 ns, 3.2 KB |
+
+`ToHttpResult` only builds the `ProblemDetails`; writing it, with `System.Text.Json` into the response body, is most of
+the cost. The client column includes creating the `HttpResponseMessage` and its content, which a real call has anyway.
+The same error costs about the same as over gRPC: the work is in the serialization, whichever format it is.
 
 ## gRPC errors
 

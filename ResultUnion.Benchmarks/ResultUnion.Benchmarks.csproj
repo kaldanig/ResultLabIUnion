@@ -21,6 +21,8 @@
   <ItemGroup>
     <ProjectReference Include="..\ResultUnion\ResultUnion.csproj" />
     <ProjectReference Include="..\ResultUnion.Grpc\ResultUnion.Grpc.csproj" />
+    <ProjectReference Include="..\ResultUnion.AspNetCore\ResultUnion.AspNetCore.csproj" />
+    <ProjectReference Include="..\ResultUnion.Http\ResultUnion.Http.csproj" />
   </ItemGroup>
 
 </Project>
