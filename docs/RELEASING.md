@@ -24,8 +24,9 @@ with NuGet trusted publishing: no API key is stored anywhere.
    `## Release 0.2.0`.
 2. **Version.** Set `<VersionPrefix>` in `Directory.Build.props` (for example `0.2.0`).
 3. **Changelog.** In `CHANGELOG.md`, rename `## [Unreleased]` to `## [0.2.0] - YYYY-MM-DD`, add a new empty
-   `## [Unreleased]` above it, and update the links at the bottom.
-4. **Commit, merge to master, push.** Wait for CI to pass.
+   `## [Unreleased]` above it, and update the links at the bottom. When the version breaks anything, open its section
+   with "### Upgrading from 0.1.0": what to change in code that used the previous version.
+4. **Commit, merge to master, push.** Wait for CI to pass: tag only a commit whose CI is green.
 5. **Tag and push the tag:**
 
    ```powershell
@@ -36,11 +37,28 @@ with NuGet trusted publishing: no API key is stored anywhere.
    git push origin v0.2.0
    ```
 
-6. **Baseline.** After the packages are on nuget.org, set `<PackageValidationBaselineVersion>` in
-   `Directory.Build.targets` to the version just released (for example `0.2.0`), delete any
-   `CompatibilitySuppressions.xml`, and commit. From then on `dotnet pack` compares every change with that version.
-   A package released for the first time (`<IsNewPackage>true</IsNewPackage>` in its project, as
-   `ResultUnion.FluentValidation` had until 0.2.0) had no baseline until now: remove that property in the same commit.
+   The tag starts `publish.yml`. Check its log: every package should say "Your package was pushed", none 403 or
+   Conflict.
+6. **GitHub Release.** When `publish.yml` has succeeded, create the release from the packages it pushed (the
+   `packages-0.2.0` artifact of the run), with the version's changelog section as the text (links to other pages as
+   full URLs, because relative ones do not resolve on the release page):
+
+   ```powershell
+   gh release create v0.2.0 --title "ResultUnion 0.2.0" --notes-file notes.md --verify-tag packages/*.nupkg packages/*.snupkg
+   ```
+
+   Add `--prerelease` for a release candidate.
+7. **Baseline.** Set `<PackageValidationBaselineVersion>` in `Directory.Build.targets` to the version just released
+   (for example `0.2.0`), delete any `CompatibilitySuppressions.xml`, and commit. From then on `dotnet pack` compares
+   every change with that version. A package released for the first time (`<IsNewPackage>true</IsNewPackage>` in its
+   project, as `ResultUnion.FluentValidation` had until 0.2.0) had no baseline until now: remove that property in the
+   same commit.
+
+   Package validation downloads the baseline from nuget.org, which lists a new version 10 to 30 minutes after the push.
+   Push this commit only when every package shows it (`https://api.nuget.org/v3-flatcontainer/resultunion/index.json`
+   and the same for each package), or CI fails to restore the baseline. Pack locally with
+   `-p:RestoreNoHttpCache=true`: NuGet's HTTP cache keeps the old version list for up to 30 minutes and reports
+   "Unable to find package" although the version is there.
 
 The template package (`ResultUnion.Templates`) is not in the solution and has no API, so it has no PublicAPI files and
 no package validation. When it is packed, `RESULTUNION_VERSION` in its template projects becomes the package version,
@@ -53,8 +71,13 @@ Before the first release of a new package, check the trusted publishing policy o
 pushing *new* packages (not only new versions), with a glob pattern that matches the new ID (`*` or `ResultUnion*`).
 Otherwise `publish.yml` pushes the existing packages and fails with 403 on the new one.
 
-`publish.yml` refuses a tag that does not match `VersionPrefix` or has no changelog entry. A prerelease is a tag with a
-suffix on the same prefix: `v0.2.0-preview.1` publishes `0.2.0-preview.1`.
+`publish.yml` refuses a tag that does not match `VersionPrefix` or has no changelog entry for exactly that version.
+
+**A release candidate** is a tag with a suffix on the same prefix: with `VersionPrefix` `1.0.0`, the tag
+`v1.0.0-rc.1` publishes `1.0.0-rc.1`, and the changelog needs a `## [1.0.0-rc.1] - YYYY-MM-DD` section. The steps are
+the same, with two differences: the GitHub Release is marked `--prerelease`, and the baseline becomes the release
+candidate (`1.0.0-rc.1`), so the final version can only add to it. The final release then gets its own section,
+`## [1.0.0]`, which lists the changes since the last release candidate, or says there are none.
 
 **A published version can never be reused**, even after unlisting it on nuget.org. If a release is wrong, fix it and
 release the next version. Never delete and recreate a tag that has been published.

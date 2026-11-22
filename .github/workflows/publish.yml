@@ -44,8 +44,9 @@ jobs:
             echo "::error::Tag $GITHUB_REF_NAME does not match VersionPrefix $PROPS_PREFIX in Directory.Build.props"
             exit 1
           fi
-          if ! grep -q "^## \[$PREFIX\]" CHANGELOG.md; then
-            echo "::error::CHANGELOG.md has no '## [$PREFIX]' entry"
+          # The section of exactly this version: "## [1.0.0-rc.1]" for a release candidate, "## [1.0.0]" for the release.
+          if ! grep -qF "## [$VERSION]" CHANGELOG.md; then
+            echo "::error::CHANGELOG.md has no '## [$VERSION]' entry"
             exit 1
           fi
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
