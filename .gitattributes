@@ -3,6 +3,10 @@
 ###############################################################################
 * text=auto
 
+# Shell scripts run under bash, which stops at the first CRLF line ending; keep them LF everywhere, a Windows
+# checkout included.
+*.sh text eol=lf
+
 ###############################################################################
 # Set default behavior for command prompt diff.
 #
