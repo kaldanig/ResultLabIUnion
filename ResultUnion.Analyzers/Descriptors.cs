@@ -121,4 +121,19 @@ internal static class Descriptors
             + "parameter cannot exclude Error, so the analyzer reports Result<Error> where it is written and where a call "
             + "produces it.",
         helpLinkUri: HelpBase + "ru0009");
+
+    public static readonly DiagnosticDescriptor SerializedResult = new(
+        id: "RU0010",
+        title: "A Result written as or read from JSON",
+        messageFormat: "{0}; a result is not a JSON contract, so map it at the boundary (ToHttpResult, Match or a "
+            + "switch into a type of your own)",
+        category: Category,
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "System.Text.Json in .NET 11 writes a Result<T> as its union case, so an endpoint that returns a "
+            + "result sends a failure as 200 OK with the error as the body, and the client takes it for a success. "
+            + "Map the result where it leaves the application: ToHttpResult in an endpoint, a DTO for a message. An "
+            + "Error on its own is serializable. At run time the library refuses to serialize a result too, with "
+            + "NotSupportedException; this rule finds the same mistake while you build.",
+        helpLinkUri: HelpBase + "ru0010");
 }

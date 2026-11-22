@@ -14,7 +14,7 @@ body:
         - ResultUnion
         - ResultUnion.AspNetCore
         - ResultUnion.Grpc
-        - Analyzers or code fixes (RU0001–RU0009)
+        - Analyzers or code fixes (RU0001–RU0010)
         - Documentation
     validations:
       required: true

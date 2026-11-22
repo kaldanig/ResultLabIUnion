@@ -14,6 +14,7 @@ compiler and the IDE as soon as a project references the package; there is nothi
 | [RU0007](#ru0007) | Info | `WithField` where the field name is not known | none |
 | [RU0008](#ru0008) | Info | A method that returns a `ValueTask` of a result | none |
 | [RU0009](#ru0009) | Warning | `Result<Error>`, an error as a success value | none |
+| [RU0010](#ru0010) | Warning | A `Result` written as or read from JSON | none |
 
 Rules RU0001–RU0003 have a code fix (the light bulb in Visual Studio and Rider, with Fix All for a document, project or solution). From the command line, `dotnet format analyzers --diagnostics RU0003 --severity warn` applies one; run one rule per call, because a fix for one rule moves the positions the next rule's diagnostics refer to.
 
@@ -216,3 +217,28 @@ follow on the same chain are not reported again. Usually the step meant `Bind` (
 not reported.
 
 No code fix: which step was meant depends on the code.
+
+## RU0010
+
+**A `Result` written as or read from JSON.** A result is not a JSON contract: it is mapped where it leaves the
+application. System.Text.Json in .NET 11 treats `Result<T>` as a union and writes its case, so an endpoint that
+returns a result sends a failure as `200 OK` with the error as the body, and the client takes it for a success.
+
+```csharp
+app.MapGet("/products/{id}", (Guid id, ProductService s, CancellationToken ct) =>
+    s.FindAsync(id, ct));                                                    // RU0010: Task<Result<Product>> as the body
+
+app.MapGet("/products/{id}", (Guid id, ProductService s, CancellationToken ct) =>
+    s.FindAsync(id, ct).MapAsync(ProductResponse.From).ToHttpResultAsync());  // fine: 200 or a problem response
+
+JsonSerializer.Serialize(result);                                            // RU0010
+JsonSerializer.Serialize(new OrderRejected(order.Id, error));               // fine: an Error is serializable
+```
+
+Reported for a Minimal API handler (`MapGet`, `MapPost`, … with a lambda or a method) that returns a result or a task
+of one, and for a result passed to, or read by, the JSON methods of `JsonSerializer`, `Results` / `TypedResults`,
+`WriteAsJsonAsync` / `ReadFromJsonAsync` and `HttpClient` (`GetFromJsonAsync<Result<T>>`). The library backs it up at
+run time: writing or reading a `Result` or `Result<T>` throws `NotSupportedException` with the same advice, for the
+cases the analyzer cannot see (a result passed on as `object`).
+
+No code fix: the response depends on the endpoint (`ToHttpResult()`, or `ToHttpResult(v => TypedResults.Created(…))`).

@@ -579,7 +579,8 @@ var received = JsonSerializer.Deserialize<RegistrationRejected>(json)!;    // re
 - An `Unexpected` error keeps its message: this format is for trusted services. Clients get problem details or a gRPC
   status, which hide it.
 
-Results themselves are still not serialized (see "Things to know"): send the value, or the error.
+Results themselves are not serialized: writing or reading one throws `NotSupportedException` (see "Things to know").
+Send the value, or the error.
 
 ## OpenTelemetry: which errors, how often, in which request
 
@@ -788,6 +789,7 @@ code fix in the IDE), and the library's conventions as suggestions:
 | `RU0007` (Info) | `WithField` in a single-input value object or a catalog (set the field where the request is read) |
 | `RU0008` (Info) | a method that returns a `ValueTask` of a result (return `Task<…>`) |
 | `RU0009` | `Result<Error>`, usually `Map` with a mapper that returns an error (use `Bind`, `Ensure` or `MapError`) |
+| `RU0010` | a `Result` written as or read from JSON, such as an endpoint that returns one (use `ToHttpResult`) |
 
 Details, examples and how to change a rule's severity: [docs/ANALYZERS.md](docs/ANALYZERS.md).
 
@@ -830,10 +832,11 @@ the result (`EnsureAsync`, `TapAsync`, `TapErrorAsync`) reuse their source task.
 
 - **Do not pass `async` lambdas to `Result.Try`.** They compile, but exceptions after the first `await` are not
   observed. Use `Result.TryAsync`.
-- **Do not serialize results directly.** `System.Text.Json` writes only the case of a `Result<T>` (the value, or the
-  error object), and throws for a successful `Result` because its `Error` getter throws. Map results to a DTO or a
-  ProblemDetails response at the API boundary; in a message, send the value or the `Error`, which has its own JSON
-  format.
+- **Results are not serialized.** Writing or reading a `Result` or `Result<T>` with System.Text.Json throws
+  `NotSupportedException`, with a message that says what to do; RU0010 reports it while you build, including an
+  endpoint that returns a result. Without that, .NET 11 would write a `Result<T>`'s union case, and an endpoint would
+  send a failure as `200 OK` with the error as the body. Map results to a response at the API boundary
+  (`ToHttpResult`); in a message, send the value or the `Error`, which has its own JSON format.
 - **`Result<Error>` is not supported.** Both cases would have the type `Error`, so conversions are ambiguous (CS0457).
 - **Union members are hidden from IntelliSense.** `Value`, `HasValue` and the two `TryGetValue` overloads exist for
   the compiler's pattern matching. Use `TryGetResultValue` and `TryGetError`; `TryGetValue(out var x)` does not compile

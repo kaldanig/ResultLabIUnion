@@ -34,7 +34,7 @@ The build must finish without warnings; several checks turn a mistake into a war
 
 - **Tests.** A fix comes with a test that fails without it; a new member comes with tests for its success path, its
   failure path, and its argument validation. Async members are tested with completed and pending tasks.
-- **Analyzers.** The ResultUnion analyzers (RU0001–RU0009) run on every project, the library included. Fix what they
+- **Analyzers.** The ResultUnion analyzers (RU0001–RU0010) run on every project, the library included. Fix what they
   report instead of suppressing it; a deliberate exception gets a `#pragma warning disable` with the reason.
 - **Public API.** A new or changed public member must be listed in the package's `PublicAPI.Unshipped.txt` (the build
   reports RS0016/RS0017 until it is). Do not edit `PublicAPI.Shipped.txt`; it changes only when a version is released.

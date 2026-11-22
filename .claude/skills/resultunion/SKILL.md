@@ -65,7 +65,8 @@ an untyped `ex => …` catches everything except cancellation. Never pass an `as
 after the first `await` escape): use `TryAsync`. For no value, give `TryAsync` a block lambda: `async () => { await …; }`.
 
 **Never serialize a `Result`.** Map it at the boundary: `ToHttpResult` for HTTP, `GetValueOrThrowRpcAsync` for gRPC,
-or a DTO. `Result` and `Result<T>` are not JSON contracts.
+or a DTO. `Result` and `Result<T>` are not JSON contracts: serializing one throws `NotSupportedException`, and
+returning one from a Minimal API handler is analyzer warning RU0010.
 An `Error` is: it serializes with System.Text.Json as-is, so put the `Error` itself in an event or queue
 message (`record OrderRejected(Guid OrderId, Error Reason)`) instead of copying its code and message into strings.
 
@@ -227,8 +228,9 @@ and never retry a BusinessRule or Unexpected error.
 
 Build the project: the package's analyzers report a discarded `Result` (RU0001), `async` code in `Result.Try`
 (RU0002), `Map` with a mapper that returns a `Result` (RU0003), `ResultValue` / `Error` read without checking
-the result (RU0004), a cancellation catch that returns a result (RU0005) and a `Result<Error>`, usually `Map` with a
-mapper that returns an error (RU0009). As suggestions (Info, in the IDE) they
+the result (RU0004), a cancellation catch that returns a result (RU0005), a `Result<Error>`, usually `Map` with a
+mapper that returns an error (RU0009), and a result written as or read from JSON, such as an endpoint that returns
+one (RU0010). As suggestions (Info, in the IDE) they
 also flag an error created outside a catalog (RU0006), `WithField` in a single-input value object or a catalog
 (RU0007) and a method returning `ValueTask<Result…>` (RU0008). Fix them rather than suppressing them; a discard
 that is really intended is written `_ = ...`.

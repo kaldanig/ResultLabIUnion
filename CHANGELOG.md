@@ -9,6 +9,20 @@ are in the diff of those files.
 
 ## [Unreleased]
 
+### ResultUnion
+
+#### Changed
+
+- **Breaking:** writing or reading a `Result` or `Result<T>` with System.Text.Json throws `NotSupportedException`,
+  with a message that says what to do instead. Before, .NET 11 wrote a `Result<T>`'s union case, so a Minimal API
+  endpoint that returned a result sent a failure as `200 OK` with the error as the body, and a successful `Result`
+  threw an unhelpful `InvalidOperationException`. `Error` still serializes as before.
+
+### ResultUnion (analyzers)
+
+- RU0010 (Warning): a result written as or read from JSON: a Minimal API handler that returns one, or one passed to
+  `JsonSerializer`, `Results` / `TypedResults`, `WriteAsJsonAsync` or the `HttpClient` JSON methods.
+
 ## [0.3.0] - 2026-11-22
 
 ### Upgrading from 0.2.0

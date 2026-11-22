@@ -34,7 +34,8 @@ was checked with a small program, and the observed output is quoted.
   [38 HTTP clients read problems back as errors](#38-http-clients-read-problems-back-as-errors) ·
   [39 Test assertions need no test framework](#39-test-assertions-need-no-test-framework) ·
   [40 Conventions are suggestions, mistakes are warnings](#40-conventions-are-suggestions-mistakes-are-warnings) ·
-  [41 Result&lt;Error&gt; is an analyzer warning](#41-resulterror-is-an-analyzer-warning)
+  [41 Result&lt;Error&gt; is an analyzer warning](#41-resulterror-is-an-analyzer-warning) ·
+  [42 Results refuse to be serialized](#42-results-refuse-to-be-serialized)
 
 ---
 
@@ -647,3 +648,25 @@ every `Result<T>` the check that the type is initialised (a generic struct then 
 
 **Consequences.** Generic code (`Result<T>` with any `T`) is not reported, only its use with `Error`. Types that
 contain errors, such as `Result<Error[]>`, are fine.
+
+### 42. Results refuse to be serialized
+
+**Context.** A result is mapped where it leaves the application (`ToHttpResult`, `GetValueOrThrowRpc`, a DTO); it is
+not a JSON contract. Until 0.3.0 nothing enforced that, and System.Text.Json in .NET 11 treats `Result<T>` as a union
+and writes its case: a Minimal API endpoint that returned a result sent a failure as `200 OK` with the error as the
+body, and a successful `Result` failed with "Cannot access 'Error' when the 'Result' is a success".
+
+**Decision.** Both result types carry `[JsonConverter]` with an internal converter that throws
+`NotSupportedException` on write and on read, with a message that says what to do instead. Analyzer RU0010 (Warning)
+reports the same mistakes at build time: a Minimal API handler that returns a result, and a result passed to or read
+by the JSON methods of System.Text.Json, ASP.NET Core and System.Net.Http.Json. `Error` keeps its own converter and
+stays serializable.
+
+**Alternatives.** The analyzer alone would miss a result passed on as `object`; the converter alone would show the
+mistake only when the endpoint is called. A JSON format for results (`{ "isSuccess": …, "value": … }`) would make them
+a contract between services, which `Error` already is on its own. The converter for `Result<T>` is an open generic in
+the attribute, which System.Text.Json supports from .NET 11 (on .NET 10 it fails with `ContainsGenericParameters`);
+it keeps `MakeGenericType` out of the AOT path.
+
+**Consequences.** A behavior change in a released type: code that serialized a result, on purpose or not, now throws.
+Before, it produced JSON that no reader of the library could turn back into a result.

@@ -2,6 +2,8 @@
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
+using System.Text.Json.Serialization;
+using ResultUnion.Serialization;
 
 namespace ResultUnion;
 
@@ -76,6 +78,7 @@ public interface IResultFactory<out TSelf> : IAnyResult
 /// </remarks>
 [Union]
 [DebuggerDisplay("{ToString(),nq}")]
+[JsonConverter(typeof(ResultJsonConverter<>))]   // not a JSON contract: refuses to be serialized (DESIGN.md, 42)
 public readonly record struct Result<T> : IUnion, IResultFactory<Result<T>>
     where T : notnull
 {
@@ -378,6 +381,7 @@ public readonly record struct Result<T> : IUnion, IResultFactory<Result<T>>
 /// </para>
 /// </remarks>
 [DebuggerDisplay("{ToString(),nq}")]
+[JsonConverter(typeof(ResultJsonConverter))]
 public readonly partial record struct Result : IResultFactory<Result>
 {
     /// <inheritdoc/>
