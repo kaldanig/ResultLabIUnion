@@ -66,6 +66,9 @@ release the next version. Never delete and recreate a tag that has been publishe
   versions, with related packages grouped (Roslyn, ASP.NET Core, gRPC, OpenTelemetry, testing, actions). CI and Docs
   run on each one. Merge a green PR as it is; a dependency of a package (`Grpc.StatusProto`) changes what consumers
   get, so note it in the changelog.
+- Benchmarks (`benchmarks.yml`): every change to the library runs each benchmark once, so a broken benchmark fails
+  the run; the measured suite runs every Monday and on demand, with the reports in the run summary (docs/BENCHMARKS.md,
+  "In CI"). Before a release, a look at the latest full run shows whether an allocation appeared on a success path.
 - Security: CodeQL (`codeql.yml`) scans the C# code and the workflows on every push, pull request and weekly;
   findings are under **Security → Code scanning**. Dependabot alerts and security updates, secret scanning with push
   protection, and private vulnerability reporting are enabled in the repository settings. A reported vulnerability is

@@ -1,3 +1,4 @@
+using BenchmarkDotNet.Engines;
 using BenchmarkDotNet.Environments;
 using BenchmarkDotNet.Jobs;
 
@@ -9,5 +10,17 @@ namespace ResultUnion.Benchmarks;
 /// </summary>
 internal static class Net11
 {
-    public static Job Job { get; } = Job.Default.WithRuntime(CoreRuntime.Core11_0).WithId("RuntimeAsync");
+    /// <summary>Run each benchmark once instead of measuring it (<c>--smoke</c>); set before the benchmarks are read.</summary>
+    public static bool Smoke { get; set; }
+
+    public static Job Job
+    {
+        get
+        {
+            var job = Job.Default.WithRuntime(CoreRuntime.Core11_0).WithId("RuntimeAsync");
+            return Smoke
+                ? job.WithStrategy(RunStrategy.ColdStart).WithLaunchCount(1).WithWarmupCount(0).WithIterationCount(1)
+                : job;
+        }
+    }
 }

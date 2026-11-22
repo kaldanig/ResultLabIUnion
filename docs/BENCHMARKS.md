@@ -19,6 +19,25 @@ BenchmarkDotNet 0.15.8, the latest stable release, knows runtimes only up to .NE
 fails with `GetRuntimeVersion not implemented for NotRecognized`. 0.16 adds .NET 11, so the benchmark project uses the
 preview. Nothing else depends on it.
 
+### In CI
+
+`benchmarks.yml` has two jobs:
+
+- **smoke**, on every push to master and pull request that changes the library or the benchmarks: every benchmark
+  runs once (`--smoke`: one launch, one iteration, no warm-up), in about a minute. It fails when a benchmark throws or
+  a class cannot run, which the build alone does not catch. Its numbers mean nothing.
+- **full**, every Monday and on demand (**Actions → Benchmarks → Run workflow**, with an optional filter): the measured
+  suite. The reports are in the run summary and, with the CSV and HTML files, in the `benchmarks` artifact. A shared
+  runner is noisy, so compare its times only for large changes; the allocations are exact. It never blocks anything.
+
+The smoke run locally:
+
+```powershell
+dotnet run -c Release --project ResultUnion.Benchmarks -- --filter '*' --smoke
+```
+
+BenchmarkDotNet exits with 0 even when a benchmark fails; the project returns 1 then, and names the class.
+
 ## Summary
 
 - **The success path allocates nothing.** Matching, pipelines and `CombineAll` without failures: 0 B.

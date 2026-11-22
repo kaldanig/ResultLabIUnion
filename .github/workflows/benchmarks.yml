@@ -1,0 +1,90 @@
+name: Benchmarks
+
+# Two jobs (docs/BENCHMARKS.md, "In CI"):
+# - smoke: on every push to master and pull request that touches the library or the benchmarks, runs every benchmark
+#   once (--smoke), so a change that breaks one fails here. About a minute; the numbers mean nothing.
+# - full: once a week and on demand, the measured suite. Shared runners are noisy, so the times are for spotting large
+#   changes, not small ones; the allocations are exact. The reports are in the run summary and the "benchmarks"
+#   artifact. Informational only: it never blocks anything.
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'ResultUnion/**'
+      - 'ResultUnion.Benchmarks/**'
+      - 'Directory.Build.*'
+      - '.github/workflows/benchmarks.yml'
+  pull_request:
+    paths:
+      - 'ResultUnion/**'
+      - 'ResultUnion.Benchmarks/**'
+      - 'Directory.Build.*'
+      - '.github/workflows/benchmarks.yml'
+  schedule:
+    - cron: '17 4 * * 1'
+  workflow_dispatch:
+    inputs:
+      filter:
+        description: "BenchmarkDotNet filter, for example '*Async*'"
+        default: '*'
+
+permissions:
+  contents: read
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+jobs:
+  smoke:
+    if: github.event_name == 'push' || github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '11.0.x'
+
+      - name: Run every benchmark once
+        run: dotnet run -c Release --project ResultUnion.Benchmarks -- --filter '*' --smoke --artifacts artifacts/benchmarks
+
+  full:
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '11.0.x'
+
+      - name: Run the benchmarks
+        env:
+          FILTER: ${{ inputs.filter || '*' }}
+        run: dotnet run -c Release --project ResultUnion.Benchmarks -- --filter "$FILTER" --artifacts artifacts/benchmarks
+
+      - name: Summary
+        if: always()
+        shell: bash
+        run: |
+          {
+            echo "# Benchmarks"
+            echo
+            echo "Measured on a shared GitHub runner: compare times only for large changes; allocations are exact."
+            for report in artifacts/benchmarks/results/*-report-github.md; do
+              [ -e "$report" ] || continue
+              echo
+              cat "$report"
+            done
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: benchmarks
+          path: artifacts/benchmarks
+          if-no-files-found: ignore
