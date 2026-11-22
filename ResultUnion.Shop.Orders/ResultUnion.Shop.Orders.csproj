@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <!-- The shop sample's orders service (README, "A sample with two services"): customers and orders in SQLite, with
+       optimistic concurrency and Georgian problem messages; it reserves stock through the inventory service with
+       ResultUnion.Http, so a failure there comes back as an error here. -->
+
+  <PropertyGroup>
+    <TargetFramework>net11.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="11.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="11.0.0" />
+    <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.21.0" />
+    <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.21.0" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.21.0" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.21.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ResultUnion.AspNetCore\ResultUnion.AspNetCore.csproj" />
+    <ProjectReference Include="..\ResultUnion.Http\ResultUnion.Http.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="ResultUnion" />
+  </ItemGroup>
+
+</Project>

@@ -15,4 +15,19 @@ builder.AddDotnetProject("grpcclient", "../ResultUnion.GrpcClient/ResultUnion.Gr
     .WithArgs(context => context.Args.Add(grpc.GetEndpoint("http")))
     .WaitFor(grpc);
 
+// The shop sample: the orders service reserves stock in the inventory service over HTTP. WithReference gives it the
+// inventory's address (services__inventory__http__0), and one trace shows an order and its reservation.
+var inventory = builder.AddDotnetProject("inventory", "../ResultUnion.Shop.Inventory/ResultUnion.Shop.Inventory.csproj");
+var orders = builder.AddDotnetProject("orders", "../ResultUnion.Shop.Orders/ResultUnion.Shop.Orders.csproj")
+    .WithReference(inventory)
+    .WaitFor(inventory);
+
+// The shop's web front end calls both services with ResultUnion.Http; stop the inventory in the dashboard to see an
+// order refused with inventory.unavailable.
+builder.AddDotnetProject("shop", "../ResultUnion.Shop.Web/ResultUnion.Shop.Web.csproj")
+    .WithReference(orders)
+    .WithReference(inventory)
+    .WaitFor(orders)
+    .WithExternalHttpEndpoints();
+
 builder.Build().Run();

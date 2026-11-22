@@ -1,0 +1,14 @@
+@* The messages of one field, under its input. *@
+@if (View is not null)
+{
+    @foreach (var message in View.For(Field))
+    {
+        <div class="field-message">@message</div>
+    }
+}
+
+@code {
+    [Parameter] public ErrorView? View { get; set; }
+
+    [Parameter, EditorRequired] public string Field { get; set; } = "";
+}

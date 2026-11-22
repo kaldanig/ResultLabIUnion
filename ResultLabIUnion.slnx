@@ -19,6 +19,10 @@
   <Project Path="ResultUnion.Http/ResultUnion.Http.csproj" />
   <Project Path="ResultUnion.Samples.Application/ResultUnion.Samples.Application.csproj" />
   <Project Path="ResultUnion.Samples.Domain/ResultUnion.Samples.Domain.csproj" />
+  <Project Path="ResultUnion.Shop.Inventory/ResultUnion.Shop.Inventory.csproj" />
+  <Project Path="ResultUnion.Shop.Orders/ResultUnion.Shop.Orders.csproj" />
+  <Project Path="ResultUnion.Shop.Tests/ResultUnion.Shop.Tests.csproj" />
+  <Project Path="ResultUnion.Shop.Web/ResultUnion.Shop.Web.csproj" />
   <Project Path="ResultUnion.Showcase/ResultUnion.Showcase.csproj" />
   <Project Path="ResultUnion.Testing.Tests/ResultUnion.Testing.Tests.csproj" />
   <Project Path="ResultUnion.Testing/ResultUnion.Testing.csproj" />

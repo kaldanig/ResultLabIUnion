@@ -71,6 +71,8 @@ Why it is built this way, with the alternatives that were considered: [docs/DESI
 | `ResultUnion.GrpcService` | The same use cases as a gRPC service (`Protos/demo.proto`), failures as rich gRPC statuses |
 | `ResultUnion.GrpcClient` | A console client for the gRPC service that turns every `RpcException` back into an `Error` |
 | `ResultUnion.AppHost` | Runs the Web API, the gRPC service and the client together under Aspire, with their telemetry in Aspire's dashboard |
+| `ResultUnion.Shop.Inventory`, `ResultUnion.Shop.Orders`, `ResultUnion.Shop.Web` | The shop sample: an orders service in SQLite that reserves stock in an inventory service over HTTP, and a Blazor front end that calls both with ResultUnion.Http ([A sample with two services](#a-sample-with-two-services)) |
+| `ResultUnion.Shop.Tests` | Both shop services in memory, wired together: reservations, stock that runs out, an unreachable inventory, concurrency and Georgian messages; and the front end's client against them |
 | `ResultUnion.AppHost.Tests` | Starts the AppHost with `Aspire.Hosting.Testing` and checks that the Web API answers and that the gRPC client runs every call against the service and exits cleanly |
 
 ```bash
@@ -146,6 +148,48 @@ RequestPasswordReset #4  ->  ResourceExhausted (TooManyRequests, transient)
 The Web API and the gRPC service share the domain and the application layer; they differ only in how they map their
 contract to a command and the result to their protocol. The role for `ListUsers` comes from the call metadata
 `x-role: admin`.
+
+### A sample with two services
+
+The shop sample shows what one service's failure looks like in another. `ResultUnion.Shop.Orders` keeps customers and
+orders in SQLite (`http://localhost:5301`); placing an order reserves its stock in `ResultUnion.Shop.Inventory`
+(`http://localhost:5302`) over HTTP, and `ResultUnion.Shop.Web` (`http://localhost:5300`) is a Blazor front end for
+both. Start the inventory, the orders service and the front end, or all three under Aspire
+(`dotnet run --project ResultUnion.AppHost --launch-profile http`) and open `shop` from the dashboard.
+
+- **The inventory's error becomes the orders service's own.** The client reads each answer with ResultUnion.Http
+  (`ReadResultAsync`), and `InventoryClient` turns every outcome into an error of the orders catalog: too little stock
+  (the inventory's `stock.insufficient`) is `order.out_of_stock`, 409, with the same `available` and `requested`
+  arguments; an unknown product is `order.unknown_product` on the line that names it (`lines[1].product`); a refused
+  connection, a timeout or a 503 is `inventory.unavailable`, 503; anything else is a disagreement between the two
+  services and stays an `Unexpected` error. A client of the orders API never sees the inventory's codes.
+- **Every input at once, then the outside world.** `PlaceAsync` validates the customer and every line with
+  `CombineAll` before it calls anything, then finds the customer, reserves the stock, and stores the order only when
+  the stock is held.
+- **Optimistic concurrency with EF Core.** Customers and orders have a `Version` concurrency token. A client sends the
+  version it read; the service makes it the original value, so the database's `UPDATE … WHERE Version = …` refuses a
+  change from a stale one, and `Result.TryAsync(…, (DbUpdateConcurrencyException _) => …)` turns that into
+  `customer.changed_concurrently` (409). A taken email is the unique index's answer, `customer.email_taken`.
+- **Messages in the request's language.** With `Accept-Language: ka` the problem messages come from
+  `ProblemTranslator.ka.resx`, filled with the error's arguments; the codes stay the same.
+
+- **The client side.** The front end calls both services through `ShopClient`, with `ReadResultAsync` and the language
+  the user picked as `Accept-Language`. `ErrorView` puts each field's messages under its input (`lines[0].quantity`,
+  `customerId`) and the error's own message and code above the form, with a hint that follows the category: reload
+  for `Concurrency`, try again for `Unavailable`. Stop the inventory in the Aspire dashboard to see an order refused
+  with `inventory.unavailable`.
+
+```text
+POST /orders  (6 plums, 5 in stock)                ->  409 order.out_of_stock   {"product":"PLUM","requested":6,"available":5}
+POST /orders  (MANGO on the second line)           ->  400 order.unknown_product  lines[1].product
+POST /orders  (inventory stopped)                  ->  503 inventory.unavailable
+POST /orders/{id}/cancel  (version already used)   ->  409 order.changed_concurrently
+```
+
+`ResultUnion.Shop.Tests` runs both services in memory and points the orders service's `HttpClient` at the inventory's
+test server, so these outcomes are tested across the real HTTP boundary, and runs the front end's `ShopClient` against
+them; `ResultUnion.AppHost.Tests` places an order
+through the two services as Aspire starts them.
 
 ## The types
 

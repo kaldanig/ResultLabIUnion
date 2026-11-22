@@ -147,9 +147,10 @@ with the same codes, fields and arguments, so the same `Describe` works on it:
             }
 ```
 
-An argument that came over JSON is a `JsonElement`; `Convert.ToString` writes its value as it was sent, which is what
-a placeholder needs for numbers and text. Format dates and amounts for the culture before you add them as arguments,
-or let the client parse the element and format it.
+`ReadResultAsync` reads each argument back as a plain value: a whole number as an `int` (or a `long`), another number
+as a `double`, text as a `string`, and only an object or array as a `JsonElement`. `Convert.ToString` writes the value
+as it was sent, which is what a placeholder needs for numbers and text. Format dates and amounts for the culture
+before you add them as arguments, or let the client parse the text and format it.
 
 ## Choosing where
 

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="validation.failed" xml:space="preserve"><value>ერთი ან მეტი ველი არასწორია.</value></data>
+  <data name="customer_name.required" xml:space="preserve"><value>მომხმარებლის სახელი სავალდებულოა.</value></data>
+  <data name="customer_name.too_long" xml:space="preserve"><value>სახელი {length} სიმბოლოა; დასაშვებია მაქსიმუმ {maxLength}.</value></data>
+  <data name="customer_email.required" xml:space="preserve"><value>ელფოსტა სავალდებულოა.</value></data>
+  <data name="customer_email.invalid" xml:space="preserve"><value>„{value}“ ელფოსტის მისამართი არ არის.</value></data>
+  <data name="customer.not_found" xml:space="preserve"><value>მომხმარებელი {id} არ არსებობს.</value></data>
+  <data name="customer.email_taken" xml:space="preserve"><value>მომხმარებელი ელფოსტით {email} უკვე არსებობს.</value></data>
+  <data name="customer.changed_concurrently" xml:space="preserve"><value>მომხმარებელი {id} შეიცვალა მას შემდეგ, რაც ვერსია {version} წაიკითხეთ.</value></data>
+  <data name="order.customer_required" xml:space="preserve"><value>შეკვეთას მომხმარებელი სჭირდება.</value></data>
+  <data name="order.no_lines" xml:space="preserve"><value>შეკვეთაში ერთი ხაზი მაინც უნდა იყოს.</value></data>
+  <data name="order.not_found" xml:space="preserve"><value>შეკვეთა {id} არ არსებობს.</value></data>
+  <data name="order.already_cancelled" xml:space="preserve"><value>შეკვეთა {id} უკვე გაუქმებულია.</value></data>
+  <data name="order.changed_concurrently" xml:space="preserve"><value>შეკვეთა {id} შეიცვალა მას შემდეგ, რაც ვერსია {version} წაიკითხეთ.</value></data>
+  <data name="order.unknown_product" xml:space="preserve"><value>პროდუქტი {product} არ არსებობს.</value></data>
+  <data name="order.out_of_stock" xml:space="preserve"><value>მარაგში მხოლოდ {available} ცალი {product}-ია; შეკვეთას {requested} სჭირდება.</value></data>
+  <data name="order_line.product_required" xml:space="preserve"><value>ყოველ ხაზს პროდუქტი სჭირდება.</value></data>
+  <data name="order_line.product_invalid" xml:space="preserve"><value>„{value}“ პროდუქტის კოდი არ არის: 3-დან 20-მდე ასო, ციფრი ან ტირე.</value></data>
+  <data name="order_line.quantity_out_of_range" xml:space="preserve"><value>რაოდენობა 1-დან {max}-მდე უნდა იყოს; {quantity} ასე არ არის.</value></data>
+  <data name="inventory.unavailable" xml:space="preserve"><value>საწყობის სერვისი მიუწვდომელია; ცოტა ხანში სცადეთ.</value></data>
+</root>

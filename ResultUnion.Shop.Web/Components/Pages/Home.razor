@@ -1,0 +1,205 @@
+﻿@page "/"
+@rendermode InteractiveServer
+@inject ShopClient Shop
+@inject ShopLanguage Language
+
+<PageTitle>ResultUnion shop</PageTitle>
+
+<header>
+    <h1>ResultUnion shop</h1>
+    <nav class="languages" aria-label="Language">
+        <button class="@(Language.Code == "en" ? "active" : "")" @onclick='() => SetLanguage("en")'>English</button>
+        <button class="@(Language.Code == "ka" ? "active" : "")" @onclick='() => SetLanguage("ka")'>ქართული</button>
+    </nav>
+</header>
+<p class="lead">
+    Every failure below comes from the orders or the inventory service as a problem response, and ResultUnion.Http reads
+    it back as an <code>Error</code>: its code, its message in the chosen language, and its fields.
+</p>
+
+<section>
+    <h2>Stock</h2>
+    <table>
+        <thead><tr><th>Product</th><th>Available</th></tr></thead>
+        <tbody>
+            @foreach (var sku in Products)
+            {
+                <tr><td>@sku</td><td>@(stock.TryGetValue(sku, out var count) ? count : "–")</td></tr>
+            }
+        </tbody>
+    </table>
+    <button @onclick="LoadStockAsync">Refresh</button>
+    <Problem View="stockError" />
+</section>
+
+<section>
+    <h2>Customer</h2>
+    @if (customer is null)
+    {
+        <label>Name <input @bind="name" class="@Invalid(customerError, "name")" /></label>
+        <FieldMessages View="customerError" Field="name" />
+        <label>Email <input @bind="email" class="@Invalid(customerError, "email")" /></label>
+        <FieldMessages View="customerError" Field="email" />
+        <button @onclick="CreateCustomerAsync">Create</button>
+        <Problem View="customerError" Shown='["name", "email"]' />
+    }
+    else
+    {
+        <p>@customer.Name, @customer.Email <span class="muted">(version @customer.Version)</span></p>
+        <label>New name <input @bind="newName" class="@Invalid(customerError, "name")" /></label>
+        <FieldMessages View="customerError" Field="name" />
+        <label>From version <input type="number" @bind="renameVersion" /></label>
+        <p class="hint">Rename twice from the same version, and the second one is refused: someone changed it since.</p>
+        <button @onclick="RenameCustomerAsync">Rename</button>
+        <Problem View="customerError" Shown='["name"]' />
+    }
+</section>
+
+<section>
+    <h2>Order</h2>
+    @if (customer is null)
+    {
+        <p class="hint">Without a customer the order is refused with every other invalid input at once; try it.</p>
+    }
+    @foreach (var (line, index) in lines.Select((line, index) => (line, index)))
+    {
+        <div class="line">
+            <input placeholder="Product" @bind="line.Product" class="@Invalid(orderError, $"lines[{index}].product")" />
+            <input type="number" @bind="line.Quantity" class="@Invalid(orderError, $"lines[{index}].quantity")" />
+            <button class="secondary" @onclick="() => lines.Remove(line)">Remove</button>
+        </div>
+        <FieldMessages View="orderError" Field="@($"lines[{index}].product")" />
+        <FieldMessages View="orderError" Field="@($"lines[{index}].quantity")" />
+    }
+    <button class="secondary" @onclick="() => lines.Add(new LineInput())">Add a line</button>
+    <button @onclick="PlaceOrderAsync">Place the order</button>
+    <FieldMessages View="orderError" Field="customerId" />
+    <FieldMessages View="orderError" Field="lines" />
+    <Problem View="orderError" Shown="ShownOrderFields" />
+    <p class="hint">Ask for more PLUM than there is, name a product that does not exist, or stop the inventory in the Aspire dashboard.</p>
+
+    @if (orders.Count > 0)
+    {
+        <h3>Placed here</h3>
+        <ul class="orders">
+            @foreach (var order in orders)
+            {
+                <li>
+                    @string.Join(", ", order.Lines.Select(line => $"{line.Quantity} × {line.Product}")) – @order.Status
+                    <span class="muted">(version @order.Version)</span>
+                    @if (order.Status != "Cancelled")
+                    {
+                        <button class="secondary" @onclick="() => CancelOrderAsync(order)">Cancel</button>
+                    }
+                </li>
+            }
+        </ul>
+        <Problem View="cancelError" />
+    }
+</section>
+
+@code {
+    private static readonly string[] Products = ["APPLE", "PEAR", "PLUM"];
+
+    private readonly Dictionary<string, int> stock = [];
+    private readonly List<LineInput> lines = [new() { Product = "APPLE", Quantity = 2 }];
+    private readonly List<OrderView> orders = [];
+
+    private CustomerView? customer;
+    private string? name;
+    private string? email;
+    private string? newName;
+    private int renameVersion;
+
+    private ErrorView? stockError;
+    private ErrorView? customerError;
+    private ErrorView? orderError;
+    private ErrorView? cancelError;
+
+    private sealed class LineInput
+    {
+        public string? Product { get; set; }
+        public int Quantity { get; set; } = 1;
+    }
+
+    private string[] ShownOrderFields =>
+        ["customerId", "lines", .. Enumerable.Range(0, lines.Count).SelectMany(i => new[] { $"lines[{i}].product", $"lines[{i}].quantity" })];
+
+    // Loaded once the page is interactive, so that prerendering calls no service.
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await LoadStockAsync();
+            StateHasChanged();
+        }
+    }
+
+    private async Task LoadStockAsync()
+    {
+        stockError = null;
+        foreach (var sku in Products)
+        {
+            var result = await Shop.StockAsync(sku, default);
+            if (result.TryGetResultValue(out var view))
+                stock[sku] = view.Available;
+            else if (result.TryGetError(out var error))
+            {
+                stockError = new ErrorView(error);
+                if (stockError.Transient)
+                    break;          // the inventory is down: the other products would only wait for the same answer
+            }
+        }
+    }
+
+    private async Task CreateCustomerAsync()
+    {
+        var result = await Shop.CreateCustomerAsync(name, email, default);
+        customerError = result.TryGetError(out var error) ? new ErrorView(error) : null;
+        if (result.TryGetResultValue(out var created))
+            UseCustomer(created);
+    }
+
+    private async Task RenameCustomerAsync()
+    {
+        var result = await Shop.RenameCustomerAsync(customer!.Id, newName, renameVersion, default);
+        customerError = result.TryGetError(out var error) ? new ErrorView(error) : null;
+        if (result.TryGetResultValue(out var renamed))
+            UseCustomer(renamed);
+    }
+
+    private void UseCustomer(CustomerView view)
+    {
+        customer = view;
+        newName = view.Name;
+        renameVersion = view.Version;
+    }
+
+    private async Task PlaceOrderAsync()
+    {
+        var result = await Shop.PlaceOrderAsync(customer?.Id, lines.Select(line => new OrderLineView(line.Product ?? "", line.Quantity)), default);
+        orderError = result.TryGetError(out var error) ? new ErrorView(error) : null;
+        if (result.TryGetResultValue(out var placed))
+            orders.Insert(0, placed);
+
+        await LoadStockAsync();
+    }
+
+    private async Task CancelOrderAsync(OrderView order)
+    {
+        var result = await Shop.CancelOrderAsync(order.Id, order.Version, default);
+        cancelError = result.TryGetError(out var error) ? new ErrorView(error) : null;
+        if (result.TryGetResultValue(out var cancelled))
+            orders[orders.IndexOf(order)] = cancelled;
+
+        await LoadStockAsync();
+    }
+
+    private void SetLanguage(string code)
+    {
+        Language.Code = code;
+        stockError = customerError = orderError = cancelError = null;   // shown again in the new language on the next call
+    }
+
+    private static string Invalid(ErrorView? view, string field) => view?.Has(field) == true ? "invalid" : "";
+}

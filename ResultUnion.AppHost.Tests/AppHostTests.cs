@@ -61,4 +61,22 @@ public sealed class AppHostTests(AppHostFixture fixture) : IClassFixture<AppHost
 
         Assert.Equal(0, finished.Snapshot.ExitCode);
     }
+
+    // The shop's two services as Aspire wires them: the orders service finds the inventory through WithReference, so an
+    // order for more plums than there are comes back as the orders service's own 409, from the inventory's answer.
+    [Fact]
+    public async Task The_orders_service_reaches_the_inventory_through_Aspire()
+    {
+        await fixture.App.ResourceNotifications.WaitForResourceAsync("orders", KnownResourceStates.Running, Ct).WaitAsync(WaitTimeout, Ct);
+        using var orders = fixture.App.CreateHttpClient("orders", "http");
+
+        var customer = await (await orders.PostAsJsonAsync("/customers", new { name = "Ann", email = $"ann-{Guid.NewGuid():N}@example.com" }, Ct))
+            .Content.ReadFromJsonAsync<JsonElement>(Ct);
+        var placed = await orders.PostAsJsonAsync("/orders", new { customerId = customer.GetProperty("id").GetGuid(), lines = new[] { new { product = "APPLE", quantity = 1 } } }, Ct);
+        var tooMany = await orders.PostAsJsonAsync("/orders", new { customerId = customer.GetProperty("id").GetGuid(), lines = new[] { new { product = "PLUM", quantity = 99 } } }, Ct);
+
+        Assert.Equal(HttpStatusCode.Created, placed.StatusCode);
+        Assert.Equal(HttpStatusCode.Conflict, tooMany.StatusCode);
+        Assert.Equal("order.out_of_stock", (await tooMany.Content.ReadFromJsonAsync<JsonElement>(Ct)).GetProperty("code").GetString());
+    }
 }

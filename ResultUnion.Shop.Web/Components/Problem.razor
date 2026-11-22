@@ -1,0 +1,24 @@
+@* The error's own message and code, and any field error that no input on the form shows. *@
+@if (View is not null && (!View.AllOnFields || View.Others(Shown).Any()))
+{
+    <div class="problem @(View.Transient ? "transient" : "")" role="alert">
+        @if (!View.AllOnFields)
+        {
+            <strong>@View.Message</strong> <code>@View.Code</code>
+        }
+        @if (View.Hint is not null)
+        {
+            <div>@View.Hint</div>
+        }
+        @foreach (var other in View.Others(Shown))
+        {
+            <div>@other</div>
+        }
+    </div>
+}
+
+@code {
+    [Parameter] public ErrorView? View { get; set; }
+
+    [Parameter] public string[] Shown { get; set; } = [];
+}
