@@ -8,8 +8,9 @@ namespace ResultUnion.Articles.Tests;
 
 /// <summary>
 /// Keeps docs/articles honest: every line of C# an article shows must appear in this project or in ResultUnion.Articles,
-/// where it compiles (with the analyzers) and, for the testing article, runs. An article edited without its sample, or
-/// a sample that drifted from its article, fails here.
+/// where it compiles (with the analyzers) and, for the testing article, runs, or in the template's projects, which CI
+/// creates, builds and tests (ResultUnion.Templates/test-template.sh). An article edited without its sample, or a
+/// sample that drifted from its article, fails here.
 /// </summary>
 public sealed partial class ArticleCodeTests(WebApplicationFactory<Program> factory) : IClassFixture<WebApplicationFactory<Program>>
 {
@@ -23,7 +24,7 @@ public sealed partial class ArticleCodeTests(WebApplicationFactory<Program> fact
     public void Every_line_of_CSharp_in_the_article_is_in_a_compiled_sample(string article)
     {
         var sources = Normalize(string.Join("\n",
-            new[] { "ResultUnion.Articles", "ResultUnion.Articles.Tests" }
+            new[] { "ResultUnion.Articles", "ResultUnion.Articles.Tests", Path.Combine("ResultUnion.Templates", "content") }
                 .SelectMany(project => Directory.GetFiles(Path.Combine(Root, project), "*.cs", SearchOption.AllDirectories))
                 .Where(path => !path.Contains($"{Path.DirectorySeparatorChar}obj{Path.DirectorySeparatorChar}", StringComparison.Ordinal)
                     && !path.Contains($"{Path.DirectorySeparatorChar}bin{Path.DirectorySeparatorChar}", StringComparison.Ordinal))
@@ -37,7 +38,7 @@ public sealed partial class ArticleCodeTests(WebApplicationFactory<Program> fact
             .ToList();
 
         Assert.True(missing.Count == 0,
-            $"{article} shows C# that is not in ResultUnion.Articles or ResultUnion.Articles.Tests, so nothing compiles it:\n" +
+            $"{article} shows C# that is not in ResultUnion.Articles, ResultUnion.Articles.Tests or the template, so nothing compiles it:\n" +
             string.Join("\n", missing));
     }
 

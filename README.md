@@ -681,6 +681,9 @@ for the failure metric), endpoints with `ToHttpResultAsync` and `ProducesErrors`
 packages of the template's own version. CI creates both variants from every build of the template and builds them with
 warnings as errors and runs their tests.
 
+A walk-through of the generated code, the responses it sends and how to add a feature of your own:
+[Starting a project from the template](docs/articles/templates.md).
+
 ## Using ResultUnion in a DDD application
 
 ### Result or exception?

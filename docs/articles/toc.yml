@@ -1,5 +1,7 @@
 - name: Getting started
   href: getting-started.md
+- name: Starting from the template
+  href: templates.md
 - name: EF Core
   href: ef-core.md
 - name: Pipeline behaviors
