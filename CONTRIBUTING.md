@@ -2,10 +2,10 @@
 
 Thank you for helping. Bug reports, questions, documentation fixes and code are all welcome.
 
-- **A question, or feedback on the 1.0 release candidate:** start a
-  [discussion](https://github.com/kaldanig/ResultLabIUnion/discussions); the
-  [feedback thread](https://github.com/kaldanig/ResultLabIUnion/discussions/2) says what helps most before the API
-  is frozen.
+- **A question, or feedback on the 1.0 release candidates:** start a
+  [discussion](https://github.com/kaldanig/ResultLabIUnion/discussions); the feedback threads for the
+  [API](https://github.com/kaldanig/ResultLabIUnion/discussions/2) and the
+  [templates](https://github.com/kaldanig/ResultLabIUnion/discussions/3) say what helps most before the API is frozen.
 - **A bug or an idea:** open an issue with one of the forms; they ask for what is needed to reproduce or judge it.
 - **A security problem:** do not open an issue; report it privately as described in [SECURITY.md](SECURITY.md).
 - **A larger change** (a new API, a new package, a different behaviour): open an issue first, so we can agree on the
