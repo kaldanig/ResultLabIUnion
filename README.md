@@ -861,12 +861,13 @@ Measured with BenchmarkDotNet on .NET 11 ([docs/BENCHMARKS.md](docs/BENCHMARKS.m
 
 | | Mean | Allocated |
 |---|---:|---:|
-| `switch` / `Match` / `TryGetResultValue` | 1–3 ns | 0 B |
-| Four-step pipeline (`Ensure → Bind → Ensure → Map`) | 10–13 ns | 0 B |
-| `CombineAll` of three successes | 14 ns | 0 B |
-| Returning a cached catalog error | 4 ns | 0 B |
-| `throw` + `catch`, for comparison | 1,239 ns | 376 B |
-| Async handler chain, five steps, synchronous I/O | 66 ns | 256 B |
+| `switch` / `Match` / `TryGetResultValue` | 1–2 ns | 0 B |
+| Four-step pipeline (`Ensure → Bind → Ensure → Map`) | 9–10 ns | 0 B |
+| `CombineAll` of three successes | 13 ns | 0 B |
+| Returning a cached catalog error | 3 ns | 0 B |
+| `throw` + `catch`, for comparison | 965 ns | 376 B |
+| Async handler chain, five steps, synchronous I/O | 58 ns | 256 B |
+| A failure written as a problem response / read back by a client | 1.1–2.3 µs / 0.7–1.7 µs | 2–5 KB |
 
 The success path allocates nothing; async chains allocate a task per step that creates a value, and steps that keep
 the result (`EnsureAsync`, `TapAsync`, `TapErrorAsync`) reuse their source task.
