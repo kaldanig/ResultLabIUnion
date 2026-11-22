@@ -1,4 +1,3 @@
-using System.ComponentModel;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using Grpc.Core;
@@ -54,16 +53,6 @@ public static class ResultRpcExtensions
 
             return result.TryGetError(out var error) ? throw ToRpcFailure(error, domain) : onSuccess();
         }
-
-        /// <summary>Returns the reply built by <paramref name="onSuccess"/> on success; throws an <see cref="RpcException"/> on failure.</summary>
-        /// <remarks>Renamed <see cref="ToReplyOrThrowRpc"/> in 0.5.0: a result without a value has no value to get. This name goes in 1.0.</remarks>
-        /// <param name="onSuccess">Creates the reply.</param>
-        /// <param name="domain">The <c>ErrorInfo.domain</c>.</param>
-        [Obsolete("Use ToReplyOrThrowRpc(onSuccess); this name is removed in 1.0.")]
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        [SuppressMessage("ApiDesign", "RS0026", Justification = "Different receivers in one static class, not real overloads. Add new options as new overloads, never as new optional parameters.")]
-        public TReply GetValueOrThrowRpc<TReply>(Func<TReply> onSuccess, string domain = RpcErrorMapping.DefaultDomain) =>
-            result.ToReplyOrThrowRpc(onSuccess, domain);
     }
 
     // The exception for a failure that leaves the service; tags the current span (the call's server span) with the
@@ -117,15 +106,5 @@ public static class ResultRpcExtensions
             static async Task<TReply> Core(Task<Result> source, Func<TReply> onSuccess, string domain) =>
                 (await source.ConfigureAwait(false)).ToReplyOrThrowRpc(onSuccess, domain);
         }
-
-        /// <summary>Awaits the result, then returns the reply built by <paramref name="onSuccess"/> or throws an <see cref="RpcException"/>.</summary>
-        /// <remarks>Renamed <see cref="ToReplyOrThrowRpcAsync"/> in 0.5.0. This name goes in 1.0.</remarks>
-        /// <param name="onSuccess">Creates the reply.</param>
-        /// <param name="domain">The <c>ErrorInfo.domain</c>.</param>
-        [Obsolete("Use ToReplyOrThrowRpcAsync(onSuccess); this name is removed in 1.0.")]
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        [SuppressMessage("ApiDesign", "RS0026", Justification = "Different receivers in one static class, not real overloads. Add new options as new overloads, never as new optional parameters.")]
-        public Task<TReply> GetValueOrThrowRpcAsync<TReply>(Func<TReply> onSuccess, string domain = RpcErrorMapping.DefaultDomain) =>
-            source.ToReplyOrThrowRpcAsync(onSuccess, domain);
     }
 }

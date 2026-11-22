@@ -1,4 +1,3 @@
-using System.ComponentModel;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -64,12 +63,6 @@ public static class ProblemDetailsMapping
             ErrorType.Unavailable => StatusCodes.Status503ServiceUnavailable,
             _ => StatusCodes.Status500InternalServerError,
         };
-
-        /// <summary>Gets the HTTP status code for the category.</summary>
-        /// <remarks>Renamed <see cref="ToHttpStatusCode"/> in 0.5.0, next to ResultUnion.Grpc's <c>ToGrpcStatusCode()</c>; this name goes in 1.0.</remarks>
-        [Obsolete("Use ToHttpStatusCode(); ToStatusCode() is removed in 1.0.")]
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        public int ToStatusCode() => type.ToHttpStatusCode();
     }
 
     /// <param name="error">The error to describe.</param>

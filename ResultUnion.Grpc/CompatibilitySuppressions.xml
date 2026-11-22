@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- https://learn.microsoft.com/dotnet/fundamentals/package-validation/diagnostic-ids -->
+<Suppressions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:ResultUnion.Grpc.ResultRpcExtensions.&lt;G&gt;$1E4A04FCBD7E0E5687591BB4BD22197E.GetValueOrThrowRpcAsync``1(System.Func{``0},System.String)</Target>
+    <Left>lib/net11.0/ResultUnion.Grpc.dll</Left>
+    <Right>lib/net11.0/ResultUnion.Grpc.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:ResultUnion.Grpc.ResultRpcExtensions.&lt;G&gt;$50423D8A17F8F4D026C60EC77D5DD987.GetValueOrThrowRpc``1(System.Func{``0},System.String)</Target>
+    <Left>lib/net11.0/ResultUnion.Grpc.dll</Left>
+    <Right>lib/net11.0/ResultUnion.Grpc.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:ResultUnion.Grpc.ResultRpcExtensions.GetValueOrThrowRpc``1(ResultUnion.Result,System.Func{``0},System.String)</Target>
+    <Left>lib/net11.0/ResultUnion.Grpc.dll</Left>
+    <Right>lib/net11.0/ResultUnion.Grpc.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:ResultUnion.Grpc.ResultRpcExtensions.GetValueOrThrowRpcAsync``1(System.Threading.Tasks.Task{ResultUnion.Result},System.Func{``0},System.String)</Target>
+    <Left>lib/net11.0/ResultUnion.Grpc.dll</Left>
+    <Right>lib/net11.0/ResultUnion.Grpc.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+</Suppressions>

@@ -5,24 +5,25 @@ What is left before 1.0, and what 1.x promises once it is out. The decisions beh
 
 ## Where things stand
 
-0.5.0 has the full set of packages (ResultUnion with its analyzers and code fixes, ResultUnion.AspNetCore,
-ResultUnion.Grpc, ResultUnion.FluentValidation, ResultUnion.Http, ResultUnion.Testing and ResultUnion.Templates) and
-the outcome of the API review before 1.0 ([DESIGN.md, 43](DESIGN.md#43-the-api-review-before-10)). Every package
-depends only on stable releases: .NET 11, Grpc.StatusProto and FluentValidation. Runtime Async, which the libraries
-are compiled with, is a supported .NET 11 feature, no longer a preview.
+1.0.0-rc.1 is the first release candidate: 0.5.0 without the members it deprecated. It has the full set of packages
+(ResultUnion with its analyzers and code fixes, ResultUnion.AspNetCore, ResultUnion.Grpc, ResultUnion.FluentValidation,
+ResultUnion.Http, ResultUnion.Testing and ResultUnion.Templates) and the outcome of the API review before 1.0
+([DESIGN.md, 43](DESIGN.md#43-the-api-review-before-10)). Every package depends only on stable releases: .NET 11,
+Grpc.StatusProto and FluentValidation. Runtime Async, which the libraries are compiled with, is a supported .NET 11
+feature, no longer a preview.
 
 Before 1.0 a minor version may contain breaking changes; each one is listed under **Changed** or **Removed** in the
 changelog, with an "Upgrading from" section for the version before.
 
 ## Before 1.0
 
-1. **Remove the deprecated members.** `ErrorType.ToStatusCode()` (now `ToHttpStatusCode()`) and
-   `GetValueOrThrowRpc(onSuccess)` / `GetValueOrThrowRpcAsync(onSuccess)` on a result without a value (now
-   `ToReplyOrThrowRpc` / `ToReplyOrThrowRpcAsync`). They have warned since 0.5.0.
-2. **Freeze the analyzer rules.** RU0001–RU0010 keep their IDs and severities in 1.x: RU0001–RU0005, RU0009 and RU0010
-   are warnings, RU0006–RU0008 suggestions (Info). An ID is never reused for another rule.
-3. **Write the compatibility promise into the documentation**: this page's "Versioning in 1.x" section, linked from the
-   README and CONTRIBUTING, and the release checklist in RELEASING.md.
+1. ~~**Remove the deprecated members.**~~ Done in 1.0.0-rc.1: `ErrorType.ToStatusCode()` (now `ToHttpStatusCode()`)
+   and `GetValueOrThrowRpc(onSuccess)` / `GetValueOrThrowRpcAsync(onSuccess)` on a result without a value (now
+   `ToReplyOrThrowRpc` / `ToReplyOrThrowRpcAsync`).
+2. ~~**Freeze the analyzer rules.**~~ Done: RU0001–RU0010 keep their IDs and severities in 1.x. RU0001–RU0005,
+   RU0009 and RU0010 are warnings, RU0006–RU0008 suggestions (Info). An ID is never reused for another rule.
+3. ~~**Write the compatibility promise into the documentation**~~. Done: this page's "Versioning in 1.x" section,
+   linked from the README and CONTRIBUTING, and the release checklist in RELEASING.md.
 4. **Release 1.0.0-rc.1** with the deprecated members removed. It stays out for at least four weeks; issues that need
    an API change go into a further release candidate.
 5. **Release 1.0.0** from the last release candidate when no issue needs an API change. The package validation

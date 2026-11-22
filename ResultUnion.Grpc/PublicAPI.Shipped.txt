@@ -8,10 +8,8 @@ ResultUnion.Grpc.GrpcStatusCodeMapping.extension(ResultUnion.ErrorType)
 ResultUnion.Grpc.GrpcStatusCodeMapping.extension(ResultUnion.ErrorType).ToGrpcStatusCode() -> Grpc.Core.StatusCode
 ResultUnion.Grpc.ResultRpcExtensions
 ResultUnion.Grpc.ResultRpcExtensions.extension(ResultUnion.Result)
-ResultUnion.Grpc.ResultRpcExtensions.extension(ResultUnion.Result).GetValueOrThrowRpc<TReply>(System.Func<TReply>! onSuccess, string! domain = "resultunion") -> TReply
 ResultUnion.Grpc.ResultRpcExtensions.extension(ResultUnion.Result).ToReplyOrThrowRpc<TReply>(System.Func<TReply>! onSuccess, string! domain = "resultunion") -> TReply
 ResultUnion.Grpc.ResultRpcExtensions.extension(System.Threading.Tasks.Task<ResultUnion.Result>!)
-ResultUnion.Grpc.ResultRpcExtensions.extension(System.Threading.Tasks.Task<ResultUnion.Result>!).GetValueOrThrowRpcAsync<TReply>(System.Func<TReply>! onSuccess, string! domain = "resultunion") -> System.Threading.Tasks.Task<TReply>!
 ResultUnion.Grpc.ResultRpcExtensions.extension(System.Threading.Tasks.Task<ResultUnion.Result>!).ToReplyOrThrowRpcAsync<TReply>(System.Func<TReply>! onSuccess, string! domain = "resultunion") -> System.Threading.Tasks.Task<TReply>!
 ResultUnion.Grpc.ResultRpcExtensions.extension<T>(ResultUnion.Result<T>)
 ResultUnion.Grpc.ResultRpcExtensions.extension<T>(ResultUnion.Result<T>).GetValueOrThrowRpc(string! domain = "resultunion") -> T
@@ -26,9 +24,7 @@ ResultUnion.Grpc.RpcErrorMapping.extension(ResultUnion.Error!).ToRpcStatus(strin
 static ResultUnion.Grpc.GrpcStatusCodeMapping.ToErrorType(this Grpc.Core.StatusCode code) -> ResultUnion.ErrorType
 static ResultUnion.Grpc.GrpcStatusCodeMapping.ToGrpcStatusCode(this ResultUnion.ErrorType type) -> Grpc.Core.StatusCode
 static ResultUnion.Grpc.ResultRpcExtensions.GetValueOrThrowRpc<T>(this ResultUnion.Result<T> result, string! domain = "resultunion") -> T
-static ResultUnion.Grpc.ResultRpcExtensions.GetValueOrThrowRpc<TReply>(this ResultUnion.Result result, System.Func<TReply>! onSuccess, string! domain = "resultunion") -> TReply
 static ResultUnion.Grpc.ResultRpcExtensions.GetValueOrThrowRpcAsync<T>(this System.Threading.Tasks.Task<ResultUnion.Result<T>>! source, string! domain = "resultunion") -> System.Threading.Tasks.Task<T>!
-static ResultUnion.Grpc.ResultRpcExtensions.GetValueOrThrowRpcAsync<TReply>(this System.Threading.Tasks.Task<ResultUnion.Result>! source, System.Func<TReply>! onSuccess, string! domain = "resultunion") -> System.Threading.Tasks.Task<TReply>!
 static ResultUnion.Grpc.ResultRpcExtensions.ToReplyOrThrowRpc<TReply>(this ResultUnion.Result result, System.Func<TReply>! onSuccess, string! domain = "resultunion") -> TReply
 static ResultUnion.Grpc.ResultRpcExtensions.ToReplyOrThrowRpcAsync<TReply>(this System.Threading.Tasks.Task<ResultUnion.Result>! source, System.Func<TReply>! onSuccess, string! domain = "resultunion") -> System.Threading.Tasks.Task<TReply>!
 static ResultUnion.Grpc.RpcErrorMapping.ToError(this Grpc.Core.RpcException! exception) -> ResultUnion.Error!

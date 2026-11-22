@@ -9,7 +9,6 @@ ResultUnion.AspNetCore.ProblemDetailsMapping.extension(ResultUnion.Error!)
 ResultUnion.AspNetCore.ProblemDetailsMapping.extension(ResultUnion.Error!).ToProblemDetails() -> Microsoft.AspNetCore.Mvc.ProblemDetails!
 ResultUnion.AspNetCore.ProblemDetailsMapping.extension(ResultUnion.ErrorType)
 ResultUnion.AspNetCore.ProblemDetailsMapping.extension(ResultUnion.ErrorType).ToHttpStatusCode() -> int
-ResultUnion.AspNetCore.ProblemDetailsMapping.extension(ResultUnion.ErrorType).ToStatusCode() -> int
 ResultUnion.AspNetCore.ProblemErrorDetail
 ResultUnion.AspNetCore.ProblemErrorDetail.<Clone>$() -> ResultUnion.AspNetCore.ProblemErrorDetail!
 ResultUnion.AspNetCore.ProblemErrorDetail.Arguments.get -> System.Collections.Generic.IReadOnlyDictionary<string!, object?>?
@@ -45,7 +44,6 @@ ResultUnion.AspNetCore.ResultHttpExtensions.extension<T>(System.Threading.Tasks.
 static ResultUnion.AspNetCore.EndpointProblemMetadataExtensions.ProducesErrors<TBuilder>(this TBuilder builder, params ResultUnion.ErrorType[]! types) -> TBuilder
 static ResultUnion.AspNetCore.ProblemDetailsMapping.ToHttpStatusCode(this ResultUnion.ErrorType type) -> int
 static ResultUnion.AspNetCore.ProblemDetailsMapping.ToProblemDetails(this ResultUnion.Error! error) -> Microsoft.AspNetCore.Mvc.ProblemDetails!
-static ResultUnion.AspNetCore.ProblemDetailsMapping.ToStatusCode(this ResultUnion.ErrorType type) -> int
 static ResultUnion.AspNetCore.ProblemErrorDetail.operator !=(ResultUnion.AspNetCore.ProblemErrorDetail? left, ResultUnion.AspNetCore.ProblemErrorDetail? right) -> bool
 static ResultUnion.AspNetCore.ProblemErrorDetail.operator ==(ResultUnion.AspNetCore.ProblemErrorDetail? left, ResultUnion.AspNetCore.ProblemErrorDetail? right) -> bool
 static ResultUnion.AspNetCore.ResultHttpExtensions.ToHttpResult(this ResultUnion.Error! error) -> Microsoft.AspNetCore.Http.HttpResults.ProblemHttpResult!

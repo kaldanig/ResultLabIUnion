@@ -8,7 +8,7 @@ namespace ResultUnion.AspNetCore;
 /// <remarks>
 /// A typed <c>Results&lt;Ok&lt;T&gt;, ProblemHttpResult&gt;</c> documents the success response, but not the problems: their
 /// status depends on the <see cref="ErrorType"/> at run time. Declare the categories an endpoint can fail with, and each one
-/// is documented with the status code that <see cref="ProblemDetailsMapping.ToStatusCode(ErrorType)"/> maps it to.
+/// is documented with the status code that <see cref="ProblemDetailsMapping.ToHttpStatusCode(ErrorType)"/> maps it to.
 /// </remarks>
 public static class EndpointProblemMetadataExtensions
 {

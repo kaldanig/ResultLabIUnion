@@ -9,6 +9,33 @@ are in the diff of those files.
 
 ## [Unreleased]
 
+## [1.0.0-rc.1] - 2026-11-22
+
+The first release candidate for 1.0. It removes the members deprecated in 0.5.0 and is otherwise the same as 0.5.0.
+From 1.0.0 on, versions keep the promise in [docs/ROADMAP.md](docs/ROADMAP.md), "Versioning in 1.x": no breaking
+change to the C# API, documented behavior, the wire formats or the analyzer rules until 2.0. Issues found in this
+release candidate that need an API change go into another one; otherwise 1.0.0 follows without changes.
+
+### Upgrading from 0.5.0
+
+- Code that builds against 0.5.0 without obsolete warnings (CS0618) builds unchanged. Otherwise rename the calls the
+  warnings point to: `ToStatusCode()` → `ToHttpStatusCode()`, and on a `Result` without a value
+  `GetValueOrThrowRpc(onSuccess)` → `ToReplyOrThrowRpc(onSuccess)` (`…Async` the same).
+
+### ResultUnion.AspNetCore
+
+#### Removed
+
+- **Breaking:** `ErrorType.ToStatusCode()`, deprecated in 0.5.0. Use `ToHttpStatusCode()`.
+
+### ResultUnion.Grpc
+
+#### Removed
+
+- **Breaking:** `GetValueOrThrowRpc(onSuccess)` and `GetValueOrThrowRpcAsync(onSuccess)` on `Result` and
+  `Task<Result>`, deprecated in 0.5.0. Use `ToReplyOrThrowRpc` / `ToReplyOrThrowRpcAsync`. `GetValueOrThrowRpc()` on
+  `Result<T>` is unchanged.
+
 ## [0.5.0] - 2026-11-22
 
 ### Upgrading from 0.4.0
@@ -214,7 +241,8 @@ The first release. Requires .NET 11 (C# 15 unions).
 - `RpcException.ToError()` for clients, restoring type, code, message, arguments and field violations.
 - Failures that leave a service tag the call's span with the error code and category.
 
-[Unreleased]: https://github.com/kaldanig/ResultLabIUnion/compare/v0.5.0...HEAD
+[Unreleased]: https://github.com/kaldanig/ResultLabIUnion/compare/v1.0.0-rc.1...HEAD
+[1.0.0-rc.1]: https://github.com/kaldanig/ResultLabIUnion/compare/v0.5.0...v1.0.0-rc.1
 [0.5.0]: https://github.com/kaldanig/ResultLabIUnion/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/kaldanig/ResultLabIUnion/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/kaldanig/ResultLabIUnion/compare/v0.2.0...v0.3.0
