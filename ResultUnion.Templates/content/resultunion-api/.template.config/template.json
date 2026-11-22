@@ -1,0 +1,37 @@
+{
+  "$schema": "http://json.schemastore.org/template",
+  "author": "Giorgi Kaldani",
+  "classifications": [ "Web", "WebAPI", "Result pattern" ],
+  "identity": "ResultUnion.Templates.WebApi",
+  "name": "ResultUnion Web API",
+  "description": "A Minimal API that uses the Result pattern with ResultUnion: a feature with value objects and error catalogs, a use case as one pipeline, endpoints that turn failures into problem responses, and tests with ResultUnion.Testing.",
+  "shortName": "resultunion-api",
+  "sourceName": "ResultUnionApi",
+  "preferNameDirectory": true,
+  "tags": {
+    "language": "C#",
+    "type": "solution"
+  },
+  "symbols": {
+    "NoTests": {
+      "type": "parameter",
+      "datatype": "bool",
+      "defaultValue": "false",
+      "description": "Leave out the test project."
+    },
+    "Tests": {
+      "type": "computed",
+      "value": "(!NoTests)"
+    }
+  },
+  "sources": [
+    {
+      "modifiers": [
+        {
+          "condition": "(NoTests)",
+          "exclude": [ "tests/**" ]
+        }
+      ]
+    }
+  ]
+}

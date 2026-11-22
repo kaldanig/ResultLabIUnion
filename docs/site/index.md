@@ -24,6 +24,7 @@ public Result<User> Register(string? email, string? age) =>
 | `ResultUnion.FluentValidation` | FluentValidation results as `Result`, with one field error per failure |
 | `ResultUnion.Http` | HTTP responses read back as `Result`, problem details as `Error`: the client side of `ResultUnion.AspNetCore` |
 | `ResultUnion.Testing` | Test assertions: `ShouldSucceed()`, `ShouldFail("code")`, `ShouldHaveFieldErrors(...)` |
+| `ResultUnion.Templates` | `dotnet new resultunion-api`: a Minimal API and its tests, following the conventions |
 
 ## Where to go next
 

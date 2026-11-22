@@ -1,0 +1,54 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- dotnet new templates for ResultUnion (README, "Starting a project"; docs/RELEASING.md). Only packed: the content
+       is copied as it is, except that RESULTUNION_VERSION in the template projects becomes this package's version, so
+       a new project references the ResultUnion packages of the same release. Not in the solution: CI packs it and
+       tests what it creates (`dotnet new`, build, test) against the packages of the same run. -->
+
+  <PropertyGroup>
+    <TargetFramework>net11.0</TargetFramework>
+    <IsPackable>true</IsPackable>
+    <PackageType>Template</PackageType>
+    <PackageId>ResultUnion.Templates</PackageId>
+    <Description>dotnet new templates for ResultUnion. resultunion-api: a Minimal API with value objects and error catalogs, a use case as one Result pipeline, endpoints that return problem responses, and tests with ResultUnion.Testing.</Description>
+    <PackageTags>result;result-pattern;dotnet-new;templates;minimal-api</PackageTags>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <IncludeSymbols>false</IncludeSymbols>
+    <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
+    <NoDefaultExcludes>true</NoDefaultExcludes>
+    <EnableDefaultItems>false</EnableDefaultItems>
+    <NoWarn>$(NoWarn);NU5128</NoWarn>                 <!-- no lib folder: a template package has none -->
+    <!-- A template has no API: nothing to validate, and no analyzers or API files. -->
+    <EnablePackageValidation>false</EnablePackageValidation>
+    <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);AddTemplateContent</TargetsForTfmSpecificContentInPackage>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <TemplateFile Include="content\**\*" Exclude="content\**\bin\**;content\**\obj\**;content\**\.vs\**;content\**\*.user" />
+  </ItemGroup>
+
+  <!-- Every file as it is, except the projects, whose RESULTUNION_VERSION is replaced with the package version. -->
+  <Target Name="AddTemplateContent">
+    <PropertyGroup>
+      <_StampedDirectory>$(IntermediateOutputPath)template-content\</_StampedDirectory>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <_TemplateProject Include="@(TemplateFile)" Condition="'%(Extension)' == '.csproj'" />
+      <_TemplateOther Include="@(TemplateFile)" Condition="'%(Extension)' != '.csproj'" />
+    </ItemGroup>
+
+    <WriteLinesToFile File="$(_StampedDirectory)%(_TemplateProject.RecursiveDir)%(_TemplateProject.Filename)%(_TemplateProject.Extension)"
+                      Lines="$([MSBuild]::Escape($([System.IO.File]::ReadAllText('%(_TemplateProject.FullPath)').Replace('RESULTUNION_VERSION', '$(PackageVersion)'))))"
+                      Overwrite="true" WriteOnlyWhenDifferent="true" />
+
+    <ItemGroup>
+      <!-- Full file paths: with a folder as PackagePath, NuGet appends the item's RecursiveDir a second time. -->
+      <TfmSpecificPackageFile Include="$(_StampedDirectory)%(_TemplateProject.RecursiveDir)%(_TemplateProject.Filename)%(_TemplateProject.Extension)"
+                              PackagePath="content\%(_TemplateProject.RecursiveDir)%(_TemplateProject.Filename)%(_TemplateProject.Extension)" />
+      <TfmSpecificPackageFile Include="@(_TemplateOther)"
+                              PackagePath="content\%(_TemplateOther.RecursiveDir)%(_TemplateOther.Filename)%(_TemplateOther.Extension)" />
+    </ItemGroup>
+  </Target>
+
+</Project>

@@ -34,6 +34,13 @@ are in the diff of those files.
 - RU0008 (Info): a method, local function or property that returns a `ValueTask` of a result.
 - RU0009 (Warning): a `Result<Error>`, where it is written and where a call such as `Map(x => error)` produces it.
 
+### ResultUnion.Templates (new package)
+
+- `dotnet new resultunion-api`: a Minimal API with one feature (products) that follows the conventions (value objects
+  with error catalogs, a use case as one pipeline, endpoints with `ToHttpResultAsync` and `ProducesErrors`), and a test
+  project with ResultUnion.Testing and `WebApplicationFactory`; `--no-tests` leaves the tests out. The projects
+  reference the ResultUnion packages of the template's version.
+
 ### ResultUnion.Testing (new package)
 
 - Test assertions that need no test framework: `ShouldSucceed()` returns the value, `ShouldFail()` /

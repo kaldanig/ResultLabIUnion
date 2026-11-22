@@ -13,6 +13,9 @@ updates:
     # Test fixtures of the ResultUnion skill reference packages that do not exist; they are not built.
     exclude-paths:
       - ".claude/**"
+      # The template's projects reference RESULTUNION_VERSION, replaced when the template is packed; their other
+      # versions are updated by hand before a release (docs/RELEASING.md).
+      - "ResultUnion.Templates/content/**"
     schedule:
       interval: weekly
       day: monday

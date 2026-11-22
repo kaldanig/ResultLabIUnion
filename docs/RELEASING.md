@@ -1,6 +1,6 @@
 # Releasing
 
-The packages (`ResultUnion`, `ResultUnion.AspNetCore`, `ResultUnion.Grpc`, `ResultUnion.FluentValidation`, `ResultUnion.Http`, `ResultUnion.Testing`) are released together, with one version,
+The packages (`ResultUnion`, `ResultUnion.AspNetCore`, `ResultUnion.Grpc`, `ResultUnion.FluentValidation`, `ResultUnion.Http`, `ResultUnion.Testing`, `ResultUnion.Templates`) are released together, with one version,
 by pushing a tag. [`publish.yml`](https://github.com/kaldanig/ResultLabIUnion/blob/master/.github/workflows/publish.yml) builds, tests, packs and pushes them to nuget.org
 with NuGet trusted publishing: no API key is stored anywhere.
 
@@ -41,6 +41,13 @@ with NuGet trusted publishing: no API key is stored anywhere.
    `CompatibilitySuppressions.xml`, and commit. From then on `dotnet pack` compares every change with that version.
    A package released for the first time (`<IsNewPackage>true</IsNewPackage>` in its project, as
    `ResultUnion.FluentValidation` had until 0.2.0) had no baseline until now: remove that property in the same commit.
+
+The template package (`ResultUnion.Templates`) is not in the solution and has no API, so it has no PublicAPI files and
+no package validation. When it is packed, `RESULTUNION_VERSION` in its template projects becomes the package version,
+so a project created from it uses the ResultUnion packages of the same release; CI and `publish.yml` create projects
+from it with those packages and build and test them (`ResultUnion.Templates/test-template.sh`) before anything is
+pushed. Dependabot does not look inside the template (`exclude-paths`), so before a release update its other package
+versions (`Microsoft.AspNetCore.OpenApi`, xUnit, …) to the ones the repository uses.
 
 Before the first release of a new package, check the trusted publishing policy on nuget.org: its scope must allow
 pushing *new* packages (not only new versions), with a glob pattern that matches the new ID (`*` or `ResultUnion*`).

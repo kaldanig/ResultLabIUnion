@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/ResultUnionApi/ResultUnionApi.csproj" />
+  </Folder>
+<!--#if (Tests) -->
+  <Folder Name="/tests/">
+    <Project Path="tests/ResultUnionApi.Tests/ResultUnionApi.Tests.csproj" />
+  </Folder>
+<!--#endif -->
+</Solution>

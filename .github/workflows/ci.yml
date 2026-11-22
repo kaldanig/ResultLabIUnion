@@ -81,6 +81,13 @@ jobs:
             dotnet pack "$project/$project.csproj" --configuration Release --no-build \
               --output artifacts ${{ steps.version.outputs.args }}
           done
+          # Not in the solution, so packed with its own restore and build.
+          dotnet pack ResultUnion.Templates/ResultUnion.Templates.csproj --configuration Release \
+            --output artifacts ${{ steps.version.outputs.args }}
+
+      # Creates projects from the template package, against the packages just packed, and builds and tests them.
+      - name: Test the template
+        run: bash ResultUnion.Templates/test-template.sh artifacts
 
       - uses: actions/upload-artifact@v7
         with:

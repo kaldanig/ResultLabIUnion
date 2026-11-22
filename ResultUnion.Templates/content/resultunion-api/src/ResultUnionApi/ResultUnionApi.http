@@ -1,0 +1,22 @@
+@host = http://localhost:5080
+
+### A valid product: 201 Created
+POST {{host}}/products
+Content-Type: application/json
+
+{ "name": "Coffee", "price": 4.5 }
+
+### Every invalid field at once: 400, with "details" per field
+POST {{host}}/products
+Content-Type: application/json
+
+{ "name": "", "price": -1 }
+
+### The same name again: 409, code "product.name_taken"
+POST {{host}}/products
+Content-Type: application/json
+
+{ "name": "coffee", "price": 5 }
+
+### An unknown id: 404, code "product.not_found"
+GET {{host}}/products/00000000-0000-0000-0000-000000000001

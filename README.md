@@ -45,6 +45,7 @@ Why it is built this way, with the alternatives that were considered: [docs/DESI
 | `ResultUnion.FluentValidation` | FluentValidation integration: a `ValidationResult` as a `Result` with one field error per failure, `ValidateToResultAsync` |
 | `ResultUnion.Http` | HTTP client integration: a response read back as a `Result`, a problem details body as an `Error` (the client side of `ResultUnion.AspNetCore`) |
 | `ResultUnion.Testing` | Test assertions for any test framework: `ShouldSucceed()`, `ShouldFail("code")`, `ShouldHaveFieldErrors(...)` |
+| `ResultUnion.Templates` | `dotnet new resultunion-api`: a Minimal API with one feature that follows the conventions, and its tests |
 | `ResultUnion.Analyzers` | Roslyn analyzers shipped inside the `ResultUnion` package: a discarded `Result`, `async` code in `Result.Try`, `Map` that should be `Bind` ([docs/ANALYZERS.md](docs/ANALYZERS.md)) |
 | `ResultUnion.CodeFixes` | The code fixes for those rules (`_ =`, `TryAsync`, `Bind`), in a separate assembly because they need Roslyn's Workspaces; shipped next to the analyzers |
 | `ResultUnion.Tests` | xUnit v3 tests for `ResultUnion`; no ASP.NET Core dependency |
@@ -659,6 +660,24 @@ error.ShouldHaveFieldErrors(("email", "email.required"), ("password", "password.
 ```
 
 More in the [testing article](docs/articles/testing.md).
+
+## Starting a project: `dotnet new resultunion-api`
+
+```powershell
+dotnet new install ResultUnion.Templates
+```
+
+```powershell
+dotnet new resultunion-api -n Shop
+```
+
+The template creates a solution with a Minimal API and a test project (`--no-tests` leaves the tests out). Its one
+feature, products, shows each convention in place: value objects with `Errors` catalogs (`ProductName`, `Price`), a
+use case as one pipeline (`CombineAll` for every invalid field, `EnsureAsync` for a name that is taken, `RecordAsync`
+for the failure metric), endpoints with `ToHttpResultAsync` and `ProducesErrors`, and tests with
+`ShouldSucceedAsync` / `ShouldFailAsync("code")` and `WebApplicationFactory`. The projects reference the ResultUnion
+packages of the template's own version. CI creates both variants from every build of the template and builds them with
+warnings as errors and runs their tests.
 
 ## Using ResultUnion in a DDD application
 

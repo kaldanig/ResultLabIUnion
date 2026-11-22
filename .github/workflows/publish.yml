@@ -66,6 +66,13 @@ jobs:
             dotnet pack "$project/$project.csproj" --configuration Release --no-build \
               --output artifacts -p:Version=${{ steps.version.outputs.version }}
           done
+          # Not in the solution, so packed with its own restore and build.
+          dotnet pack ResultUnion.Templates/ResultUnion.Templates.csproj --configuration Release \
+            --output artifacts -p:Version=${{ steps.version.outputs.version }}
+
+      # The template must create projects that build and pass their tests with the packages about to be published.
+      - name: Test the template
+        run: bash ResultUnion.Templates/test-template.sh artifacts
 
       - name: NuGet login (OIDC)
         id: login

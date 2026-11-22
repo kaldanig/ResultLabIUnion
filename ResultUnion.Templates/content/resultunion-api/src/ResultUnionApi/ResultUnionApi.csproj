@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net11.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Brings ResultUnion itself and its analyzers. -->
+    <PackageReference Include="ResultUnion.AspNetCore" Version="RESULTUNION_VERSION" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="11.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="ResultUnion" />
+  </ItemGroup>
+
+</Project>

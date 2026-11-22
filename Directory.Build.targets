@@ -21,7 +21,8 @@
        package as shipped. After a release, set the baseline to the version just published (docs/RELEASING.md).
        A deliberate break before 1.0 is recorded with `dotnet pack -p:GenerateCompatibilitySuppressionFile=true`,
        which writes CompatibilitySuppressions.xml next to the project. -->
-  <PropertyGroup Condition="'$(IsPackable)' == 'true'">
+  <!-- A package with no API (the template package) sets EnablePackageValidation to false itself. -->
+  <PropertyGroup Condition="'$(IsPackable)' == 'true' and '$(EnablePackageValidation)' == ''">
     <EnablePackageValidation>true</EnablePackageValidation>
     <!-- A package that has never been released sets IsNewPackage; remove it once its first version is on nuget.org. -->
     <PackageValidationBaselineVersion Condition="'$(IsNewPackage)' != 'true'">0.2.0</PackageValidationBaselineVersion>
