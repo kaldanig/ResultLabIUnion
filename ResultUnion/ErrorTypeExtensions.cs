@@ -19,7 +19,7 @@ public static class ErrorTypeExtensions
         public bool IsTransient => type is ErrorType.Unavailable or ErrorType.TooManyRequests or ErrorType.Concurrency;
     }
 
-    /// <param name="error">The error.</param>
+    /// <param name="error">The error to inspect.</param>
     extension(Error error)
     {
         /// <summary>Gets a value indicating whether running the operation again may succeed: <see cref="get_IsTransient(ErrorType)">IsTransient</see> of <see cref="Error.Type"/>.</summary>

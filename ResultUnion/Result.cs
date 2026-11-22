@@ -132,12 +132,12 @@ public readonly record struct Result<T> : IUnion, IResultFactory<Result<T>>
     /// <remarks>Named <c>ResultValue</c> because <see cref="Value"/> is the union's case, as required by <see cref="IUnion"/>.</remarks>
     public T ResultValue => IsSuccess
         ? _value!
-        : throw new InvalidOperationException("Cannot access 'ResultValue' when the 'Result' is a failure.");
+        : ExceptionHelper.ResultValueOnFailure<T>();
 
     /// <inheritdoc/>
     public Error Error => IsFailure
         ? field ?? Error.DefaultResult
-        : throw new InvalidOperationException("Cannot access 'Error' when the 'Result' is a success.");
+        : ExceptionHelper.ErrorOnSuccess();
 
     /// <summary>Creates a successful result carrying <paramref name="value"/>.</summary>
     /// <param name="value">The success value.</param>
@@ -146,9 +146,9 @@ public readonly record struct Result<T> : IUnion, IResultFactory<Result<T>>
     {
         // 'T : notnull' is enforced at compile time (CS8714), so this only guards callers
         // that pass 'null!' or come from a nullable-oblivious assembly.
-        if (!typeof(T).IsValueType && value is null)
+        if (!typeof(T).IsValueType)
         {
-            throw new ArgumentNullException(nameof(value));
+            ArgumentNullException.ThrowIfNull(value);
         }
 
         IsSuccess = true;
@@ -393,7 +393,7 @@ public readonly partial record struct Result : IResultFactory<Result>
     /// <inheritdoc/>
     public Error Error => IsFailure
         ? field ?? Error.DefaultResult
-        : throw new InvalidOperationException("Cannot access 'Error' when the 'Result' is a success.");
+        : ExceptionHelper.ErrorOnSuccess();
 
     private Result(bool isSuccess)
     {
