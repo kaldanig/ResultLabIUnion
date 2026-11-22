@@ -25,7 +25,12 @@ are in the diff of those files.
   folder (`OrderLines/`): an entity and its name as value objects with catalogs (`order_line.not_found`,
   `order_line.name_taken`, `order_line_name.required`), an in-memory repository, a service of `Result` pipelines and
   endpoints at `/order-lines`, registered with `AddOrderLines()` and `MapOrderLines()`. `--plural` sets the plural
-  when adding an s is wrong.
+  when adding an s is wrong. `--database sqlite` stores it through EF Core in the application's DbContext:
+  `AddOrderLines<AppDbContext>()`, and an `OrderLineConfiguration` (value conversion, case-insensitive unique name)
+  that the DbContext applies.
+- An item template for the test project, `dotnet new resultunion-feature-tests -n OrderLine`: a test for each code the
+  feature's use cases return, without HTTP, and its endpoints over HTTP with `WebApplicationFactory` (201 with the
+  location, 400, 409, 404). `--database sqlite` gives the HTTP tests a database file of their own.
 
 ### ResultUnion (analyzers)
 

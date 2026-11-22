@@ -1,0 +1,161 @@
+{
+  "$schema": "http://json.schemastore.org/template",
+  "author": "Giorgi Kaldani",
+  "classifications": [
+    "Test",
+    "xUnit",
+    "Result pattern"
+  ],
+  "identity": "ResultUnion.Templates.FeatureTests",
+  "name": "ResultUnion feature tests",
+  "description": "Tests for a feature made with resultunion-feature: its use cases without HTTP, one for each code they return, and its endpoints over HTTP with WebApplicationFactory, using ResultUnion.Testing.",
+  "shortName": "resultunion-feature-tests",
+  "sourceName": "Widget",
+  "tags": {
+    "language": "C#",
+    "type": "item"
+  },
+  "symbols": {
+    "Namespace": {
+      "type": "parameter",
+      "datatype": "text",
+      "description": "The namespace the tests' folder goes under. By default the test project's root namespace."
+    },
+    "RootNamespace": {
+      "type": "bind",
+      "binding": "msbuild:RootNamespace",
+      "defaultValue": "MyApp"
+    },
+    "TargetNamespace": {
+      "type": "generated",
+      "generator": "coalesce",
+      "parameters": {
+        "sourceVariableName": "Namespace",
+        "fallbackVariableName": "RootNamespace"
+      },
+      "replaces": "TargetNamespace"
+    },
+    "AppNamespace": {
+      "type": "parameter",
+      "datatype": "text",
+      "description": "The namespace the feature's folder is under in the application. By default the test project's root namespace without .Tests."
+    },
+    "DefaultAppNamespace": {
+      "type": "derived",
+      "valueSource": "RootNamespace",
+      "valueTransform": "withoutTests"
+    },
+    "AppNamespaceName": {
+      "type": "generated",
+      "generator": "coalesce",
+      "parameters": {
+        "sourceVariableName": "AppNamespace",
+        "fallbackVariableName": "DefaultAppNamespace"
+      },
+      "replaces": "APP_NAMESPACE"
+    },
+    "Plural": {
+      "type": "parameter",
+      "datatype": "text",
+      "description": "The plural of the name, for the folder, the namespace, the route and the metrics. By default the name with an s."
+    },
+    "DefaultPlural": {
+      "type": "derived",
+      "valueSource": "name",
+      "valueTransform": "addS"
+    },
+    "PluralName": {
+      "type": "generated",
+      "generator": "coalesce",
+      "parameters": {
+        "sourceVariableName": "Plural",
+        "fallbackVariableName": "DefaultPlural"
+      },
+      "replaces": "Gizmos",
+      "fileRename": "Gizmos"
+    },
+    "EntityCode": {
+      "type": "derived",
+      "valueSource": "name",
+      "valueTransform": "snakeCase",
+      "replaces": "ENTITY_CODE"
+    },
+    "EntityWords": {
+      "type": "derived",
+      "valueSource": "name",
+      "valueTransform": "words",
+      "replaces": "ENTITY_WORDS"
+    },
+    "PluralCode": {
+      "type": "derived",
+      "valueSource": "PluralName",
+      "valueTransform": "snakeCase",
+      "replaces": "PLURAL_CODE"
+    },
+    "PluralRoute": {
+      "type": "derived",
+      "valueSource": "PluralName",
+      "valueTransform": "kebab",
+      "replaces": "PLURAL_ROUTE"
+    },
+    "Database": {
+      "type": "parameter",
+      "datatype": "choice",
+      "defaultValue": "inmemory",
+      "description": "Where the application stores the entities: with sqlite, the HTTP tests use a database file of their own.",
+      "choices": [
+        {
+          "choice": "inmemory",
+          "description": "In memory."
+        },
+        {
+          "choice": "sqlite",
+          "description": "SQLite, as resultunion-feature --database sqlite."
+        }
+      ]
+    },
+    "Sqlite": {
+      "type": "computed",
+      "value": "(Database == \"sqlite\")"
+    }
+  },
+  "forms": {
+    "addS": {
+      "identifier": "replace",
+      "pattern": "$",
+      "replacement": "s"
+    },
+    "kebab": {
+      "identifier": "kebabCase"
+    },
+    "dashToUnderscore": {
+      "identifier": "replace",
+      "pattern": "-",
+      "replacement": "_"
+    },
+    "dashToSpace": {
+      "identifier": "replace",
+      "pattern": "-",
+      "replacement": " "
+    },
+    "snakeCase": {
+      "identifier": "chain",
+      "steps": [
+        "kebab",
+        "dashToUnderscore"
+      ]
+    },
+    "words": {
+      "identifier": "chain",
+      "steps": [
+        "kebab",
+        "dashToSpace"
+      ]
+    },
+    "withoutTests": {
+      "identifier": "replace",
+      "pattern": "\\.Tests$",
+      "replacement": ""
+    }
+  }
+}

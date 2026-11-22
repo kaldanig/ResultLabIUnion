@@ -1,7 +1,12 @@
 {
   "$schema": "http://json.schemastore.org/template",
   "author": "Giorgi Kaldani",
-  "classifications": [ "Web", "WebAPI", "Code", "Result pattern" ],
+  "classifications": [
+    "Web",
+    "WebAPI",
+    "Code",
+    "Result pattern"
+  ],
   "identity": "ResultUnion.Templates.Feature",
   "name": "ResultUnion feature",
   "description": "A feature for a Minimal API in the shape of resultunion-api's products: an entity and a value object with error catalogs, a repository, a service whose use cases are Result pipelines, and endpoints that return problem responses.",
@@ -80,24 +85,97 @@
       "valueSource": "PluralName",
       "valueTransform": "words",
       "replaces": "ENTITY_PLURAL_WORDS"
+    },
+    "Database": {
+      "type": "parameter",
+      "datatype": "choice",
+      "defaultValue": "inmemory",
+      "description": "Where the entities are stored.",
+      "choices": [
+        {
+          "choice": "inmemory",
+          "description": "In memory: nothing to set up, gone when the application stops."
+        },
+        {
+          "choice": "sqlite",
+          "description": "SQLite through EF Core, in the application's DbContext, with a unique index on the name."
+        }
+      ]
+    },
+    "Sqlite": {
+      "type": "computed",
+      "value": "(Database == \"sqlite\")"
     }
   },
   "forms": {
-    "addS": { "identifier": "replace", "pattern": "$", "replacement": "s" },
-    "kebab": { "identifier": "kebabCase" },
-    "dashToUnderscore": { "identifier": "replace", "pattern": "-", "replacement": "_" },
-    "dashToSpace": { "identifier": "replace", "pattern": "-", "replacement": " " },
-    "snakeCase": { "identifier": "chain", "steps": [ "kebab", "dashToUnderscore" ] },
-    "words": { "identifier": "chain", "steps": [ "kebab", "dashToSpace" ] }
+    "addS": {
+      "identifier": "replace",
+      "pattern": "$",
+      "replacement": "s"
+    },
+    "kebab": {
+      "identifier": "kebabCase"
+    },
+    "dashToUnderscore": {
+      "identifier": "replace",
+      "pattern": "-",
+      "replacement": "_"
+    },
+    "dashToSpace": {
+      "identifier": "replace",
+      "pattern": "-",
+      "replacement": " "
+    },
+    "snakeCase": {
+      "identifier": "chain",
+      "steps": [
+        "kebab",
+        "dashToUnderscore"
+      ]
+    },
+    "words": {
+      "identifier": "chain",
+      "steps": [
+        "kebab",
+        "dashToSpace"
+      ]
+    }
   },
   "postActions": [
     {
+      "condition": "(!Sqlite)",
       "actionId": "AC1156F7-BB77-4DB8-B28F-24EEBCCA1E5C",
       "description": "Register the feature in Program.cs.",
       "manualInstructions": [
-        { "text": "Call the two methods of the new ...Feature class in Program.cs: builder.Services.Add<Plural>() and app.Map<Plural>()." }
+        {
+          "text": "Call the two methods of the new ...Feature class in Program.cs: builder.Services.Add<Plural>() and app.Map<Plural>()."
+        }
       ],
       "continueOnError": true
+    },
+    {
+      "condition": "(Sqlite)",
+      "actionId": "AC1156F7-BB77-4DB8-B28F-24EEBCCA1E5C",
+      "description": "Register the feature in Program.cs and its entity in the DbContext.",
+      "manualInstructions": [
+        {
+          "text": "Call builder.Services.Add<Plural><AppDbContext>() and app.Map<Plural>() in Program.cs, and modelBuilder.ApplyConfiguration(new ...Configuration()) in the DbContext's OnModelCreating."
+        }
+      ],
+      "continueOnError": true
+    }
+  ],
+  "sources": [
+    {
+      "modifiers": [
+        {
+          "condition": "(!Sqlite)",
+          "exclude": [
+            "Gizmos/EfWidgetRepository.cs",
+            "Gizmos/WidgetConfiguration.cs"
+          ]
+        }
+      ]
     }
   ]
 }

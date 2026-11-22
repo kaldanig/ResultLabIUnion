@@ -99,57 +99,13 @@ done
 sed -i 's/^builder.Services.AddScoped<ProductService>();/&\nbuilder.Services.AddOrderLines();\nbuilder.Services.AddCategories();/; s/^app.MapProducts();/&\napp.MapOrderLines();\napp.MapCategories();/' \
   "$work/Shop/src/Shop/Program.cs"
 sed -i 's/^using Shop.Products;/&\nusing Shop.Categories;\nusing Shop.OrderLines;/' "$work/Shop/src/Shop/Program.cs"
-cat > "$work/Shop/tests/Shop.Tests/FeatureTemplateTests.cs" <<'EOF'
-using System.Net;
-using System.Net.Http.Json;
-using System.Text.Json;
-using Microsoft.AspNetCore.Mvc.Testing;
-
-namespace Shop.Tests;
-
-public sealed class FeatureTemplateTests(WebApplicationFactory<Program> factory) : IClassFixture<WebApplicationFactory<Program>>
-{
-    private static CancellationToken Ct => TestContext.Current.CancellationToken;
-
-    private readonly HttpClient _client = factory.CreateClient();
-
-    [Fact]
-    public async Task A_created_entity_is_found_and_its_name_is_then_taken()
-    {
-        var name = $"Line {Guid.NewGuid()}";
-        var created = await _client.PostAsJsonAsync("/order-lines", new { name }, Ct);
-        Assert.Equal(HttpStatusCode.Created, created.StatusCode);
-
-        var found = await _client.GetAsync(created.Headers.Location, Ct);
-        Assert.Equal(name, (await found.Content.ReadFromJsonAsync<JsonElement>(Ct)).GetProperty("name").GetString());
-
-        var again = await _client.PostAsJsonAsync("/order-lines", new { name = name.ToUpperInvariant() }, Ct);
-        Assert.Equal(HttpStatusCode.Conflict, again.StatusCode);
-        Assert.Equal("order_line.name_taken", await CodeOf(again));
-    }
-
-    [Fact]
-    public async Task An_empty_name_is_a_validation_problem()
-    {
-        var response = await _client.PostAsJsonAsync("/categories", new { name = " " }, Ct);
-
-        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-        Assert.Equal("category_name.required", await CodeOf(response));
-    }
-
-    [Fact]
-    public async Task A_missing_entity_is_404()
-    {
-        var response = await _client.GetAsync($"/categories/{Guid.NewGuid()}", Ct);
-
-        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
-        Assert.Equal("category.not_found", await CodeOf(response));
-    }
-
-    private static async Task<string?> CodeOf(HttpResponseMessage response) =>
-        (await response.Content.ReadFromJsonAsync<JsonElement>(Ct)).GetProperty("code").GetString();
-}
-EOF
+# And their tests, from the tests template, in the test project.
+(cd "$work/Shop/tests/Shop.Tests" \
+  && dotnet restore \
+  && dotnet new resultunion-feature-tests -n OrderLine --debug:custom-hive "$hive" \
+  && dotnet new resultunion-feature-tests -n Category --plural Categories --debug:custom-hive "$hive")
+grep -q '^using Shop.OrderLines;' "$work/Shop/tests/Shop.Tests/OrderLines/OrderLineServiceTests.cs" \
+  || { echo "::error::resultunion-feature-tests did not derive the application's namespace"; exit 1; }
 (cd "$work/Shop" && dotnet build -warnaserror && dotnet test)
 echo "::endgroup::"
 
@@ -160,6 +116,18 @@ if [ ! -e "$work/Store/src/Store/Data/AppDbContext.cs" ]; then
   echo "::error::--database sqlite did not add the DbContext"
   exit 1
 fi
+
+# A feature in SQLite, in the application's DbContext, with its tests.
+(cd "$work/Store/src/Store" && dotnet restore \
+  && dotnet new resultunion-feature -n Supplier --database sqlite --debug:custom-hive "$hive")
+(cd "$work/Store/tests/Store.Tests" && dotnet restore \
+  && dotnet new resultunion-feature-tests -n Supplier --database sqlite --debug:custom-hive "$hive")
+[ -e "$work/Store/src/Store/Suppliers/EfSupplierRepository.cs" ] \
+  || { echo "::error::resultunion-feature --database sqlite did not add the EF repository"; exit 1; }
+sed -i 's/^builder.Services.AddScoped<ProductService>();/&\nbuilder.Services.AddSuppliers<AppDbContext>();/; s/^app.MapProducts();/&\napp.MapSuppliers();/; s/^using Store.Products;/&\nusing Store.Suppliers;/' \
+  "$work/Store/src/Store/Program.cs"
+sed -i 's/^        var product = modelBuilder.Entity<Product>();/        modelBuilder.ApplyConfiguration(new Store.Suppliers.SupplierConfiguration());\n&/' \
+  "$work/Store/src/Store/Data/AppDbContext.cs"
 (cd "$work/Store" && dotnet build -warnaserror && dotnet test)
 echo "::endgroup::"
 

@@ -179,7 +179,21 @@ dotnet new resultunion-feature -n Order
 It creates `Order` with `not_found` and `name_taken`, `OrderName`, `IOrderRepository` with an in-memory store,
 `OrderService` (create and find) and endpoints at `/orders`; register them in `Program.cs` with
 `builder.Services.AddOrders()` and `app.MapOrders()`. `--plural Categories` sets the plural where adding an s is wrong.
-Then grow it step by step:
+
+With `--database sqlite` the orders go into the application's DbContext instead: `EfOrderRepository` (the same
+pre-check and unique-constraint catch as the products) and `OrderConfiguration`, registered with
+`builder.Services.AddOrders<AppDbContext>()` and applied in `OnModelCreating` with
+`modelBuilder.ApplyConfiguration(new OrderConfiguration())`.
+
+Its tests come from a second template, run in the test project:
+
+```powershell
+dotnet new resultunion-feature-tests -n Order
+```
+
+`OrderServiceTests` checks each code the use cases return (`order_name.required` with its field, `order.name_taken`,
+`order.not_found`) and `OrderEndpointTests` what a client receives (201 with the location, 400, 409, 404); add
+`--database sqlite` for an application that stores in SQLite. Then grow the feature step by step:
 
 1. **Value objects** for the inputs that have rules (`Quantity`, `OrderNote`), each with its `Errors` catalog and a
    `Create` that returns a result. An input with a rule is a value object even when it is a single string; the entity

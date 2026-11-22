@@ -11,6 +11,19 @@ public sealed record WidgetResponse(Guid Id, string Name)
     public static WidgetResponse From(Widget entity) => new(entity.Id, entity.Name.Value);
 }
 
+#if (Sqlite)
+/// <summary>
+/// The feature's services and endpoints: <c>builder.Services.AddGizmos&lt;AppDbContext&gt;()</c> and
+/// <c>app.MapGizmos()</c>, with <see cref="WidgetConfiguration"/> applied in the DbContext.
+/// </summary>
+public static class WidgetFeature
+{
+    public static IServiceCollection AddGizmos<TContext>(this IServiceCollection services)
+        where TContext : Microsoft.EntityFrameworkCore.DbContext =>
+        services
+            .AddScoped<IWidgetRepository, EfWidgetRepository<TContext>>()
+            .AddScoped<WidgetService>();
+#else
 /// <summary>The feature's services and endpoints: <c>builder.Services.AddGizmos()</c> and <c>app.MapGizmos()</c>.</summary>
 public static class WidgetFeature
 {
@@ -18,6 +31,7 @@ public static class WidgetFeature
         services
             .AddSingleton<IWidgetRepository, InMemoryWidgetRepository>()
             .AddScoped<WidgetService>();
+#endif
 
     /// <summary>
     /// A success becomes the typed response, a failure an RFC 9457 problem with the error's <c>code</c>, its

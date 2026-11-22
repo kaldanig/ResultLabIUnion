@@ -35,4 +35,15 @@ dotnet new resultunion-feature -n OrderLine
 `resultunion-feature` adds a feature in the shape of the products to a Minimal API project, in the folder
 `OrderLines/`: the entity and its name with error catalogs, an in-memory repository, a service whose use cases are
 `Result` pipelines, and endpoints at `/order-lines`. Register it in `Program.cs` with `builder.Services.AddOrderLines()`
-and `app.MapOrderLines()`. `--plural Categories` sets the plural where adding an s is wrong.
+and `app.MapOrderLines()`. `--plural Categories` sets the plural where adding an s is wrong. `--database sqlite`
+stores it through EF Core in the application's DbContext: register it with `AddOrderLines<AppDbContext>()` and apply
+`OrderLineConfiguration` in `OnModelCreating`.
+
+```powershell
+dotnet new resultunion-feature-tests -n OrderLine
+```
+
+`resultunion-feature-tests`, run in the test project, adds the feature's tests in `OrderLines/`: one for each code its
+use cases return, and its endpoints over HTTP with `WebApplicationFactory`. The application's namespace is the test
+project's without `.Tests` (`--app-namespace` sets another); `--database sqlite` gives the HTTP tests a database file
+of their own.

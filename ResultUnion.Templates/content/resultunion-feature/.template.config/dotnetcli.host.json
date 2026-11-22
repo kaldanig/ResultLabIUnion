@@ -8,6 +8,10 @@
     "Plural": {
       "longName": "plural",
       "shortName": ""
+    },
+    "Database": {
+      "longName": "database",
+      "shortName": ""
     }
   }
 }

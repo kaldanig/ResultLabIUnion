@@ -687,7 +687,8 @@ shape as `ProductName`: its codes (`customer_email.required`, `customer_email.to
 name, the namespace from the project (`--namespace` sets another), and `--max-length` sets the limit (100 by default);
 `--value-type int` or `decimal` makes a number with a range (`--min`, `--max`). `dotnet new resultunion-feature -n
 OrderLine` adds a whole feature in that shape, in `OrderLines/`, with endpoints at `/order-lines` that `AddOrderLines()`
-and `MapOrderLines()` register.
+and `MapOrderLines()` register (`--database sqlite` for EF Core), and `dotnet new resultunion-feature-tests -n
+OrderLine`, in the test project, its tests.
 
 A walk-through of the generated code, the responses it sends and how to add a feature of your own:
 [Starting a project from the template](docs/articles/templates.md).
