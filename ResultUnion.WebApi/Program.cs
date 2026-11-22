@@ -56,7 +56,7 @@ api.MapAdminEndpoints();
 
 app.Services.SeedSampleData();                          // ann@example.com
 
-app.Run();
+await app.RunAsync();
 
 // Traces show the API calls only, not the browser UI's files, Scalar or the OpenAPI document.
 static bool IsApiRequest(PathString path) =>

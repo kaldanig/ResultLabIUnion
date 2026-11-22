@@ -16,7 +16,7 @@ var config = DefaultConfig.Instance
     .AddJob(Net11.Job)
     .AddDiagnoser(MemoryDiagnoser.Default);
 
-var summaries = BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args, config).ToList();
+var summaries = (await BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).RunAsync(args, config)).ToList();
 
 // BenchmarkDotNet reports a benchmark that throws, or a class it cannot run, in the log and the summary, but exits
 // with 0; make it a failure, so CI notices.
@@ -26,6 +26,6 @@ var failed = summaries
     .ToList();
 
 foreach (var title in failed)
-    Console.Error.WriteLine($"Failed: {title}");
+    await Console.Error.WriteLineAsync($"Failed: {title}");
 
 return failed.Count == 0 ? 0 : 1;

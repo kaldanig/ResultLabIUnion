@@ -124,7 +124,7 @@ document.getElementById("register").addEventListener("submit", event => {
   const form = event.currentTarget;
   const data = Object.fromEntries(new FormData(form));
 
-  guarded(form, async () => {
+  void guarded(form, async () => {  // guarded catches and shows its own errors
     const { ok, json } = await send("POST", "/users", data);
     if (ok) showSuccess(form, "Registered", [`${json.email}, age ${json.age}`, `id ${json.id}`]);
     else showProblem(form, json);
@@ -139,7 +139,7 @@ document.getElementById("find").addEventListener("submit", event => {
   const action = event.submitter?.dataset.action ?? "find";
   const email = encodeURIComponent(form.elements.email.value.trim());
 
-  guarded(form, async () => {
+  void guarded(form, async () => {  // guarded catches and shows its own errors
     if (action === "find") {
       const { ok, json } = await send("GET", `/users/${email}`);
       if (ok) showSuccess(form, json.email, [`age ${json.age}`, json.isActive ? "active" : "inactive"]);
@@ -210,7 +210,7 @@ document.getElementById("order").addEventListener("submit", event => {
     })),
   };
 
-  guarded(form, async () => {
+  void guarded(form, async () => {  // guarded catches and shows its own errors
     const { ok, json } = await send("POST", "/orders", body);
     if (ok) showSuccess(form, `Order placed: ${json.totalQuantity} items`, json.lines.map(line => `${line.quantity} × ${line.product}`));
     else showProblem(form, json);
@@ -224,7 +224,7 @@ document.getElementById("admin").addEventListener("submit", event => {
   const form = event.currentTarget;
   const role = form.elements.role.value;
 
-  guarded(form, async () => {
+  void guarded(form, async () => {  // guarded catches and shows its own errors
     const { ok, json } = await send("GET", "/admin/users", undefined, role ? { "X-Role": role } : {});
     if (!ok) {
       showProblem(form, json);

@@ -30,7 +30,7 @@ app.MapGrpcService<ProductCatalogService>();
 app.MapGrpcReflectionService();
 app.MapGet("/", () => "A gRPC service (HTTP/2). Call it with a gRPC client, or with grpcurl through reflection.");
 
-app.Run();
+await app.RunAsync();
 
 /// <summary>The entry point, visible to the tests (WebApplicationFactory).</summary>
 public partial class Program;

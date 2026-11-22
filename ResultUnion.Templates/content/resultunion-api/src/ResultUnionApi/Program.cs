@@ -32,7 +32,7 @@ if (app.Environment.IsDevelopment())
 
 app.MapProducts();
 
-app.Run();
+await app.RunAsync();
 
 /// <summary>The entry point, visible to the integration tests (WebApplicationFactory).</summary>
 public partial class Program;

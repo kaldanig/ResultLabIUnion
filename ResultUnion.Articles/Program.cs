@@ -16,6 +16,6 @@ app.UseRequestLocalization(options => options
     .AddSupportedCultures("en", "ka")
     .AddSupportedUICultures("en", "ka"));
 GettingStartedSnippets.Map(app);
-app.Run();
+await app.RunAsync();
 
 public partial class Program;

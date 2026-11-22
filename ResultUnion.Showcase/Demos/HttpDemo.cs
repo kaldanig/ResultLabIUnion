@@ -92,7 +92,7 @@ internal static class HttpDemo
         if (body.Length > 0)
         {
             body.Position = 0;
-            using var json = JsonDocument.Parse(body);
+            using var json = await JsonDocument.ParseAsync(body);
             var text = JsonSerializer.Serialize(json.RootElement, Pretty);
             Console.WriteLine(string.Join(Environment.NewLine, text.Split('\n').Select(line => "    " + line.TrimEnd('\r'))));
         }

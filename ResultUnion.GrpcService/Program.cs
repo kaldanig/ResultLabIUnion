@@ -30,4 +30,4 @@ app.MapGet("/", () => "ResultUnion gRPC demo: gRPC only (HTTP/2). Run ResultUnio
 
 app.Services.SeedSampleData();                          // ann@example.com
 
-app.Run();
+await app.RunAsync();

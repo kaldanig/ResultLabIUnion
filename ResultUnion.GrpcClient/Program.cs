@@ -8,6 +8,7 @@ using OpenTelemetry.Trace;
 using ResultUnion;
 using ResultUnion.Diagnostics;
 using ResultUnion.Grpc;
+using ResultUnion.GrpcClient;
 using ResultUnion.GrpcDemo;
 
 // Calls ResultUnion.GrpcService over real gRPC. Every call goes through Result.TryAsync with a typed mapper, so only an
@@ -111,7 +112,10 @@ static void Write(ConsoleColor color, string text)
     Console.ResetColor();
 }
 
-internal static class ClientTelemetry
+namespace ResultUnion.GrpcClient
 {
-    public static readonly ActivitySource Source = new("ResultUnion.GrpcClient");
+    internal static class ClientTelemetry
+    {
+        public static readonly ActivitySource Source = new("ResultUnion.GrpcClient");
+    }
 }

@@ -32,7 +32,7 @@ dotnet new install "$template" --debug:custom-hive "$hive"
 echo "::group::resultunion-api"
 dotnet new resultunion-api -n Shop -o "$work/Shop" --debug:custom-hive "$hive"
 cp "$work/nuget.config" "$work/Shop/"
-if [ -e "$work/Shop/src/Shop/Data" ] || [ -e "$work/Shop/src/Shop/Products/EfProductRepository.cs" ]; then
+if [[ -e "$work/Shop/src/Shop/Data" ]] || [[ -e "$work/Shop/src/Shop/Products/EfProductRepository.cs" ]]; then
   echo "::error::the in-memory project contains the SQLite files"
   exit 1
 fi
@@ -94,7 +94,7 @@ EOF
   && dotnet new resultunion-feature -n Category --plural Categories --crud --debug:custom-hive "$hive")
 for file in OrderLines/OrderLine.cs OrderLines/OrderLineName.cs OrderLines/OrderLineRepository.cs OrderLines/OrderLineService.cs \
             OrderLines/OrderLineFeature.cs Categories/CategoryFeature.cs; do
-  [ -e "$work/Shop/src/Shop/$file" ] || { echo "::error::resultunion-feature did not create $file"; exit 1; }
+  [[ -e "$work/Shop/src/Shop/$file" ]] || { echo "::error::resultunion-feature did not create $file"; exit 1; }
 done
 sed -i 's/^builder.Services.AddScoped<ProductService>();/&\nbuilder.Services.AddOrderLines();\nbuilder.Services.AddCategories();/; s/^app.MapProducts();/&\napp.MapOrderLines();\napp.MapCategories();/' \
   "$work/Shop/src/Shop/Program.cs"
@@ -112,7 +112,7 @@ echo "::endgroup::"
 echo "::group::resultunion-api --database sqlite"
 dotnet new resultunion-api -n Store -o "$work/Store" --database sqlite --debug:custom-hive "$hive"
 cp "$work/nuget.config" "$work/Store/"
-if [ ! -e "$work/Store/src/Store/Data/AppDbContext.cs" ]; then
+if [[ ! -e "$work/Store/src/Store/Data/AppDbContext.cs" ]]; then
   echo "::error::--database sqlite did not add the DbContext"
   exit 1
 fi
@@ -122,7 +122,7 @@ fi
 (cd "$work/Store" && dotnet restore \
   && dotnet new resultunion-feature -n Supplier -o src/Store --database sqlite --crud --debug:custom-hive "$hive" \
   && dotnet new resultunion-feature-tests -n Supplier -o tests/Store.Tests --database sqlite --crud --debug:custom-hive "$hive")
-[ -e "$work/Store/src/Store/Suppliers/EfSupplierRepository.cs" ] \
+[[ -e "$work/Store/src/Store/Suppliers/EfSupplierRepository.cs" ]] \
   || { echo "::error::resultunion-feature --database sqlite did not add the EF repository"; exit 1; }
 sed -i 's/^builder.Services.AddScoped<ProductService>();/&\nbuilder.Services.AddSuppliers<AppDbContext>();/; s/^app.MapProducts();/&\napp.MapSuppliers();/; s/^using Store.Products;/&\nusing Store.Suppliers;/' \
   "$work/Store/src/Store/Program.cs"
@@ -134,7 +134,7 @@ echo "::endgroup::"
 echo "::group::resultunion-api --no-tests"
 dotnet new resultunion-api -n Lean -o "$work/Lean" --no-tests --debug:custom-hive "$hive"
 cp "$work/nuget.config" "$work/Lean/"
-if [ -d "$work/Lean/tests" ]; then
+if [[ -d "$work/Lean/tests" ]]; then
   echo "::error::--no-tests left the tests folder in place"
   exit 1
 fi
@@ -146,7 +146,7 @@ dotnet new resultunion-grpc -n Catalog -o "$work/Catalog" --debug:custom-hive "$
 cp "$work/nuget.config" "$work/Catalog/"
 grep -q '^package catalog.products.v1;' "$work/Catalog/src/Catalog/Protos/products.proto" \
   || { echo "::error::resultunion-grpc did not name the proto package after the project"; exit 1; }
-if [ -e "$work/Catalog/src/Catalog/Data" ] || [ -e "$work/Catalog/src/Catalog/Products/EfProductRepository.cs" ]; then
+if [[ -e "$work/Catalog/src/Catalog/Data" ]] || [[ -e "$work/Catalog/src/Catalog/Products/EfProductRepository.cs" ]]; then
   echo "::error::the in-memory gRPC project contains the SQLite files"
   exit 1
 fi
@@ -155,9 +155,9 @@ fi
 (cd "$work/Catalog" && dotnet restore \
   && dotnet new resultunion-feature -n Supplier -o src/Catalog --grpc --crud --debug:custom-hive "$hive" \
   && dotnet new resultunion-feature-tests -n Supplier -o tests/Catalog.Tests --grpc --crud --debug:custom-hive "$hive")
-[ -e "$work/Catalog/src/Catalog/Protos/suppliers.proto" ] && [ -e "$work/Catalog/src/Catalog/Suppliers/SupplierCatalogService.cs" ] \
+[[ -e "$work/Catalog/src/Catalog/Protos/suppliers.proto" ]] && [[ -e "$work/Catalog/src/Catalog/Suppliers/SupplierCatalogService.cs" ]] \
   || { echo "::error::resultunion-feature --grpc did not add the contract and the service"; exit 1; }
-if [ -e "$work/Catalog/src/Catalog/Grpc" ] || [ -e "$work/Catalog/tests/Catalog.Tests/Suppliers/SupplierEndpointTests.cs" ]; then
+if [[ -e "$work/Catalog/src/Catalog/Grpc" ]] || [[ -e "$work/Catalog/tests/Catalog.Tests/Suppliers/SupplierEndpointTests.cs" ]]; then
   echo "::error::resultunion-feature --grpc left the HTTP files or its Grpc folder"
   exit 1
 fi
@@ -169,7 +169,7 @@ echo "::endgroup::"
 echo "::group::resultunion-grpc --database sqlite"
 dotnet new resultunion-grpc -n Warehouse -o "$work/Warehouse" --database sqlite --debug:custom-hive "$hive"
 cp "$work/nuget.config" "$work/Warehouse/"
-[ -e "$work/Warehouse/src/Warehouse/Data/AppDbContext.cs" ] \
+[[ -e "$work/Warehouse/src/Warehouse/Data/AppDbContext.cs" ]] \
   || { echo "::error::resultunion-grpc --database sqlite did not add the DbContext"; exit 1; }
 
 # A gRPC feature in SQLite, in the application's DbContext, with its tests.
@@ -186,7 +186,7 @@ echo "::endgroup::"
 echo "::group::resultunion-grpc --no-tests"
 dotnet new resultunion-grpc -n LeanCatalog -o "$work/LeanCatalog" --no-tests --debug:custom-hive "$hive"
 cp "$work/nuget.config" "$work/LeanCatalog/"
-if [ -d "$work/LeanCatalog/tests" ]; then
+if [[ -d "$work/LeanCatalog/tests" ]]; then
   echo "::error::--no-tests left the tests folder in place"
   exit 1
 fi

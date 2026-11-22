@@ -38,10 +38,12 @@ internal static class BasicsDemo
         // A default result is never a "half" state: it is a failure with a dedicated error.
         Demo.Show("default(Result<int>)", default(Result<int>));
 
-        // Equality is by value.
-        // ReSharper disable once EqualExpressionComparison
-        Demo.Show("Success(1) == Success(1)", Result<int>.Success(1) == Result<int>.Success(1));
-        // ReSharper disable once EqualExpressionComparison
-        Demo.Show("NotFound(\"x\") == NotFound(\"x\")", Error.NotFound("x") == Error.NotFound("x"));
+        // Equality is by value: two results, or two errors, created apart are equal.
+        var one = Result<int>.Success(1);
+        var another = Result<int>.Success(1);
+        Demo.Show("Success(1) == Success(1)", one == another);
+        var notFound = Error.NotFound("x");
+        var sameNotFound = Error.NotFound("x");
+        Demo.Show("NotFound(\"x\") == NotFound(\"x\")", notFound == sameNotFound);
     }
 }
