@@ -8,6 +8,9 @@ Thank you for helping. Bug reports, questions, documentation fixes and code are 
   design before you spend time on code. The reasoning behind the existing API is in [docs/DESIGN.md](docs/DESIGN.md);
   a proposal that changes one of those decisions should say why.
 
+Everyone who takes part in the project, in issues, pull requests and reviews, follows the
+[code of conduct](CODE_OF_CONDUCT.md).
+
 ## Building and testing
 
 You need the .NET 11 SDK. Every `net11.0` project is built with .NET 11 Runtime Async, and the library must also work
