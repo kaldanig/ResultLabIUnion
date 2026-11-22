@@ -17,7 +17,7 @@ dotnet new resultunion-api -n Shop
 `-n` names the solution, the projects and their namespaces (`Shop`, `Shop.Products`, `Shop.Tests`). `--no-tests`
 leaves the test project out, and `--database sqlite` stores the products in SQLite through EF Core instead of in
 memory. The projects reference the ResultUnion packages of the template's own version, so
-`dotnet new install ResultUnion.Templates::1.0.0-rc.2` creates a project on the release candidate.
+`dotnet new install ResultUnion.Templates::1.0.0-rc.3` creates a project on the release candidate.
 
 ```text
 Shop/

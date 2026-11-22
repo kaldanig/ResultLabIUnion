@@ -9,6 +9,11 @@ are in the diff of those files.
 
 ## [Unreleased]
 
+## [1.0.0-rc.3] - 2026-11-23
+
+The public API of the libraries is the same as in 1.0.0-rc.1 and rc.2; this candidate adds the gRPC templates, so
+that they are tried before 1.0.0, which follows when this candidate has been out for four weeks.
+
 ### ResultUnion.Templates
 
 - `dotnet new resultunion-grpc`: the products feature as a gRPC service. Its methods map the request to the same
@@ -301,7 +306,8 @@ The first release. Requires .NET 11 (C# 15 unions).
 - `RpcException.ToError()` for clients, restoring type, code, message, arguments and field violations.
 - Failures that leave a service tag the call's span with the error code and category.
 
-[Unreleased]: https://github.com/kaldanig/ResultLabIUnion/compare/v1.0.0-rc.2...HEAD
+[Unreleased]: https://github.com/kaldanig/ResultLabIUnion/compare/v1.0.0-rc.3...HEAD
+[1.0.0-rc.3]: https://github.com/kaldanig/ResultLabIUnion/compare/v1.0.0-rc.2...v1.0.0-rc.3
 [1.0.0-rc.2]: https://github.com/kaldanig/ResultLabIUnion/compare/v1.0.0-rc.1...v1.0.0-rc.2
 [1.0.0-rc.1]: https://github.com/kaldanig/ResultLabIUnion/compare/v0.5.0...v1.0.0-rc.1
 [0.5.0]: https://github.com/kaldanig/ResultLabIUnion/compare/v0.4.0...v0.5.0
