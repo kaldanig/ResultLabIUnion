@@ -1,0 +1,61 @@
+{
+  "$schema": "http://json.schemastore.org/template",
+  "author": "Giorgi Kaldani",
+  "classifications": [ "Code", "Result pattern" ],
+  "identity": "ResultUnion.Templates.ValueObject",
+  "name": "ResultUnion value object",
+  "description": "A string value object with its error catalog: Create returns Result<T>, the codes are declared once, and the arguments are in the errors for clients that translate them.",
+  "shortName": "resultunion-valueobject",
+  "sourceName": "ValueName",
+  "tags": {
+    "language": "C#",
+    "type": "item"
+  },
+  "symbols": {
+    "Namespace": {
+      "type": "parameter",
+      "datatype": "text",
+      "description": "The namespace of the value object. By default the project's root namespace."
+    },
+    "RootNamespace": {
+      "type": "bind",
+      "binding": "msbuild:RootNamespace",
+      "defaultValue": "MyApp"
+    },
+    "TargetNamespace": {
+      "type": "generated",
+      "generator": "coalesce",
+      "parameters": {
+        "sourceVariableName": "Namespace",
+        "fallbackVariableName": "RootNamespace"
+      },
+      "replaces": "TargetNamespace"
+    },
+    "MaxLength": {
+      "type": "parameter",
+      "datatype": "integer",
+      "defaultValue": "100",
+      "description": "The most characters a value may have.",
+      "replaces": "VALUE_MAX_LENGTH"
+    },
+    "Code": {
+      "type": "derived",
+      "valueSource": "name",
+      "valueTransform": "snakeCase",
+      "replaces": "VALUE_CODE"
+    },
+    "Words": {
+      "type": "derived",
+      "valueSource": "name",
+      "valueTransform": "words",
+      "replaces": "VALUE_WORDS"
+    }
+  },
+  "forms": {
+    "kebab": { "identifier": "kebabCase" },
+    "dashToUnderscore": { "identifier": "replace", "pattern": "-", "replacement": "_" },
+    "dashToSpace": { "identifier": "replace", "pattern": "-", "replacement": " " },
+    "snakeCase": { "identifier": "chain", "steps": [ "kebab", "dashToUnderscore" ] },
+    "words": { "identifier": "chain", "steps": [ "kebab", "dashToSpace" ] }
+  }
+}

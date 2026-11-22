@@ -16,6 +16,9 @@ are in the diff of those files.
   `product.name_taken`. The HTTP tests use a temporary database file.
 - In both variants, `IProductRepository.AddAsync` returns a `Result`: a taken name is the store's answer, and the use
   case adds the product with one `EnsureAsync`.
+- An item template, `dotnet new resultunion-valueobject -n CustomerEmail`: a string value object with its `Errors`
+  catalog in an existing project. The codes and messages come from the name (`customer_email.required`), the
+  namespace from the project's `RootNamespace` or `--namespace`, the limit from `--max-length`.
 
 ### ResultUnion (analyzers)
 

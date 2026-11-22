@@ -173,7 +173,17 @@ Copy the shape of `Products` for each new concept, say `Orders`:
 
 1. **Value objects** for the inputs that have rules (`Quantity`, `OrderNote`), each with its `Errors` catalog and a
    `Create` that returns a result. An input with a rule is a value object even when it is a single string; the entity
-   then takes only validated parts.
+   then takes only validated parts. The package's item template writes a string one in the shape of `ProductName`,
+   in the current folder:
+
+   ```powershell
+   dotnet new resultunion-valueobject -n OrderNote --max-length 500
+   ```
+
+   The codes and messages come from the name (`order_note.required`, `order_note.too_long`, "The order note is
+   required."), and the namespace is the project's `RootNamespace`. That namespace is read from a restored project;
+   in a new project, or for a subfolder, pass `--namespace Shop.Orders`. Then change the rules to what the value
+   needs.
 2. **The entity** (`Order`) with its own catalog for the errors about it: `not_found`, and the domain rules
    (`order.already_shipped` as a `BusinessRule`, a conflict as `Conflict`).
 3. **A repository interface** that returns `null` for a missing entity; the service turns that into the catalog error

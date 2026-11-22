@@ -682,6 +682,10 @@ pipeline (`CombineAll` for every invalid field, `EnsureAsync` with the store's a
 packages of the template's own version. CI creates the variants from every build of the template and builds them with
 warnings as errors and runs their tests.
 
+In an existing project, `dotnet new resultunion-valueobject -n CustomerEmail` adds a string value object in the same
+shape as `ProductName`: its codes (`customer_email.required`, `customer_email.too_long`) and messages come from the
+name, the namespace from the project (`--namespace` sets another), and `--max-length` sets the limit (100 by default).
+
 A walk-through of the generated code, the responses it sends and how to add a feature of your own:
 [Starting a project from the template](docs/articles/templates.md).
 

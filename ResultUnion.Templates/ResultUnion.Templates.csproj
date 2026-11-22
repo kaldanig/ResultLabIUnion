@@ -10,8 +10,8 @@
     <IsPackable>true</IsPackable>
     <PackageType>Template</PackageType>
     <PackageId>ResultUnion.Templates</PackageId>
-    <Description>dotnet new templates for ResultUnion. resultunion-api: a Minimal API with value objects and error catalogs, a use case as one Result pipeline, endpoints that return problem responses, and tests with ResultUnion.Testing.</Description>
-    <PackageTags>result;result-pattern;dotnet-new;templates;minimal-api</PackageTags>
+    <Description>dotnet new templates for ResultUnion. resultunion-api: a Minimal API with value objects and error catalogs, a use case as one Result pipeline, endpoints that return problem responses, and tests with ResultUnion.Testing. resultunion-valueobject: a value object with its error catalog, in an existing project.</Description>
+    <PackageTags>result;result-pattern;dotnet-new;templates;minimal-api;value-object</PackageTags>
     <IncludeBuildOutput>false</IncludeBuildOutput>
     <IncludeSymbols>false</IncludeSymbols>
     <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>

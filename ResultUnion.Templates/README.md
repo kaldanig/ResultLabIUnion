@@ -17,3 +17,11 @@ responses, and a test project with ResultUnion.Testing. `--no-tests` leaves the 
 stores the products in SQLite through EF Core instead of in memory.
 
 The projects reference the ResultUnion packages of the same version as the template.
+
+```powershell
+dotnet new resultunion-valueobject -n CustomerEmail --max-length 254
+```
+
+`resultunion-valueobject` adds a string value object to an existing project: `Create` returns `Result<T>`, and its
+`Errors` catalog declares `customer_email.required` and `customer_email.too_long` (with the `length` and `maxLength`
+arguments). The namespace is the project's `RootNamespace`, read from a restored project; `--namespace` sets another.
