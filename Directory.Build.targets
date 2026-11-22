@@ -25,7 +25,7 @@
   <PropertyGroup Condition="'$(IsPackable)' == 'true' and '$(EnablePackageValidation)' == ''">
     <EnablePackageValidation>true</EnablePackageValidation>
     <!-- A package that has never been released sets IsNewPackage; remove it once its first version is on nuget.org. -->
-    <PackageValidationBaselineVersion Condition="'$(IsNewPackage)' != 'true'">1.0.0-rc.2</PackageValidationBaselineVersion>
+    <PackageValidationBaselineVersion Condition="'$(IsNewPackage)' != 'true'">1.0.0-rc.3</PackageValidationBaselineVersion>
   </PropertyGroup>
 
   <!-- Every project in this repository runs the ResultUnion analyzers and offers their code fixes, as a package consumer
