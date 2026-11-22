@@ -415,7 +415,7 @@ A failure becomes an RFC 9457 `application/problem+json` response:
 
 - the status comes from `ErrorType`: Validation 400, Unauthorized 401, Forbidden 403, NotFound 404,
   Conflict and Concurrency 409, BusinessRule 422, TooManyRequests 429, Unavailable 503, Unexpected 500
-  (`ErrorType.ToStatusCode()`);
+  (`ErrorType.ToHttpStatusCode()`);
 - `detail` is the message, and the stable error `code` is an extension, so clients can switch on it;
 - `category` is the `ErrorType` name, which the status alone does not always give (Conflict and Concurrency are both 409);
 - `Arguments` become the `arguments` extension, and each entry of `details` carries its own (omitted when empty);
@@ -444,7 +444,8 @@ A failure becomes an RFC 9457 `application/problem+json` response:
 ## gRPC: `ResultUnion.Grpc`
 
 The domain and application layers stay the same; only the boundary changes. A gRPC method returns the reply message,
-and gRPC reports failures through the call's status, so the service ends the pipeline with `GetValueOrThrowRpc`:
+and gRPC reports failures through the call's status, so the service ends the pipeline with `GetValueOrThrowRpc` (or
+`ToReplyOrThrowRpc` for a result without a value):
 
 ```csharp
 using ResultUnion.Grpc;
@@ -456,7 +457,7 @@ public override Task<UserReply> GetUser(GetUserRequest request, ServerCallContex
 
 public override Task<Empty> DeactivateUser(DeactivateUserRequest request, ServerCallContext context) =>
     users.DeactivateAsync(request.Email, context.CancellationToken)
-        .GetValueOrThrowRpcAsync(() => new Empty());
+        .ToReplyOrThrowRpcAsync(() => new Empty());
 ```
 
 The `RpcException` carries gRPC's rich error model (`google.rpc.Status`):

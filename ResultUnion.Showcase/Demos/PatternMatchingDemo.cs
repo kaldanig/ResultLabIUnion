@@ -40,7 +40,7 @@ internal static class PatternMatchingDemo
         // Each category tells the caller what to do: the HTTP status (ResultUnion.AspNetCore), and whether a retry may succeed.
         foreach (var type in Enum.GetValues<ErrorType>())
         {
-            Demo.Show($"{type}", $"HTTP {type.ToStatusCode()}{(type.IsTransient() ? ", transient: retry may succeed" : "")}");
+            Demo.Show($"{type}", $"HTTP {type.ToHttpStatusCode()}{(type.IsTransient ? ", transient: retry may succeed" : "")}");
         }
     }
 

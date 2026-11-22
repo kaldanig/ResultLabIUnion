@@ -20,7 +20,10 @@ public class ProblemDetailsMappingTests
     [InlineData((ErrorType)99, 500)]
     public void ToStatusCode_MapsEveryErrorType(ErrorType type, int expected)
     {
+        Assert.Equal(expected, type.ToHttpStatusCode());
+#pragma warning disable CS0618 // the old name stays until 1.0 and must still give the same code
         Assert.Equal(expected, type.ToStatusCode());
+#pragma warning restore CS0618
     }
 
     [Fact]

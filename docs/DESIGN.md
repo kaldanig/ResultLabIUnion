@@ -35,7 +35,8 @@ was checked with a small program, and the observed output is quoted.
   [39 Test assertions need no test framework](#39-test-assertions-need-no-test-framework) ·
   [40 Conventions are suggestions, mistakes are warnings](#40-conventions-are-suggestions-mistakes-are-warnings) ·
   [41 Result&lt;Error&gt; is an analyzer warning](#41-resulterror-is-an-analyzer-warning) ·
-  [42 Results refuse to be serialized](#42-results-refuse-to-be-serialized)
+  [42 Results refuse to be serialized](#42-results-refuse-to-be-serialized) ·
+  [43 The API review before 1.0](#43-the-api-review-before-10)
 
 ---
 
@@ -670,3 +671,26 @@ it keeps `MakeGenericType` out of the AOT path.
 
 **Consequences.** A behavior change in a released type: code that serialized a result, on purpose or not, now throws.
 Before, it produced JSON that no reader of the library could turn back into a result.
+
+### 43. The API review before 1.0
+
+**Context.** After 0.4.0 the six packages had about 570 public members. A break costs least before 1.0, so every
+member was read for names, overload sets and consistency between packages.
+
+**Decision.** Three names change in 0.5.0. `ErrorType.IsTransient` becomes a property, like `Error.IsTransient`:
+the two read the same now. A method and a property of one name cannot coexist on one type, so this one is a clean
+break. `ErrorType.ToStatusCode()` becomes `ToHttpStatusCode()`, which says which status it is next to ResultUnion.Grpc's
+`ToGrpcStatusCode()`. On a `Result` without a value, `GetValueOrThrowRpc(onSuccess)` becomes
+`ToReplyOrThrowRpc(onSuccess)`: there is no value to get, the reply comes from `onSuccess`. `Result<T>` keeps
+`GetValueOrThrowRpc()`, which does return its value. The two renamed members stay until 1.0 as `[Obsolete]`
+forwarders hidden from IntelliSense, so 0.5.0 breaks only `IsTransient()`.
+
+**Alternatives.** Kept as they are, after the review: `Combine` (stops at the first failure) and `CombineAll` (reports
+every failure), whose difference is recorded in [20](#20-combineall-semantics); the three meanings of
+`ToResult` (`Result<T>` to `Result`, `ValidationResult` to `Result`, `T?` to `Result<T>`), which all turn something into
+a result; the public `ProblemErrorDetail`, `ErrorJsonConverter` and constants, which clients and source-generated JSON
+contexts need. `ValueTask` sources for `RecordAsync`, `ToHttpResultAsync` and `GetValueOrThrowRpcAsync` were left out:
+the first pipeline step turns a `ValueTask` into a `Task`, so they would rarely be reached; they can be added without a
+break.
+
+**Consequences.** 1.0 removes `ToStatusCode()` and the two `GetValueOrThrowRpc(onSuccess)` overloads.

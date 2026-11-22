@@ -29,7 +29,7 @@ public static class EndpointProblemMetadataExtensions
         ArgumentNullException.ThrowIfNull(types);
 
         var metadata = types
-            .GroupBy(type => type.ToStatusCode())
+            .GroupBy(type => type.ToHttpStatusCode())
             .Select(group => (IProducesResponseTypeMetadata)new ProducesResponseTypeMetadata(
                 group.Key,
                 group.Contains(ErrorType.Validation) ? typeof(HttpValidationProblemDetails) : typeof(Microsoft.AspNetCore.Mvc.ProblemDetails),

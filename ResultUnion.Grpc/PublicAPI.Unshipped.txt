@@ -1,1 +1,5 @@
 #nullable enable
+ResultUnion.Grpc.ResultRpcExtensions.extension(ResultUnion.Result).ToReplyOrThrowRpc<TReply>(System.Func<TReply>! onSuccess, string! domain = "resultunion") -> TReply
+static ResultUnion.Grpc.ResultRpcExtensions.ToReplyOrThrowRpc<TReply>(this ResultUnion.Result result, System.Func<TReply>! onSuccess, string! domain = "resultunion") -> TReply
+static ResultUnion.Grpc.ResultRpcExtensions.ToReplyOrThrowRpcAsync<TReply>(this System.Threading.Tasks.Task<ResultUnion.Result>! source, System.Func<TReply>! onSuccess, string! domain = "resultunion") -> System.Threading.Tasks.Task<TReply>!
+ResultUnion.Grpc.ResultRpcExtensions.extension(System.Threading.Tasks.Task<ResultUnion.Result>!).ToReplyOrThrowRpcAsync<TReply>(System.Func<TReply>! onSuccess, string! domain = "resultunion") -> System.Threading.Tasks.Task<TReply>!

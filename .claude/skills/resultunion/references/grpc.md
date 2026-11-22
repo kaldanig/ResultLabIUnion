@@ -18,7 +18,7 @@ public sealed class UsersGrpcService(UserService users) : Users.UsersBase
 
     public override Task<Empty> DeactivateUser(UserRequest request, ServerCallContext context) =>
         users.DeactivateAsync(request.Email, context.CancellationToken)
-            .GetValueOrThrowRpcAsync(() => new Empty(), Domain);   // Result without a value
+            .ToReplyOrThrowRpcAsync(() => new Empty(), Domain);    // Result without a value
 
     private static UserReply ToReply(User user) => new() { Id = user.Id.ToString(), Email = user.Email.Value };
 }

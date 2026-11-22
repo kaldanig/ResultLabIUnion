@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -48,9 +49,10 @@ public static class ProblemDetailsMapping
         /// <summary>Gets the HTTP status code for the category.</summary>
         /// <remarks>
         /// Validation 400, Unauthorized 401, Forbidden 403, NotFound 404, Conflict and Concurrency 409, BusinessRule 422,
-        /// TooManyRequests 429, Unavailable 503, Unexpected (and any unknown value) 500.
+        /// TooManyRequests 429, Unavailable 503, Unexpected (and any unknown value) 500. The gRPC counterpart is
+        /// <c>ToGrpcStatusCode()</c> in ResultUnion.Grpc.
         /// </remarks>
-        public int ToStatusCode() => type switch
+        public int ToHttpStatusCode() => type switch
         {
             ErrorType.Validation => StatusCodes.Status400BadRequest,
             ErrorType.Unauthorized => StatusCodes.Status401Unauthorized,
@@ -62,6 +64,12 @@ public static class ProblemDetailsMapping
             ErrorType.Unavailable => StatusCodes.Status503ServiceUnavailable,
             _ => StatusCodes.Status500InternalServerError,
         };
+
+        /// <summary>Gets the HTTP status code for the category.</summary>
+        /// <remarks>Renamed <see cref="ToHttpStatusCode"/> in 0.5.0, next to ResultUnion.Grpc's <c>ToGrpcStatusCode()</c>; this name goes in 1.0.</remarks>
+        [Obsolete("Use ToHttpStatusCode(); ToStatusCode() is removed in 1.0.")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public int ToStatusCode() => type.ToHttpStatusCode();
     }
 
     /// <param name="error">The error to describe.</param>
@@ -117,7 +125,7 @@ public static class ProblemDetailsMapping
 
             var unexpected = error.Type == ErrorType.Unexpected;
 
-            problem.Status = error.Type.ToStatusCode();
+            problem.Status = error.Type.ToHttpStatusCode();
             problem.Detail = unexpected ? UnexpectedDetail : error.Message;
             problem.Extensions["code"] = error.Code;
             problem.Extensions["category"] = error.Type.ToString();

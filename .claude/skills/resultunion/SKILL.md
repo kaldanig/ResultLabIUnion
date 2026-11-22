@@ -222,7 +222,7 @@ and never retry a BusinessRule or Unexpected error.
   `result.ShouldFail("code")` for the error, `error.ShouldHaveFieldErrors(("email", "email.required"), ...)` for
   several; assert on codes, types, fields and arguments, never on messages.
 - **gRPC service or client** (`ResultUnion.Grpc`): read `references/grpc.md`. In short: the service method ends with
-  `.GetValueOrThrowRpcAsync()`; a client wraps calls in `Result.TryAsync(call, (RpcException ex) => ex.ToError())`.
+  `.GetValueOrThrowRpcAsync()` (`.ToReplyOrThrowRpcAsync(() => new Empty())` for a `Result` without a value); a client wraps calls in `Result.TryAsync(call, (RpcException ex) => ex.ToError())`.
 
 ## Quick check before you finish
 

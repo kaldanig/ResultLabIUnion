@@ -28,11 +28,11 @@ public sealed class UsersGrpcService(UserService users) : Users.UsersBase
 
     public override Task<Empty> DeactivateUser(UserRequest request, ServerCallContext context) =>
         users.DeactivateAsync(request.Email, context.CancellationToken)
-            .GetValueOrThrowRpcAsync(() => new Empty(), Domain);
+            .ToReplyOrThrowRpcAsync(() => new Empty(), Domain);
 
     public override Task<Empty> RequestPasswordReset(UserRequest request, ServerCallContext context) =>
         users.RequestPasswordResetAsync(request.Email, context.CancellationToken)
-            .GetValueOrThrowRpcAsync(() => new Empty(), Domain);
+            .ToReplyOrThrowRpcAsync(() => new Empty(), Domain);
 
     // The generic IResultFactory behavior, with the role from call metadata instead of an HTTP header.
     public override Task<UserList> ListUsers(Empty request, ServerCallContext context) =>

@@ -249,15 +249,23 @@ public class GrpcMappingTests
     [Fact]
     public void GetValueOrThrowRpc_WithoutValue_BuildsTheReply()
     {
+        Assert.Equal("empty", Result.Success().ToReplyOrThrowRpc(() => "empty"));
+        Assert.Throws<RpcException>(() => Result.Failure(Error.Forbidden("x")).ToReplyOrThrowRpc(() => "empty"));
+
+#pragma warning disable CS0618 // the old names stay until 1.0 and must behave the same
         Assert.Equal("empty", Result.Success().GetValueOrThrowRpc(() => "empty"));
         Assert.Throws<RpcException>(() => Result.Failure(Error.Forbidden("x")).GetValueOrThrowRpc(() => "empty"));
+#pragma warning restore CS0618
     }
 
     [Fact]
     public async Task GetValueOrThrowRpcAsync_AwaitsFirst()
     {
         Assert.Equal(7, await Task.FromResult(Result<int>.Success(7)).GetValueOrThrowRpcAsync());
+        Assert.Equal("empty", await Task.FromResult(Result.Success()).ToReplyOrThrowRpcAsync(() => "empty"));
+#pragma warning disable CS0618 // the old name stays until 1.0
         Assert.Equal("empty", await Task.FromResult(Result.Success()).GetValueOrThrowRpcAsync(() => "empty"));
+#pragma warning restore CS0618
 
         var exception = await Assert.ThrowsAsync<RpcException>(() => Task.FromResult(Result<int>.Failure(TooYoung)).GetValueOrThrowRpcAsync());
         Assert.Equal(StatusCode.FailedPrecondition, exception.StatusCode);
@@ -268,7 +276,7 @@ public class GrpcMappingTests
     {
         Assert.Throws<ArgumentNullException>(() => ((Error)null!).ToRpcStatus());
         Assert.Throws<ArgumentNullException>(() => ((RpcException)null!).ToError());
-        Assert.Throws<ArgumentNullException>(() => Result.Success().GetValueOrThrowRpc<string>(null!));
+        Assert.Throws<ArgumentNullException>(() => Result.Success().ToReplyOrThrowRpc<string>(null!));
         ThrowsEagerly(() => _ = ((Task<Result<int>>)null!).GetValueOrThrowRpcAsync());
     }
 

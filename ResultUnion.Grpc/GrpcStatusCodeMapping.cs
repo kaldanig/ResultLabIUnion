@@ -16,7 +16,7 @@ public static class GrpcStatusCodeMapping
         /// <para>
         /// Conflict maps to FailedPrecondition ("the state prevents the operation; do not retry until it changes") rather than
         /// AlreadyExists, because a conflict is not always a duplicate. Concurrency maps to Aborted, which gRPC defines as
-        /// "retry the whole operation", matching <see cref="ErrorTypeExtensions.IsTransient(ErrorType)"/>.
+        /// "retry the whole operation", matching <see cref="ErrorTypeExtensions.get_IsTransient(ErrorType)">IsTransient</see>.
         /// </para>
         /// </remarks>
         public StatusCode ToGrpcStatusCode() => type switch

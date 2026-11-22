@@ -30,7 +30,7 @@ public sealed class TelemetryTests
         using var activity = Source.StartActivity("call")!;
 
         await Assert.ThrowsAsync<RpcException>(() =>
-            Task.FromResult(Result.Failure(Error.Unavailable("Database down."))).GetValueOrThrowRpcAsync(() => 0));
+            Task.FromResult(Result.Failure(Error.Unavailable("Database down."))).ToReplyOrThrowRpcAsync(() => 0));
 
         Assert.Equal(ActivityStatusCode.Error, activity.Status);
     }

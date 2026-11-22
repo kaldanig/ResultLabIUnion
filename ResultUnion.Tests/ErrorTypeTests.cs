@@ -17,7 +17,7 @@ public class ErrorTypeTests
     [InlineData((ErrorType)99, false)]
     public void IsTransient_IsTrueOnlyWhenARetryMaySucceed(ErrorType type, bool expected)
     {
-        Assert.Equal(expected, type.IsTransient());
+        Assert.Equal(expected, type.IsTransient);
     }
 
     [Fact]

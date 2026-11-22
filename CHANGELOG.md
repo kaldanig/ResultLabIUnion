@@ -9,6 +9,36 @@ are in the diff of those files.
 
 ## [Unreleased]
 
+### ResultUnion
+
+#### Changed
+
+- **Breaking:** `ErrorType.IsTransient` is a property, like `Error.IsTransient`: write `type.IsTransient` instead of
+  `type.IsTransient()`.
+
+### ResultUnion.AspNetCore
+
+#### Added
+
+- `ErrorType.ToHttpStatusCode()`, the name that pairs with ResultUnion.Grpc's `ToGrpcStatusCode()`.
+
+#### Deprecated
+
+- `ErrorType.ToStatusCode()`: use `ToHttpStatusCode()`. It still works, with a warning, and is removed in 1.0.
+
+### ResultUnion.Grpc
+
+#### Added
+
+- `Result.ToReplyOrThrowRpc(onSuccess)` and `Task<Result>.ToReplyOrThrowRpcAsync(onSuccess)` for a result without a
+  value: it has no value to get, so the reply comes from `onSuccess`.
+
+#### Deprecated
+
+- `GetValueOrThrowRpc(onSuccess)` and `GetValueOrThrowRpcAsync(onSuccess)` on `Result` and `Task<Result>`: use
+  `ToReplyOrThrowRpc` / `ToReplyOrThrowRpcAsync`. They still work, with a warning, and are removed in 1.0.
+  `GetValueOrThrowRpc()` on `Result<T>` keeps its name.
+
 ## [0.4.0] - 2026-11-22
 
 ### Upgrading from 0.3.0

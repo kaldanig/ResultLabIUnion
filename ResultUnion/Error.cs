@@ -259,7 +259,7 @@ public sealed record Error
 /// <summary>The category of an <see cref="Error"/>, used to decide how a failure is handled, for example which HTTP status to return or whether to retry.</summary>
 /// <remarks>
 /// A category describes what the caller should <em>do</em> (fix the input, sign in, retry later, reload); the specific
-/// reason is the <see cref="Error.Code"/>. <see cref="ErrorTypeExtensions.IsTransient(ErrorType)"/> tells whether a retry may succeed.
+/// reason is the <see cref="Error.Code"/>. <see cref="ErrorTypeExtensions.get_IsTransient(ErrorType)">IsTransient</see> tells whether a retry may succeed.
 /// </remarks>
 public enum ErrorType
 {
