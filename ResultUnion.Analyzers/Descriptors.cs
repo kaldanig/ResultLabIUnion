@@ -106,4 +106,19 @@ internal static class Descriptors
             + "fine as a source; methods you write return Task<Result<T>>. Overrides and interface implementations, "
             + "whose signature is given, are not reported.",
         helpLinkUri: HelpBase + "ru0008");
+
+    public static readonly DiagnosticDescriptor ErrorAsValue = new(
+        id: "RU0009",
+        title: "Result<Error>, an error as a success value",
+        messageFormat: "{0} a success whose value is an error; return the error as a failure instead (Bind rather "
+            + "than Map, Result<T>.Failure, or 'return error;')",
+        category: Category,
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "In a Result<Error> both cases of the union are errors: a switch on the cases cannot tell a "
+            + "success from a failure, and a failure produced by a step reaches the rest of the chain as a success. It "
+            + "usually comes from Map with a mapper that returns an error, where Bind or MapError was meant. A type "
+            + "parameter cannot exclude Error, so the analyzer reports Result<Error> where it is written and where a call "
+            + "produces it.",
+        helpLinkUri: HelpBase + "ru0009");
 }

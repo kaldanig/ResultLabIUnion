@@ -768,6 +768,7 @@ code fix in the IDE), and the library's conventions as suggestions:
 | `RU0006` (Info) | an error created outside an error catalog (declare it in the concept's `Errors` class) |
 | `RU0007` (Info) | `WithField` in a single-input value object or a catalog (set the field where the request is read) |
 | `RU0008` (Info) | a method that returns a `ValueTask` of a result (return `Task<…>`) |
+| `RU0009` | `Result<Error>`, usually `Map` with a mapper that returns an error (use `Bind`, `Ensure` or `MapError`) |
 
 Details, examples and how to change a rule's severity: [docs/ANALYZERS.md](docs/ANALYZERS.md).
 

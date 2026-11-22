@@ -33,7 +33,8 @@ was checked with a small program, and the observed output is quoted.
   [37 FluentValidation failures become field errors](#37-fluentvalidation-failures-become-field-errors) ·
   [38 HTTP clients read problems back as errors](#38-http-clients-read-problems-back-as-errors) ·
   [39 Test assertions need no test framework](#39-test-assertions-need-no-test-framework) ·
-  [40 Conventions are suggestions, mistakes are warnings](#40-conventions-are-suggestions-mistakes-are-warnings)
+  [40 Conventions are suggestions, mistakes are warnings](#40-conventions-are-suggestions-mistakes-are-warnings) ·
+  [41 Result&lt;Error&gt; is an analyzer warning](#41-resulterror-is-an-analyzer-warning)
 
 ---
 
@@ -618,3 +619,20 @@ turn a style into a rule. Leaving them as text would leave the skill's "quick ch
 **Consequences.** The repository runs every rule: tests, the showcase, the benchmarks and the packages that translate
 other systems' errors turn RU0006 off (and tests RU0008) in `.editorconfig`, with the reason next to the setting; the
 samples follow the conventions.
+
+### 41. Result&lt;Error&gt; is an analyzer warning
+
+**Context.** In a `Result<Error>` both cases of the union are errors: `switch` on the cases cannot tell success from
+failure, and an error returned as a value passes the rest of the chain as a success. It is almost never meant; it
+comes from `Map` with a mapper that returns an error, where `Bind`, `Ensure` or `MapError` was meant.
+
+**Decision.** RU0009 (Warning) reports it where the type is written and where a call produces it from something that
+was not one (`Map(x => error)`, a generic method closed over `Error`); the following steps of the same chain are not
+reported again.
+
+**Alternatives.** C# has no constraint that excludes a type (`where T : not Error`). A check in a static constructor of
+`Result<T>` would fail only at run time, with a `TypeInitializationException`, and would cost every static member of
+every `Result<T>` the check that the type is initialised (a generic struct then loses `beforefieldinit`).
+
+**Consequences.** Generic code (`Result<T>` with any `T`) is not reported, only its use with `Error`. Types that
+contain errors, such as `Result<Error[]>`, are fine.

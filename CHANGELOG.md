@@ -17,6 +17,7 @@ are in the diff of those files.
 - RU0007 (Info): `WithField` in a single-input value object's factory or in an error catalog, which cannot know the
   field's name.
 - RU0008 (Info): a method, local function or property that returns a `ValueTask` of a result.
+- RU0009 (Warning): a `Result<Error>`, where it is written and where a call such as `Map(x => error)` produces it.
 
 ### ResultUnion.Testing (new package)
 

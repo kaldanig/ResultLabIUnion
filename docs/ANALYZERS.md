@@ -13,6 +13,7 @@ compiler and the IDE as soon as a project references the package; there is nothi
 | [RU0006](#ru0006) | Info | An error created outside an error catalog | none |
 | [RU0007](#ru0007) | Info | `WithField` where the field name is not known | none |
 | [RU0008](#ru0008) | Info | A method that returns a `ValueTask` of a result | none |
+| [RU0009](#ru0009) | Warning | `Result<Error>`, an error as a success value | none |
 
 Rules RU0001–RU0003 have a code fix (the light bulb in Visual Studio and Rider, with Fix All for a document, project or solution). From the command line, `dotnet format analyzers --diagnostics RU0003 --severity warn` applies one; run one rule per call, because a fix for one rule moves the positions the next rule's diagnostics refer to.
 
@@ -194,3 +195,24 @@ public Task<Result<User>> FindAsync(Guid id);         // fine
 Reported for methods, local functions and properties you declare. Not reported for overrides and interface
 implementations, whose signature is given, nor for a `ValueTask` from someone else's API used as a source
 (`db.Users.FindAsync([id], ct).ToResultAsync(error)`), which the pipeline accepts.
+
+## RU0009
+
+**`Result<Error>`, an error as a success value.** Both cases of the union are then errors: a `switch` on the cases
+cannot tell a success from a failure, and an error produced by a step travels down the chain as a success, so the
+steps after it run. C# has no constraint that excludes one type, so `Result<T>` cannot forbid it; the analyzer does.
+
+```csharp
+var checkedUser = user.Map(u => Errors.Blocked(u.Id));                          // RU0009: a success whose value is an error
+var checkedUser = user.Ensure(u => !u.IsBlocked, u => Errors.Blocked(u.Id));    // fine: a failure when blocked
+
+Result<Error> last;                                                             // RU0009
+```
+
+Reported where `Result<Error>` (or a task of one) is written, and where a call produces it from something that was not
+one: `Map` / `MapAsync` with a mapper that returns an `Error`, or a generic method closed over `Error`. The steps that
+follow on the same chain are not reported again. Usually the step meant `Bind` (a mapper that returns a result),
+`Ensure` (a condition) or `MapError` (a different error). `Result<Error[]>` and other types that contain errors are
+not reported.
+
+No code fix: which step was meant depends on the code.
