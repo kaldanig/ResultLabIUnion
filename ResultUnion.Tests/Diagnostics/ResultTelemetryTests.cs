@@ -92,7 +92,20 @@ public sealed class ResultTelemetryTests
         var tags = recorded.Tags.ToDictionary(tag => tag.Key, tag => tag.Value);
         Assert.Equal("users.register", tags[ResultTelemetry.OperationAttribute]);
         Assert.Equal("user.too_young", tags[ResultTelemetry.CodeAttribute]);
+        Assert.Equal("age", tags[ResultTelemetry.FieldAttribute]);
         Assert.DoesNotContain(tags.Values, value => value is string text && text.Contains("Ann"));   // no message
+    }
+
+    [Fact]
+    public void An_error_without_a_field_has_no_field_attribute()
+    {
+        using var capture = new TelemetryCapture();
+        using var activity = TelemetryCapture.StartActivity();
+
+        _ = Result.Failure(Error.Conflict("Taken.")).Record("users.register");
+
+        Assert.Null(activity.GetTagItem(ResultTelemetry.FieldAttribute));
+        Assert.DoesNotContain(Assert.Single(activity.Events).Tags, tag => tag.Key == ResultTelemetry.FieldAttribute);
     }
 
     [Theory]
@@ -137,6 +150,10 @@ public sealed class ResultTelemetryTests
         ResultTelemetry.TagActivity(null, TooYoung);
         _ = Result<int>.Failure(TooYoung).Record("tests.no_listener");   // no meter listener: does not throw
     }
+
+    [Fact]
+    public void TagActivity_rejects_a_null_error_even_without_a_span() =>
+        Assert.Throws<ArgumentNullException>(() => ResultTelemetry.TagActivity(null, null!));
 
     private static async Task<T> Pending<T>(T result)
     {

@@ -141,8 +141,16 @@ The report is `artifacts/stryker/ResultUnion/reports/mutation-report.html`. Note
 - The tests run on Microsoft.Testing.Platform, so the configuration selects Stryker's `mtp` test runner, which Stryker
   still marks as a preview; the default VSTest runner reports every mutant as surviving with this setup.
 - `ConfigureAwait(false)` → `true` is ignored: without a synchronization context the two behave the same.
-- A negated `IsCompletedSuccessfully` sends a completed task down the general path, which returns the same result, so
-  those survivors are expected unless a test checks that the source task is reused.
+- A negated `IsCompletedSuccessfully`, or the removal of the block it guards, sends a completed task down the general
+  path, which returns the same result, so those survivors are expected unless a test checks that the source task is
+  reused.
+- Mutants marked *static* (in `static readonly` fields: the JSON property names, `Error.DefaultResult`, the meter's
+  description) cannot be switched on per test, because the field is initialized once per test process; they show as
+  surviving although the tests check those values exactly.
+- Not every survivor is a missing test. Before writing one, apply the mutant by hand and run the tests that cover it
+  (the report lists them): the survivors at the failure message of `ShouldHaveFieldErrors` were killed that way by the
+  test that compares the message. Changes to `GetHashCode` constants, to exception messages and to checks that the
+  code repeats later (a `NaN` test before a range test that excludes `NaN` anyway) are expected survivors too.
 - Stryker leaves its mutated build in the test project's `bin` folder; run `dotnet build --no-incremental` before testing
   again, or the next `dotnet test --no-build` runs against a mutant.
 - The argument checks are covered by one contract test per package (`NullArgumentTests`, built on

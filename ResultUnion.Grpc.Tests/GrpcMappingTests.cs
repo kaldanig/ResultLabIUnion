@@ -151,6 +151,14 @@ public class GrpcMappingTests
     }
 
     [Fact]
+    public void RoundTrip_TheMappingsOwnKeysDoNotBecomeArguments()
+    {
+        // ErrorInfo also carries "code", "type" and a code per invalid field; only the error's own arguments come back.
+        Assert.Equal(["age", "minimumAge"], TooYoung.ToRpcException().ToError().Arguments.Keys.Order());
+        Assert.Empty(FormErrors().ToRpcException().ToError().Arguments);
+    }
+
+    [Fact]
     public void RoundTrip_ErrorWithField_ComesBackWithTheField()
     {
         var restored = Error.NotFound("No user zoe@example.com.").WithField("customerEmail").ToRpcException().ToError();
@@ -190,6 +198,41 @@ public class GrpcMappingTests
         Assert.Equal("grpc.deadline_exceeded", restored.Code);
         Assert.Equal(ErrorType.Unavailable, restored.Type);
         Assert.True(restored.IsTransient);
+    }
+
+    [Fact]
+    public void ToError_ErrorInfoFromAnotherServer_UsesItsReasonAndMetadata()
+    {
+        // google.rpc rich errors from a server that is not ResultUnion: no "code" or "type" in the metadata.
+        var status = new Google.Rpc.Status
+        {
+            Code = (int)StatusCode.FailedPrecondition,
+            Message = "Out of stock.",
+            Details = { Google.Protobuf.WellKnownTypes.Any.Pack(new ErrorInfo { Reason = "STOCK_EXHAUSTED", Domain = "shop.example.com", Metadata = { ["sku"] = "A1" } }) },
+        };
+
+        var restored = status.ToRpcException().ToError();
+
+        Assert.Equal("stock_exhausted", restored.Code);
+        Assert.Equal(ErrorType.Conflict, restored.Type);               // from the status code
+        Assert.Equal("Out of stock.", restored.Message);
+        Assert.Equal("A1", restored.Arguments["sku"]);
+    }
+
+    [Fact]
+    public void ToError_BadRequestWithoutViolations_IsThePlainError()
+    {
+        var status = new Google.Rpc.Status
+        {
+            Code = (int)StatusCode.InvalidArgument,
+            Message = "Invalid request.",
+            Details = { Google.Protobuf.WellKnownTypes.Any.Pack(new BadRequest()) },
+        };
+
+        var restored = status.ToRpcException().ToError();
+
+        Assert.Equal(("grpc.invalid_argument", ErrorType.Validation), (restored.Code, restored.Type));
+        Assert.Empty(restored.Details);
     }
 
     // Service boundary helpers

@@ -165,4 +165,22 @@ public sealed class MalformedProblemTests
         Assert.True((await success.ReadResultAsync(Ct)).IsSuccess);
         Assert.Equal("user.not_found", (await failure.ReadResultAsync(Ct)).Error.Code);
     }
+
+    [Fact]
+    public async Task The_title_comes_before_the_reason_phrase()
+    {
+        // A title that differs from the reason phrase ("Not Found"), so it is clear which one was used.
+        using var response = Response(HttpStatusCode.NotFound, """{"title":"The order does not exist","status":404}""");
+
+        Assert.Equal("The order does not exist", (await response.ReadErrorAsync(Ct)).Message);
+    }
+
+    [Fact]
+    public async Task A_body_that_is_not_JSON_by_its_media_type_is_not_read()
+    {
+        // Valid problem JSON, but sent as text/plain: the status decides, as for any other non-JSON body.
+        using var response = Response(HttpStatusCode.Conflict, """{"code":"order.changed","detail":"Changed."}""", "text/plain");
+
+        Assert.Equal("http.conflict", (await response.ReadErrorAsync(Ct)).Code);
+    }
 }

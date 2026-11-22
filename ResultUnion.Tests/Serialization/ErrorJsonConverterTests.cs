@@ -227,6 +227,7 @@ public sealed class ErrorJsonConverterTests
     [InlineData("""{"code":"a.b","message":"m","type":999}""")]
     [InlineData("""{"code":1,"message":"m","type":"Conflict"}""")]
     [InlineData("""{"code":"a.b","message":"m","type":"Conflict","field":""}""")]
+    [InlineData("""{"code":"a.b","message":"m","type":"Conflict","field":1}""")]
     [InlineData("""{"code":"a.b","message":"m","type":"Conflict","arguments":[]}""")]
     [InlineData("""{"code":"a.b","message":"m","type":"Conflict","details":{}}""")]
     [InlineData("""{"code":"a.b","message":"m","type":"Conflict","details":[{"code":"c"}]}""")]
@@ -240,5 +241,16 @@ public sealed class ErrorJsonConverterTests
     {
         Assert.Null(JsonSerializer.Deserialize<Error>("null"));
         Assert.Equal("null", JsonSerializer.Serialize<Error?>(null));
+    }
+
+    [Fact]
+    public void The_converter_called_directly_rejects_null_arguments()
+    {
+        // System.Text.Json writes null itself and never passes it to the converter; a direct caller might.
+        var converter = new ResultUnion.Serialization.ErrorJsonConverter();
+        using var writer = new Utf8JsonWriter(new MemoryStream());
+
+        Assert.Throws<ArgumentNullException>(() => converter.Write(writer, null!, JsonSerializerOptions.Default));
+        Assert.Throws<ArgumentNullException>(() => converter.Write(null!, TooYoung, JsonSerializerOptions.Default));
     }
 }

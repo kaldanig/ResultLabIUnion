@@ -167,6 +167,7 @@ public class CollectionTests
         Assert.Throws<ArgumentNullException>(() => new[] { 1 }.CombineAll((Func<int, Result<int>>)null!));
         Assert.Throws<ArgumentException>(() => new Result<int>[] { 1 }.CombineAll(" "));
         Assert.Throws<ArgumentException>(() => new[] { 1 }.CombineAll(Positive, ""));
+        Assert.Throws<ArgumentException>(() => { _ = new[] { 1 }.CombineAllAsync(n => Task.FromResult(Positive(n)), " "); });   // at the call
     }
 
     // CombineAllAsync
