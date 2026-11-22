@@ -45,7 +45,7 @@ Why it is built this way, with the alternatives that were considered: [docs/DESI
 | `ResultUnion.FluentValidation` | FluentValidation integration: a `ValidationResult` as a `Result` with one field error per failure, `ValidateToResultAsync` |
 | `ResultUnion.Http` | HTTP client integration: a response read back as a `Result`, a problem details body as an `Error` (the client side of `ResultUnion.AspNetCore`) |
 | `ResultUnion.Testing` | Test assertions for any test framework: `ShouldSucceed()`, `ShouldFail("code")`, `ShouldHaveFieldErrors(...)` |
-| `ResultUnion.Templates` | `dotnet new resultunion-api`: a Minimal API with one feature that follows the conventions, and its tests |
+| `ResultUnion.Templates` | `dotnet new resultunion-api` and `resultunion-grpc`: a Minimal API or a gRPC service with one feature that follows the conventions, and its tests |
 | `ResultUnion.Analyzers` | Roslyn analyzers shipped inside the `ResultUnion` package: a discarded `Result`, `async` code in `Result.Try`, `Map` that should be `Bind` ([docs/ANALYZERS.md](docs/ANALYZERS.md)) |
 | `ResultUnion.CodeFixes` | The code fixes for those rules (`_ =`, `TryAsync`, `Bind`, a `when` filter for cancellation, `Bind` with a failure, `ToHttpResult`), in a separate assembly because they need Roslyn's Workspaces; shipped next to the analyzers |
 | `ResultUnion.Tests` | xUnit v3 tests for `ResultUnion`; no ASP.NET Core dependency |
@@ -689,6 +689,10 @@ name, the namespace from the project (`--namespace` sets another), and `--max-le
 OrderLine` adds a whole feature in that shape, in `OrderLines/`, with endpoints at `/order-lines` that `AddOrderLines()`
 and `MapOrderLines()` register (`--database sqlite` for EF Core), and `dotnet new resultunion-feature-tests -n
 OrderLine`, in the test project, its tests.
+
+`dotnet new resultunion-grpc -n Catalog` creates the same feature behind gRPC: a `.proto` contract, a service whose
+methods end with `GetValueOrThrowRpcAsync` (a failure becomes a status with `ErrorInfo` and `BadRequest`), and tests
+that call it through the generated client and read failures back with `ToError()`.
 
 A walk-through of the generated code, the responses it sends and how to add a feature of your own:
 [Starting a project from the template](docs/articles/templates.md).

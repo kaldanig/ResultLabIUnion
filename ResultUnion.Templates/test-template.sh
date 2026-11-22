@@ -141,4 +141,22 @@ fi
 (cd "$work/Lean" && dotnet build -warnaserror)
 echo "::endgroup::"
 
-echo "The template creates projects that build and pass their tests."
+echo "::group::resultunion-grpc"
+dotnet new resultunion-grpc -n Catalog -o "$work/Catalog" --debug:custom-hive "$hive"
+cp "$work/nuget.config" "$work/Catalog/"
+grep -q '^package catalog.products.v1;' "$work/Catalog/src/Catalog/Protos/products.proto" \
+  || { echo "::error::resultunion-grpc did not name the proto package after the project"; exit 1; }
+(cd "$work/Catalog" && dotnet build -warnaserror && dotnet test)
+echo "::endgroup::"
+
+echo "::group::resultunion-grpc --no-tests"
+dotnet new resultunion-grpc -n LeanCatalog -o "$work/LeanCatalog" --no-tests --debug:custom-hive "$hive"
+cp "$work/nuget.config" "$work/LeanCatalog/"
+if [ -d "$work/LeanCatalog/tests" ]; then
+  echo "::error::--no-tests left the tests folder in place"
+  exit 1
+fi
+(cd "$work/LeanCatalog" && dotnet build -warnaserror)
+echo "::endgroup::"
+
+echo "The templates create projects that build and pass their tests."

@@ -1,0 +1,11 @@
+{
+  "$schema": "http://json.schemastore.org/ide.host",
+  "symbolInfo": [
+    {
+      "id": "NoTests",
+      "name": { "text": "Leave out the test project" },
+      "description": { "text": "Create only the service, without the test project that uses ResultUnion.Testing." },
+      "isVisible": true
+    }
+  ]
+}

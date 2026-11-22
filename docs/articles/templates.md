@@ -252,3 +252,39 @@ For storage, start with `--database sqlite`, or put another database behind the 
 [EF Core article](ef-core.md) shows lookups, unique constraints and concurrency as results. For checks that apply to
 every use case (validation, authorisation, transactions), see [pipeline behaviors](pipeline-behaviors.md), and for more
 on the assertions, [testing](testing.md).
+
+## A gRPC service
+
+The same feature behind gRPC instead of HTTP:
+
+```powershell
+dotnet new resultunion-grpc -n Catalog
+```
+
+The domain and the use cases are the ones `resultunion-api` creates; `Protos/products.proto` is the contract, and
+`ProductCatalogService` the host. Each method maps the request to the same command and ends the pipeline with
+`GetValueOrThrowRpcAsync`, which returns the reply or throws an `RpcException`:
+
+```csharp
+    public override Task<ProductReply> CreateProduct(CreateProductRequest request, ServerCallContext context) =>
+        service.CreateAsync(new CreateProduct(request.Name, request.HasPrice ? (decimal)request.Price : null), context.CancellationToken)
+            .MapAsync(ToReply)
+            .GetValueOrThrowRpcAsync(Domain);
+```
+
+The status code comes from the error's type (Validation is `INVALID_ARGUMENT`, NotFound `NOT_FOUND`, Conflict
+`FAILED_PRECONDITION`), and the status details carry the rest: an `ErrorInfo` with the code and arguments and, for
+validation, a `BadRequest` with every invalid field. The price is `optional double` in the contract, so a missing price
+is `price.required` and not a price of 0; the id is text, since protobuf has no GUID, and one that does not parse is
+`product.invalid_id` on the field `id`.
+
+The tests call the service through the generated client over `WebApplicationFactory`'s in-memory server. A .NET client
+turns a failed call back into an `Error`, with the same codes and fields, and only an `RpcException` becomes one:
+
+```csharp
+        return Result.TryAsync(() => _client.CreateProductAsync(request, cancellationToken: Ct).ResponseAsync, (RpcException ex) => ex.ToError());
+```
+
+The service has reflection, so `grpcurl -plaintext localhost:5090 list` shows it, and `--no-tests` leaves the test
+project out. `resultunion-valueobject` works in this project as in any other; `resultunion-feature` writes Minimal API
+endpoints, so for a new gRPC feature copy the shape of `Products` and add its methods to the `.proto` file.

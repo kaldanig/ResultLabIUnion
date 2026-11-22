@@ -1,0 +1,31 @@
+// The service's contract. Failures are not part of these messages: they travel in the call's status (google.rpc.Status
+// with ErrorInfo and BadRequest), built from the error by ResultUnion.Grpc.
+
+syntax = "proto3";
+
+package resultuniongrpc.products.v1;
+
+option csharp_namespace = "ResultUnionGrpc.Products.V1";
+
+service ProductCatalog {
+  // INVALID_ARGUMENT with one field violation per invalid field, FAILED_PRECONDITION for a taken name.
+  rpc CreateProduct (CreateProductRequest) returns (ProductReply);
+
+  // INVALID_ARGUMENT for an id that is not a GUID, NOT_FOUND for an unknown one.
+  rpc GetProduct (GetProductRequest) returns (ProductReply);
+}
+
+message CreateProductRequest {
+  string name = 1;
+  optional double price = 2;   // optional, so a missing price is told apart from 0 (price.required)
+}
+
+message GetProductRequest {
+  string id = 1;
+}
+
+message ProductReply {
+  string id = 1;
+  string name = 2;
+  double price = 3;
+}

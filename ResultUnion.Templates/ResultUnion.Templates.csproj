@@ -10,8 +10,8 @@
     <IsPackable>true</IsPackable>
     <PackageType>Template</PackageType>
     <PackageId>ResultUnion.Templates</PackageId>
-    <Description>dotnet new templates for ResultUnion. resultunion-api: a Minimal API with value objects and error catalogs, a use case as one Result pipeline, endpoints that return problem responses, and tests with ResultUnion.Testing. resultunion-valueobject: a value object (string, int or decimal) with its error catalog. resultunion-feature: a feature with an entity, a repository (in memory or EF Core with SQLite), a service and endpoints in the same shape. resultunion-feature-tests: its tests.</Description>
-    <PackageTags>result;result-pattern;dotnet-new;templates;minimal-api;value-object</PackageTags>
+    <Description>dotnet new templates for ResultUnion. resultunion-api: a Minimal API with value objects and error catalogs, a use case as one Result pipeline, endpoints that return problem responses, and tests with ResultUnion.Testing. resultunion-grpc: the same feature as a gRPC service whose failures become rich statuses, with tests through the generated client. resultunion-valueobject: a value object (string, int or decimal) with its error catalog. resultunion-feature: a feature with an entity, a repository (in memory or EF Core with SQLite), a service and endpoints in the same shape. resultunion-feature-tests: its tests.</Description>
+    <PackageTags>result;result-pattern;dotnet-new;templates;minimal-api;grpc;value-object</PackageTags>
     <IncludeBuildOutput>false</IncludeBuildOutput>
     <IncludeSymbols>false</IncludeSymbols>
     <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>

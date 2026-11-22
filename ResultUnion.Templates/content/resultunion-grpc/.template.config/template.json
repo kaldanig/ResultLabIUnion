@@ -1,0 +1,38 @@
+{
+  "$schema": "http://json.schemastore.org/template",
+  "author": "Giorgi Kaldani",
+  "classifications": [ "Web", "gRPC", "Result pattern" ],
+  "identity": "ResultUnion.Templates.Grpc",
+  "name": "ResultUnion gRPC service",
+  "description": "A gRPC service that uses the Result pattern with ResultUnion: a feature with value objects and error catalogs, a use case as one pipeline, service methods that turn failures into rich gRPC statuses, and tests with ResultUnion.Testing that call the service through a gRPC client.",
+  "shortName": "resultunion-grpc",
+  "sourceName": "ResultUnionGrpc",
+  "preferNameDirectory": true,
+  "tags": {
+    "language": "C#",
+    "type": "solution"
+  },
+  "symbols": {
+    "NoTests": {
+      "type": "parameter",
+      "displayName": "Leave out the test project",
+      "datatype": "bool",
+      "defaultValue": "false",
+      "description": "Leave out the test project."
+    },
+    "Tests": {
+      "type": "computed",
+      "value": "(!NoTests)"
+    }
+  },
+  "sources": [
+    {
+      "modifiers": [
+        {
+          "condition": "(NoTests)",
+          "exclude": [ "tests/**" ]
+        }
+      ]
+    }
+  ]
+}

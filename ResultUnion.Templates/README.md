@@ -16,6 +16,15 @@ objects with error catalogs, a use case as one `Result` pipeline, endpoints that
 responses, and a test project with ResultUnion.Testing. `--no-tests` leaves the test project out; `--database sqlite`
 stores the products in SQLite through EF Core instead of in memory.
 
+```powershell
+dotnet new resultunion-grpc -n Catalog
+```
+
+`resultunion-grpc` creates the same feature behind gRPC: a `.proto` contract, a service whose methods end with
+`GetValueOrThrowRpcAsync` (a failure becomes a status with `ErrorInfo` and, for validation, `BadRequest`), reflection
+for grpcurl, and tests that call the service through the generated client and read a failed call back as an `Error`
+with `ToError()`. `--no-tests` leaves the test project out.
+
 The projects reference the ResultUnion packages of the same version as the template.
 
 ## A second feature, with its tests

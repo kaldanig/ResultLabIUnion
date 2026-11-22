@@ -11,6 +11,10 @@ are in the diff of those files.
 
 ### ResultUnion.Templates
 
+- `dotnet new resultunion-grpc`: the products feature as a gRPC service. Its methods map the request to the same
+  command and end with `GetValueOrThrowRpcAsync`, so a failure is a status with an `ErrorInfo` (code and arguments)
+  and, for validation, a `BadRequest` with every invalid field. The tests call the service through the generated
+  client over `WebApplicationFactory` and read a failed call back with `ToError()`. `--no-tests` leaves them out.
 - `resultunion-feature --crud --database sqlite`: a rename to a taken name is answered by the unique index alone
   (`name_taken` from the constraint violation of `ExecuteUpdate`), without a check before it that a concurrent rename
   could pass.
