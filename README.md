@@ -1,11 +1,17 @@
 # ResultUnion
 
-[![ResultUnion](https://img.shields.io/nuget/v/ResultUnion.svg?label=ResultUnion)](https://www.nuget.org/packages/ResultUnion)
-[![ResultUnion.AspNetCore](https://img.shields.io/nuget/v/ResultUnion.AspNetCore.svg?label=ResultUnion.AspNetCore)](https://www.nuget.org/packages/ResultUnion.AspNetCore)
-[![ResultUnion.Grpc](https://img.shields.io/nuget/v/ResultUnion.Grpc.svg?label=ResultUnion.Grpc)](https://www.nuget.org/packages/ResultUnion.Grpc)
-[![ResultUnion.FluentValidation](https://img.shields.io/nuget/v/ResultUnion.FluentValidation.svg?label=ResultUnion.FluentValidation)](https://www.nuget.org/packages/ResultUnion.FluentValidation)
+[![ResultUnion](https://img.shields.io/nuget/vpre/ResultUnion.svg?label=ResultUnion)](https://www.nuget.org/packages/ResultUnion)
+[![ResultUnion.AspNetCore](https://img.shields.io/nuget/vpre/ResultUnion.AspNetCore.svg?label=ResultUnion.AspNetCore)](https://www.nuget.org/packages/ResultUnion.AspNetCore)
+[![ResultUnion.Grpc](https://img.shields.io/nuget/vpre/ResultUnion.Grpc.svg?label=ResultUnion.Grpc)](https://www.nuget.org/packages/ResultUnion.Grpc)
+[![ResultUnion.FluentValidation](https://img.shields.io/nuget/vpre/ResultUnion.FluentValidation.svg?label=ResultUnion.FluentValidation)](https://www.nuget.org/packages/ResultUnion.FluentValidation)
+[![ResultUnion.Http](https://img.shields.io/nuget/vpre/ResultUnion.Http.svg?label=ResultUnion.Http)](https://www.nuget.org/packages/ResultUnion.Http)
+[![ResultUnion.Testing](https://img.shields.io/nuget/vpre/ResultUnion.Testing.svg?label=ResultUnion.Testing)](https://www.nuget.org/packages/ResultUnion.Testing)
+[![ResultUnion.Templates](https://img.shields.io/nuget/vpre/ResultUnion.Templates.svg?label=ResultUnion.Templates)](https://www.nuget.org/packages/ResultUnion.Templates)
+
 [![CI](https://github.com/kaldanig/ResultLabIUnion/actions/workflows/ci.yml/badge.svg)](https://github.com/kaldanig/ResultLabIUnion/actions/workflows/ci.yml)
+[![Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=kaldanig_ResultLabIUnion&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=kaldanig_ResultLabIUnion)
 [![Docs](https://img.shields.io/badge/docs-kaldanig.github.io-blue)](https://kaldanig.github.io/ResultLabIUnion/)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green)](https://github.com/kaldanig/ResultLabIUnion/blob/master/LICENSE)
 
 A small implementation of the **Result pattern** for .NET, built on **C# 15 unions**.
 An operation returns `Result<T>`: either the value or an `Error`. Failures are part of the
