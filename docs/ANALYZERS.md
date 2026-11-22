@@ -9,14 +9,14 @@ compiler and the IDE as soon as a project references the package; there is nothi
 | [RU0002](#ru0002) | Warning | Asynchronous code passed to `Result.Try` | `Result.TryAsync`, awaited in an `async` function |
 | [RU0003](#ru0003) | Warning | `Map` with a mapper that returns a `Result` | `Bind` / `BindAsync` |
 | [RU0004](#ru0004) | Warning | `ResultValue` or `Error` read without checking the result | none |
-| [RU0005](#ru0005) | Warning | Cancellation turned into a failure | none |
+| [RU0005](#ru0005) | Warning | Cancellation turned into a failure | `when (!ct.IsCancellationRequested)` |
 | [RU0006](#ru0006) | Info | An error created outside an error catalog | none |
 | [RU0007](#ru0007) | Info | `WithField` where the field name is not known | none |
 | [RU0008](#ru0008) | Info | A method that returns a `ValueTask` of a result | none |
 | [RU0009](#ru0009) | Warning | `Result<Error>`, an error as a success value | `Map` → `Bind` with a failure |
 | [RU0010](#ru0010) | Warning | A `Result` written as or read from JSON | `.ToHttpResult()` on an endpoint lambda |
 
-Rules RU0001–RU0003, RU0009 and RU0010 have a code fix (the light bulb in Visual Studio and Rider, with Fix All for a document, project or solution). From the command line, `dotnet format analyzers --diagnostics RU0003 --severity warn` applies one; run one rule per call, because a fix for one rule moves the positions the next rule's diagnostics refer to.
+Rules RU0001–RU0003, RU0005, RU0009 and RU0010 have a code fix (the light bulb in Visual Studio and Rider, with Fix All for a document, project or solution). From the command line, `dotnet format analyzers --diagnostics RU0003 --severity warn` applies one; run one rule per call, because a fix for one rule moves the positions the next rule's diagnostics refer to.
 
 The fixes are covered by tests that apply them with Roslyn's workspace API (`ResultUnion.Analyzers.Tests`), and were
 checked by hand in Visual Studio 2026 with the published `ResultUnion` 0.1.0 package on 2026-11-22: every fix in the
@@ -140,7 +140,10 @@ Let cancellation propagate, as `Result.Try` and `Result.TryAsync` do. HttpClient
 reported. A fallback value counts too: `return -1;` in a method that returns `Result<int>` becomes a success. A catch
 that rethrows, or returns something that does not become a result or an error, is not reported.
 
-No code fix: whether to remove the catch, rethrow or add a filter depends on what the code is for.
+**Code fix:** when a `CancellationToken` parameter or local is in scope, the catch gets the filter
+`when (!ct.IsCancellationRequested)`, one fix per token: a cancellation requested through that token propagates, and
+only a timeout is still turned into a result. Without a token in scope there is no fix, because whether to remove the
+catch or rethrow depends on what the code is for. Fix All is not offered: which token to use is a choice per catch.
 
 ## RU0006
 

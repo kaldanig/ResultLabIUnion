@@ -9,6 +9,11 @@ are in the diff of those files.
 
 ## [Unreleased]
 
+### ResultUnion (analyzers)
+
+- A code fix for RU0005: with a `CancellationToken` in scope, the catch gets `when (!ct.IsCancellationRequested)`, so
+  a requested cancellation propagates and only a timeout is turned into a result.
+
 ## [1.0.0-rc.1] - 2026-11-22
 
 The first release candidate for 1.0. It removes the members deprecated in 0.5.0 and is otherwise the same as 0.5.0.

@@ -12,6 +12,9 @@ public static class DiagnosticIds
     /// <summary>Map with a mapper that returns a result.</summary>
     public const string MapReturnsResult = "RU0003";
 
+    /// <summary>A catch of OperationCanceledException that turns cancellation into a result.</summary>
+    public const string CancellationAsFailure = "RU0005";
+
     /// <summary>A Result&lt;Error&gt;: an error as a success value.</summary>
     public const string ErrorAsValue = "RU0009";
 

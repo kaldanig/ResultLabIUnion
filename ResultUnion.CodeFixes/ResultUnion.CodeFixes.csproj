@@ -1,9 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <!-- Code fixes for the ResultUnion analyzers (RU0001-RU0003, RU0009, RU0010). A separate assembly because code
-       fixes need Microsoft.CodeAnalysis.Workspaces, which the compiler does not load: the analyzer assembly must not
-       depend on it (RS1038). Shipped next to the analyzers in the ResultUnion package (analyzers/dotnet/cs); IDEs load
-       both. -->
+  <!-- Code fixes for the ResultUnion analyzers (RU0001-RU0003, RU0005, RU0009, RU0010). A separate assembly because
+       code fixes need Microsoft.CodeAnalysis.Workspaces, which the compiler does not load: the analyzer assembly must
+       not depend on it (RS1038). Shipped next to the analyzers in the ResultUnion package (analyzers/dotnet/cs); IDEs
+       load both. -->
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
