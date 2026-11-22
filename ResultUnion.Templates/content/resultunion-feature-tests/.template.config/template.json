@@ -121,6 +121,13 @@
     "Sqlite": {
       "type": "computed",
       "value": "(Database == \"sqlite\")"
+    },
+    "Crud": {
+      "type": "parameter",
+      "displayName": "Update and delete",
+      "datatype": "bool",
+      "defaultValue": "false",
+      "description": "Also test rename and delete, for a feature made with --crud."
     }
   },
   "forms": {

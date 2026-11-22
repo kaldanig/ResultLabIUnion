@@ -96,3 +96,24 @@ jobs:
             artifacts/*.nupkg
             artifacts/*.snupkg
           if-no-files-found: error
+
+  # The template test once more on Windows, against the packages the build job packed: paths, line endings and the
+  # shell commands of test-template.sh must work there too (Linux runs it in the build job).
+  templates-windows:
+    needs: build
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '11.0.x'
+
+      - uses: actions/download-artifact@v8
+        with:
+          name: packages
+          path: artifacts
+
+      - name: Test the template
+        shell: bash
+        run: bash ResultUnion.Templates/test-template.sh artifacts

@@ -20,6 +20,9 @@ public sealed class WidgetConfiguration : IEntityTypeConfiguration<Widget>
             .HasMaxLength(WidgetName.MaxLength)
             .UseCollation("NOCASE");  // names that differ only in case are one name
         entity.HasIndex(e => e.Name).IsUnique();
+#if (Crud)
+        entity.Property(e => e.Version);  // read-only, so mapped by name; the repository compares it as it writes
+#endif
     }
 
     private static T FromDatabase<T>(Result<T> value) where T : notnull =>

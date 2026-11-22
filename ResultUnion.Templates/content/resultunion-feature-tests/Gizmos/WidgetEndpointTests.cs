@@ -63,6 +63,41 @@ public sealed class WidgetEndpointTests(WebApplicationFactory<Program> factory) 
         Assert.Equal("ENTITY_CODE.not_found", await CodeOf(response));
     }
 
+#if (Crud)
+    [Fact]
+    public async Task A_rename_is_200_with_the_next_version_and_a_stale_one_is_409()
+    {
+        var created = await (await _client.PostAsJsonAsync("/PLURAL_ROUTE", new { name = $"First {Guid.NewGuid()}" }, Ct))
+            .Content.ReadFromJsonAsync<JsonElement>(Ct);
+        var id = created.GetProperty("id").GetGuid();
+        var version = created.GetProperty("version").GetInt32();
+
+        var renamed = await _client.PutAsJsonAsync($"/PLURAL_ROUTE/{id}", new { name = $"Second {Guid.NewGuid()}", version }, Ct);
+        Assert.Equal(HttpStatusCode.OK, renamed.StatusCode);
+        Assert.Equal(version + 1, (await renamed.Content.ReadFromJsonAsync<JsonElement>(Ct)).GetProperty("version").GetInt32());
+
+        var stale = await _client.PutAsJsonAsync($"/PLURAL_ROUTE/{id}", new { name = $"Third {Guid.NewGuid()}", version }, Ct);
+        Assert.Equal(HttpStatusCode.Conflict, stale.StatusCode);
+        Assert.Equal("ENTITY_CODE.changed_concurrently", await CodeOf(stale));
+    }
+
+    [Fact]
+    public async Task A_delete_is_204_and_then_404()
+    {
+        var created = await (await _client.PostAsJsonAsync("/PLURAL_ROUTE", new { name = $"First {Guid.NewGuid()}" }, Ct))
+            .Content.ReadFromJsonAsync<JsonElement>(Ct);
+        var id = created.GetProperty("id").GetGuid();
+        var version = created.GetProperty("version").GetInt32();
+
+        var deleted = await _client.DeleteAsync($"/PLURAL_ROUTE/{id}?version={version}", Ct);
+        Assert.Equal(HttpStatusCode.NoContent, deleted.StatusCode);
+
+        var again = await _client.DeleteAsync($"/PLURAL_ROUTE/{id}?version={version}", Ct);
+        Assert.Equal(HttpStatusCode.NotFound, again.StatusCode);
+        Assert.Equal("ENTITY_CODE.not_found", await CodeOf(again));
+    }
+
+#endif
     private static async Task<string?> CodeOf(HttpResponseMessage response) =>
         (await response.Content.ReadFromJsonAsync<JsonElement>(Ct)).GetProperty("code").GetString();
 }

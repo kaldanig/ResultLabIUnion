@@ -4,12 +4,24 @@ using ResultUnion.AspNetCore;
 namespace TargetNamespace.Gizmos;
 
 public sealed record CreateWidgetRequest(string? Name);
+#if (Crud)
+
+/// <summary>A new name, with the version the client read: a stale version is 409 with <c>changed_concurrently</c>.</summary>
+public sealed record RenameWidgetRequest(string? Name, int Version);
+
+/// <summary>What a client receives. A <c>Result</c> is never serialized; its value is mapped to this.</summary>
+public sealed record WidgetResponse(Guid Id, string Name, int Version)
+{
+    public static WidgetResponse From(Widget entity) => new(entity.Id, entity.Name.Value, entity.Version);
+}
+#else
 
 /// <summary>What a client receives. A <c>Result</c> is never serialized; its value is mapped to this.</summary>
 public sealed record WidgetResponse(Guid Id, string Name)
 {
     public static WidgetResponse From(Widget entity) => new(entity.Id, entity.Name.Value);
 }
+#endif
 
 #if (Sqlite)
 /// <summary>
@@ -52,6 +64,19 @@ public static class WidgetFeature
                     .MapAsync(WidgetResponse.From)
                     .ToHttpResultAsync())
             .ProducesErrors(ErrorType.NotFound);
+#if (Crud)
+
+        group.MapPut("/{id:guid}", (Guid id, RenameWidgetRequest request, WidgetService service, CancellationToken ct) =>
+                service.RenameAsync(new RenameWidget(id, request.Name, request.Version), ct)
+                    .MapAsync(WidgetResponse.From)
+                    .ToHttpResultAsync())
+            .ProducesErrors(ErrorType.Validation, ErrorType.NotFound, ErrorType.Conflict, ErrorType.Concurrency);
+
+        group.MapDelete("/{id:guid}", (Guid id, int version, WidgetService service, CancellationToken ct) =>
+                service.RemoveAsync(id, version, ct)
+                    .ToHttpResultAsync())  // 204 No Content
+            .ProducesErrors(ErrorType.NotFound, ErrorType.Concurrency);
+#endif
 
         return app;
     }

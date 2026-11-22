@@ -108,6 +108,13 @@
     "Sqlite": {
       "type": "computed",
       "value": "(Database == \"sqlite\")"
+    },
+    "Crud": {
+      "type": "parameter",
+      "displayName": "Update and delete",
+      "datatype": "bool",
+      "defaultValue": "false",
+      "description": "Also rename and delete, with a version that keeps two clients from overwriting each other (409 changed_concurrently)."
     }
   },
   "forms": {

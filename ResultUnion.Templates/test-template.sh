@@ -91,7 +91,7 @@ EOF
   && dotnet new resultunion-valueobject -n Quantity --value-type int --max 99 --debug:custom-hive "$hive" \
   && dotnet new resultunion-valueobject -n UnitPrice --value-type decimal --min 0.01 --max 100000 --debug:custom-hive "$hive" \
   && dotnet new resultunion-feature -n OrderLine --debug:custom-hive "$hive" \
-  && dotnet new resultunion-feature -n Category --plural Categories --debug:custom-hive "$hive")
+  && dotnet new resultunion-feature -n Category --plural Categories --crud --debug:custom-hive "$hive")
 for file in OrderLines/OrderLine.cs OrderLines/OrderLineName.cs OrderLines/OrderLineRepository.cs OrderLines/OrderLineService.cs \
             OrderLines/OrderLineFeature.cs Categories/CategoryFeature.cs; do
   [ -e "$work/Shop/src/Shop/$file" ] || { echo "::error::resultunion-feature did not create $file"; exit 1; }
@@ -103,7 +103,7 @@ sed -i 's/^using Shop.Products;/&\nusing Shop.Categories;\nusing Shop.OrderLines
 (cd "$work/Shop/tests/Shop.Tests" \
   && dotnet restore \
   && dotnet new resultunion-feature-tests -n OrderLine --debug:custom-hive "$hive" \
-  && dotnet new resultunion-feature-tests -n Category --plural Categories --debug:custom-hive "$hive")
+  && dotnet new resultunion-feature-tests -n Category --plural Categories --crud --debug:custom-hive "$hive")
 grep -q '^using Shop.OrderLines;' "$work/Shop/tests/Shop.Tests/OrderLines/OrderLineServiceTests.cs" \
   || { echo "::error::resultunion-feature-tests did not derive the application's namespace"; exit 1; }
 (cd "$work/Shop" && dotnet build -warnaserror && dotnet test)
@@ -120,8 +120,8 @@ fi
 # A feature in SQLite, in the application's DbContext, with its tests.
 # From the solution folder with -o, as the README's recipe does.
 (cd "$work/Store" && dotnet restore \
-  && dotnet new resultunion-feature -n Supplier -o src/Store --database sqlite --debug:custom-hive "$hive" \
-  && dotnet new resultunion-feature-tests -n Supplier -o tests/Store.Tests --database sqlite --debug:custom-hive "$hive")
+  && dotnet new resultunion-feature -n Supplier -o src/Store --database sqlite --crud --debug:custom-hive "$hive" \
+  && dotnet new resultunion-feature-tests -n Supplier -o tests/Store.Tests --database sqlite --crud --debug:custom-hive "$hive")
 [ -e "$work/Store/src/Store/Suppliers/EfSupplierRepository.cs" ] \
   || { echo "::error::resultunion-feature --database sqlite did not add the EF repository"; exit 1; }
 sed -i 's/^builder.Services.AddScoped<ProductService>();/&\nbuilder.Services.AddSuppliers<AppDbContext>();/; s/^app.MapProducts();/&\napp.MapSuppliers();/; s/^using Store.Products;/&\nusing Store.Suppliers;/' \

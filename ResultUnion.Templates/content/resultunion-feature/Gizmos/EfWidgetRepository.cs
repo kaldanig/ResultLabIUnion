@@ -32,4 +32,47 @@ public sealed class EfWidgetRepository<TContext>(TContext db) : IWidgetRepositor
             return Widget.Errors.NameTaken(entity.Name);
         }
     }
+#if (Crud)
+
+    // One UPDATE ... WHERE Id = @id AND Version = @expected: a row changed in between is not overwritten.
+    public async Task<Result> UpdateAsync(Widget changed, int expectedVersion, CancellationToken ct)
+    {
+        if (await db.Set<Widget>().AnyAsync(e => e.Id != changed.Id && e.Name == changed.Name, ct))
+            return Widget.Errors.NameTaken(changed.Name);
+
+        try
+        {
+            var rows = await db.Set<Widget>()
+                .Where(e => e.Id == changed.Id && e.Version == expectedVersion)
+                .ExecuteUpdateAsync(set => set
+                    .SetProperty(e => e.Name, changed.Name)
+                    .SetProperty(e => e.Version, changed.Version), ct);
+            if (rows == 1)
+                return Result.Success();
+
+            return await MissingOrChangedAsync(changed.Id, expectedVersion, ct);
+        }
+        catch (SqliteException ex) when (ex.SqliteExtendedErrorCode == 2067)   // UNIQUE constraint failed
+        {
+            return Widget.Errors.NameTaken(changed.Name);
+        }
+    }
+
+    public async Task<Result> RemoveAsync(Guid id, int expectedVersion, CancellationToken ct)
+    {
+        var rows = await db.Set<Widget>()
+            .Where(e => e.Id == id && e.Version == expectedVersion)
+            .ExecuteDeleteAsync(ct);
+        if (rows == 1)
+            return Result.Success();
+
+        return await MissingOrChangedAsync(id, expectedVersion, ct);
+    }
+
+    // No row was written: either there is none, or its version is another.
+    private async Task<Error> MissingOrChangedAsync(Guid id, int expectedVersion, CancellationToken ct) =>
+        await db.Set<Widget>().AnyAsync(e => e.Id == id, ct)
+            ? Widget.Errors.ChangedConcurrently(id, expectedVersion)
+            : Widget.Errors.NotFound(id);
+#endif
 }

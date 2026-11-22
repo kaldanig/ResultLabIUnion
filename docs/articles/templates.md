@@ -199,6 +199,16 @@ pre-check and unique-constraint catch as the products) and `OrderConfiguration`,
 `builder.Services.AddOrders<AppDbContext>()` and applied in `OnModelCreating` with
 `modelBuilder.ApplyConfiguration(new OrderConfiguration())`.
 
+With `--crud` an order can also be renamed and deleted, with optimistic concurrency. `Order` gets a `Version`, and
+`Rename` returns a new instance with the next one. A client sends the version it read: `PUT /orders/{id}` with `name`
+and `version`, `DELETE /orders/{id}?version=2`. The service checks it first, for a clear answer, and the store checks it
+again as it writes, so two clients that read the same version cannot both succeed. In memory that is one step under
+the store's lock; in SQLite it is `ExecuteUpdate` / `ExecuteDelete` with `Version == expected` in the `WHERE`, and no
+row written means the order is gone (`order.not_found`, 404) or changed (`order.changed_concurrently`,
+`ErrorType.Concurrency`, 409, with the `id` and the `version` the client had). The client's answer to a 409 is to read
+the order again and retry. The [EF Core article](ef-core.md) shows the same error from a row version with
+`DbUpdateConcurrencyException`.
+
 Its tests come from a second template, run in the test project:
 
 ```powershell
@@ -207,7 +217,8 @@ dotnet new resultunion-feature-tests -n Order
 
 `OrderServiceTests` checks each code the use cases return (`order_name.required` with its field, `order.name_taken`,
 `order.not_found`) and `OrderEndpointTests` what a client receives (201 with the location, 400, 409, 404); add
-`--database sqlite` for an application that stores in SQLite. Then grow the feature step by step:
+`--database sqlite` for an application that stores in SQLite, and `--crud` for the rename and delete tests (a stale
+version is `changed_concurrently`, a deleted order 404). Then grow the feature step by step:
 
 1. **Value objects** for the inputs that have rules (`Quantity`, `OrderNote`), each with its `Errors` catalog and a
    `Create` that returns a result. An input with a rule is a value object even when it is a single string; the entity

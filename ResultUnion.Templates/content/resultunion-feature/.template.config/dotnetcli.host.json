@@ -12,6 +12,10 @@
     "Database": {
       "longName": "database",
       "shortName": ""
+    },
+    "Crud": {
+      "longName": "crud",
+      "shortName": ""
     }
   }
 }

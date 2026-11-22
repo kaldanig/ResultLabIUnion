@@ -54,7 +54,9 @@ dotnet new resultunion-feature -n OrderLine
 `Result` pipelines, and endpoints at `/order-lines`. Register it in `Program.cs` with `builder.Services.AddOrderLines()`
 and `app.MapOrderLines()`. `--plural Categories` sets the plural where adding an s is wrong. `--database sqlite`
 stores it through EF Core in the application's DbContext: register it with `AddOrderLines<AppDbContext>()` and apply
-`OrderLineConfiguration` in `OnModelCreating`.
+`OrderLineConfiguration` in `OnModelCreating`. `--crud` adds rename and delete with a version: a client sends the
+version it read (`PUT /order-lines/{id}` with `name` and `version`, `DELETE /order-lines/{id}?version=2`), and a
+stale one is 409 with `order_line.changed_concurrently`.
 
 ```powershell
 dotnet new resultunion-feature-tests -n OrderLine
@@ -63,4 +65,4 @@ dotnet new resultunion-feature-tests -n OrderLine
 `resultunion-feature-tests`, run in the test project, adds the feature's tests in `OrderLines/`: one for each code its
 use cases return, and its endpoints over HTTP with `WebApplicationFactory`. The application's namespace is the test
 project's without `.Tests` (`--app-namespace` sets another); `--database sqlite` gives the HTTP tests a database file
-of their own.
+of their own, and `--crud` tests rename and delete for a feature made with `--crud`.
