@@ -85,18 +85,28 @@ public sealed record OrderLineInput(string? Product, int Quantity);
 
 public sealed record OrderLine(string Product, int Quantity)
 {
+    public static class Errors
+    {
+        public static readonly Error ProductRequired =
+            Error.Create("order_line.product_required", "Product is required.", ErrorType.Validation);
+    }
+
     public static Result<OrderLine> Create(string? product, int quantity) =>
         string.IsNullOrEmpty(product)
-            ? Error.Create("order_line.product_required", "Product is required.", ErrorType.Validation).WithField("product")
+            ? Errors.ProductRequired.WithField("product")
             : new OrderLine(product, quantity);
 }
 
 public sealed record CancellationReason(string Value)
 {
+    public static class Errors
+    {
+        public static readonly Error Required =
+            Error.Create("cancellation_reason.required", "A reason is required.", ErrorType.Validation);
+    }
+
     public static Result<CancellationReason> Create(string? input) =>
-        string.IsNullOrWhiteSpace(input)
-            ? Error.Create("cancellation_reason.required", "A reason is required.", ErrorType.Validation)
-            : new CancellationReason(input);
+        string.IsNullOrWhiteSpace(input) ? Errors.Required : new CancellationReason(input);
 }
 
 public sealed class Order

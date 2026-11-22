@@ -32,7 +32,8 @@ was checked with a small program, and the observed output is quoted.
 - **Packages:** [36 Compatibility checked against the last release](#36-compatibility-is-checked-against-the-last-release) ·
   [37 FluentValidation failures become field errors](#37-fluentvalidation-failures-become-field-errors) ·
   [38 HTTP clients read problems back as errors](#38-http-clients-read-problems-back-as-errors) ·
-  [39 Test assertions need no test framework](#39-test-assertions-need-no-test-framework)
+  [39 Test assertions need no test framework](#39-test-assertions-need-no-test-framework) ·
+  [40 Conventions are suggestions, mistakes are warnings](#40-conventions-are-suggestions-mistakes-are-warnings)
 
 ---
 
@@ -595,3 +596,25 @@ leave the others out. Comparing argument values with `Equals` alone would fail w
 **Consequences.** The assertions are about what clients depend on (code, type, field, arguments), not about messages;
 there is deliberately no `ShouldHaveMessage`. `ShouldHaveFieldErrors` compares the innermost errors as a set, so it
 works the same for one error and for a group.
+
+### 40. Conventions are suggestions, mistakes are warnings
+
+**Context.** The analyzers started with mistakes that are wrong in every codebase: a discarded result (RU0001),
+asynchronous code in `Result.Try` (RU0002), `Map` that should be `Bind` (RU0003), an unchecked read (RU0004). The
+library's conventions (error catalogs (28), who sets `Field` (29), `Task` rather than `ValueTask` (10)) were only
+written down, in the README and the skill, and code review was the only check.
+
+**Decision.** A cancellation caught and returned as a result (RU0005) is a mistake like the first four: cancellation
+is never a business failure (14), so it is a Warning. The conventions become suggestions (Info): an error created
+outside a catalog (RU0006), `WithField` in a single-input value object or a catalog (RU0007), and a method returning
+`ValueTask<Result…>` (RU0008). Info shows in the IDE but not in the build output and never fails a build. Each rule
+recognizes its pattern by names and shapes (a type ending in `Errors`, a static factory with one simple parameter), and
+leaves alone what a convention explicitly allows: `Error.Create` with a computed code (translation), a value object
+with several inputs, overrides and interface implementations.
+
+**Alternatives.** Warnings for the conventions would fail the builds of projects that organise errors differently and
+turn a style into a rule. Leaving them as text would leave the skill's "quick check" to memory.
+
+**Consequences.** The repository runs every rule: tests, the showcase, the benchmarks and the packages that translate
+other systems' errors turn RU0006 off (and tests RU0008) in `.editorconfig`, with the reason next to the setting; the
+samples follow the conventions.

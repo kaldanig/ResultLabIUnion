@@ -52,4 +52,58 @@ internal static class Descriptors
             + "known: inside 'if (result.IsSuccess)', after 'if (result.IsFailure) return ...;', on the matching side of "
             + "?: or &&, or after TryGetResultValue / TryGetError. A switch on the union or Match needs no check at all.",
         helpLinkUri: HelpBase + "ru0004");
+
+    public static readonly DiagnosticDescriptor CancellationAsFailure = new(
+        id: "RU0005",
+        title: "Cancellation turned into a failure",
+        messageFormat: "This catch turns {0} into a result; let cancellation propagate, or filter it with "
+            + "'when (!cancellationToken.IsCancellationRequested)' for a timeout",
+        category: Category,
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "Cancellation is not a business failure: the caller asked to stop, and a result would make the work "
+            + "look finished (a failure) or even successful. A catch of OperationCanceledException or "
+            + "TaskCanceledException without a 'when' filter that returns a result swallows the request; the library "
+            + "itself never catches cancellation (Result.Try, Result.TryAsync).",
+        helpLinkUri: HelpBase + "ru0005");
+
+    public static readonly DiagnosticDescriptor InlineError = new(
+        id: "RU0006",
+        title: "Error created outside an error catalog",
+        messageFormat: "The error '{0}' is created inline; declare it in the Errors catalog of the concept it is about",
+        category: Category,
+        defaultSeverity: DiagnosticSeverity.Info,
+        isEnabledByDefault: true,
+        description: "Error codes are a contract with clients, who switch on them and translate them. Declared in one "
+            + "catalog per domain concept (a nested class named Errors, or a class whose name ends in Errors), each code "
+            + "has one definition; created inline in handlers and validators, codes multiply and drift. Groups built with "
+            + "Error.Validation(details) are not reported.",
+        helpLinkUri: HelpBase + "ru0006");
+
+    public static readonly DiagnosticDescriptor FieldSetTooEarly = new(
+        id: "RU0007",
+        title: "Field set where the field name is not known",
+        messageFormat: "WithField is called in {0}, which cannot know what the caller's input is called; set the field "
+            + "where the value is read from the request",
+        category: Category,
+        defaultSeverity: DiagnosticSeverity.Info,
+        isEnabledByDefault: true,
+        description: "A value object that is itself one input (Email.Create(string)) and an error catalog do not know "
+            + "the name of the field the value came from; the request might call it 'email', 'contact' or "
+            + "'owner.email'. The caller sets it: Email.Create(command.Email).MapError(e => e.WithField(\"email\")). A "
+            + "value object with several inputs names its own parts and is not reported.",
+        helpLinkUri: HelpBase + "ru0007");
+
+    public static readonly DiagnosticDescriptor ValueTaskResult = new(
+        id: "RU0008",
+        title: "ValueTask of a Result",
+        messageFormat: "'{0}' returns {1}; return Task<…> instead, as the rest of the pipeline does",
+        category: Category,
+        defaultSeverity: DiagnosticSeverity.Info,
+        isEnabledByDefault: true,
+        description: "The pipeline's delegates and return values are Task-based: a ValueTask can be awaited only once, "
+            + "and every step after it returns a Task anyway. A ValueTask from someone else's API (EF Core's FindAsync) is "
+            + "fine as a source; methods you write return Task<Result<T>>. Overrides and interface implementations, "
+            + "whose signature is given, are not reported.",
+        helpLinkUri: HelpBase + "ru0008");
 }

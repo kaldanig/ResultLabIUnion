@@ -4,3 +4,11 @@
 # test, which is what an assertion is for. RU0004 (read without checking the state) is meant for production code.
 [ResultUnion*.Tests/**.cs]
 dotnet_diagnostic.RU0004.severity = none
+# Tests build errors inline to have something to assert on, and test ValueTask sources on purpose.
+dotnet_diagnostic.RU0006.severity = none
+dotnet_diagnostic.RU0008.severity = none
+
+# The packages translate errors that come from elsewhere (HTTP problems, gRPC statuses, FluentValidation failures), and
+# the showcase and the benchmarks demonstrate or measure the Error factories themselves, so errors are created inline.
+[{ResultUnion,ResultUnion.AspNetCore,ResultUnion.Grpc,ResultUnion.FluentValidation,ResultUnion.Http,ResultUnion.Testing,ResultUnion.Showcase,ResultUnion.Benchmarks}/**.cs]
+dotnet_diagnostic.RU0006.severity = none

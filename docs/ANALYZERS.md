@@ -9,6 +9,10 @@ compiler and the IDE as soon as a project references the package; there is nothi
 | [RU0002](#ru0002) | Warning | Asynchronous code passed to `Result.Try` | `Result.TryAsync`, awaited in an `async` function |
 | [RU0003](#ru0003) | Warning | `Map` with a mapper that returns a `Result` | `Bind` / `BindAsync` |
 | [RU0004](#ru0004) | Warning | `ResultValue` or `Error` read without checking the result | none |
+| [RU0005](#ru0005) | Warning | Cancellation turned into a failure | none |
+| [RU0006](#ru0006) | Info | An error created outside an error catalog | none |
+| [RU0007](#ru0007) | Info | `WithField` where the field name is not known | none |
+| [RU0008](#ru0008) | Info | A method that returns a `ValueTask` of a result | none |
 
 Rules RU0001–RU0003 have a code fix (the light bulb in Visual Studio and Rider, with Fix All for a document, project or solution). From the command line, `dotnet format analyzers --diagnostics RU0003 --severity warn` applies one; run one rule per call, because a fix for one rule moves the positions the next rule's diagnostics refer to.
 
@@ -17,7 +21,8 @@ checked by hand in Visual Studio 2026 with the published `ResultUnion` 0.1.0 pac
 table above gave the expected code in the preview and after applying it, Fix All in a document fixed every occurrence,
 comments next to the fixed code stayed in place, and RU0004 offered no fix.
 
-Change a rule's severity in `.editorconfig`, for example `dotnet_diagnostic.RU0001.severity = error`, or turn it off
+RU0006–RU0008 are suggestions (Info): they show in the IDE, not in the build output, and rely on naming conventions, so
+turn off any that does not fit your code. Change a rule's severity in `.editorconfig`, for example `dotnet_diagnostic.RU0001.severity = error`, or turn it off
 with `none`.
 
 ## RU0001
@@ -110,3 +115,81 @@ dotnet_diagnostic.RU0004.severity = none
 
 No code fix: the right replacement (return, throw, `Match`, a default) depends on what the code should do on the other
 track.
+
+## RU0005
+
+**Cancellation turned into a failure.** A `catch` of `OperationCanceledException` (or `TaskCanceledException`) without
+a `when` filter that returns a result swallows the cancellation: the caller asked to stop, and gets a failure that
+looks like a business outcome, or even a success.
+
+```csharp
+try { return await client.GetFromJsonAsync<Rate>(url, ct); }
+catch (OperationCanceledException) { return Errors.Unavailable; }    // RU0005
+
+try { return await client.GetFromJsonAsync<Rate>(url, ct); }
+catch (TaskCanceledException) when (!ct.IsCancellationRequested)     // fine: HttpClient's timeout, not a cancellation
+{
+    return Errors.Unavailable;
+}
+```
+
+Let cancellation propagate, as `Result.Try` and `Result.TryAsync` do. HttpClient reports its own timeout as a
+`TaskCanceledException`; a `when (!cancellationToken.IsCancellationRequested)` filter tells it apart and is not
+reported. A catch that rethrows, or returns something that is not a result or an error, is not reported either.
+
+No code fix: whether to remove the catch, rethrow or add a filter depends on what the code is for.
+
+## RU0006
+
+**An error created outside an error catalog.** Error codes are a contract: clients switch on them and translate them.
+Each code should have one definition, in the catalog of the concept it is about.
+
+```csharp
+public Result Check(Order order) =>
+    order.Lines.Count > 0 ? Result.Success() : Error.Validation("No lines.");        // RU0006
+
+public sealed partial class Order
+{
+    public static class Errors
+    {
+        public static readonly Error NoLines =
+            Error.Create("order.no_lines", "An order needs at least one line.", ErrorType.Validation);
+    }
+}
+```
+
+Reported for `Error.Create` with a constant code and for the category factories (`Error.Validation(message)`,
+`Error.NotFound(message)`, …) anywhere except inside a type named `Errors` or whose name ends in `Errors`
+(`OrderErrors`), at any nesting depth. Not reported: `Error.Create` with a code that is not a constant (code that
+translates another system's errors), and `Error.Validation(details)`, which groups existing errors. Tests, demos and
+adapters that create errors on purpose can turn the rule off in `.editorconfig`.
+
+## RU0007
+
+**`WithField` where the field name is not known.** The field is the name of the input in the request, and only the
+code that reads the request knows it: the same `Email` may come from `email`, `contact` or `owner.email`.
+
+```csharp
+public static Result<Email> Create(string? input) =>
+    string.IsNullOrWhiteSpace(input) ? Errors.Required.WithField("email") : new Email(input);    // RU0007
+
+Email.Create(command.Email).MapError(e => e.WithField("email"));    // fine: in the handler that reads the request
+```
+
+Reported in a static factory with one parameter of a simple type (string, number, Boolean, date, `Guid`, enum) that
+returns a result of its own type (`Email.Create(string)`), and inside an error catalog. A value object with several
+inputs (`OrderLine.Create(product, quantity)`, or one parameter object) names its own parts and is not reported.
+
+## RU0008
+
+**A method that returns a `ValueTask` of a result.** The pipeline's delegates and return values are `Task`-based: a
+`ValueTask` can be awaited only once, and every step after it returns a `Task` anyway.
+
+```csharp
+public ValueTask<Result<User>> FindAsync(Guid id);    // RU0008
+public Task<Result<User>> FindAsync(Guid id);         // fine
+```
+
+Reported for methods, local functions and properties you declare. Not reported for overrides and interface
+implementations, whose signature is given, nor for a `ValueTask` from someone else's API used as a source
+(`db.Users.FindAsync([id], ct).ToResultAsync(error)`), which the pipeline accepts.

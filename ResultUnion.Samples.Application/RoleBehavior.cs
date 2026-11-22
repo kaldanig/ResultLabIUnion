@@ -7,9 +7,15 @@ namespace ResultUnion.Samples.Application;
 /// <remarks>The role comes from an <c>X-Role</c> header to keep the demo self-contained; a real API uses authentication.</remarks>
 public static class RoleBehavior
 {
+    public static class Errors
+    {
+        public static Error Forbidden(string? role, string requiredRole) =>
+            Error.Forbidden($"Role '{role ?? "(none)"}' cannot do this; '{requiredRole}' is required.");
+    }
+
     public static async Task<TResponse> RequireRoleAsync<TResponse>(string? role, string requiredRole, Func<Task<TResponse>> handler)
         where TResponse : IResultFactory<TResponse> =>
         string.Equals(role, requiredRole, StringComparison.OrdinalIgnoreCase)
             ? await handler()
-            : TResponse.Failure(Error.Forbidden($"Role '{role ?? "(none)"}' cannot do this; '{requiredRole}' is required."));
+            : TResponse.Failure(Errors.Forbidden(role, requiredRole));
 }

@@ -9,6 +9,15 @@ are in the diff of those files.
 
 ## [Unreleased]
 
+### ResultUnion (analyzers)
+
+- RU0005 (Warning): a `catch` of `OperationCanceledException` / `TaskCanceledException` without a `when` filter that
+  returns a result, turning cancellation into a failure.
+- RU0006 (Info): an error created outside an error catalog (a type named `Errors` or ending in `Errors`).
+- RU0007 (Info): `WithField` in a single-input value object's factory or in an error catalog, which cannot know the
+  field's name.
+- RU0008 (Info): a method, local function or property that returns a `ValueTask` of a result.
+
 ### ResultUnion.Testing (new package)
 
 - Test assertions that need no test framework: `ShouldSucceed()` returns the value, `ShouldFail()` /

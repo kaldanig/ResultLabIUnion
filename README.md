@@ -755,8 +755,8 @@ as above, only that exception type becomes an error and everything else propagat
 
 ## Analyzers
 
-The `ResultUnion` package includes Roslyn analyzers, so mistakes show up as compiler warnings, each with a code
-fix in the IDE:
+The `ResultUnion` package includes Roslyn analyzers, so mistakes show up as compiler warnings (RU0001–RU0003 with a
+code fix in the IDE), and the library's conventions as suggestions:
 
 | Rule | Finds |
 |---|---|
@@ -764,6 +764,10 @@ fix in the IDE:
 | `RU0002` | an `async` lambda or a task-returning method passed to `Result.Try` (use `Result.TryAsync`) |
 | `RU0003` | `Map` / `MapAsync` with a mapper that returns a `Result` (use `Bind` / `BindAsync`) |
 | `RU0004` | `ResultValue` / `Error` read without checking the result (use `switch`, `Match` or `TryGetResultValue`) |
+| `RU0005` | a `catch` of `OperationCanceledException` that returns a result (let cancellation propagate) |
+| `RU0006` (Info) | an error created outside an error catalog (declare it in the concept's `Errors` class) |
+| `RU0007` (Info) | `WithField` in a single-input value object or a catalog (set the field where the request is read) |
+| `RU0008` (Info) | a method that returns a `ValueTask` of a result (return `Task<…>`) |
 
 Details, examples and how to change a rule's severity: [docs/ANALYZERS.md](docs/ANALYZERS.md).
 

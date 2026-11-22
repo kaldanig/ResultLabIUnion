@@ -77,8 +77,13 @@ public sealed class TelemetryBehavior<TCommand, TResponse>(ICommandHandler<TComm
 
 public sealed class PlaceOrderValidator : ICommandValidator<PlaceOrder>
 {
-    public Result Validate(PlaceOrder command) =>
-        command.Lines.Count > 0 ? Result.Success() : Error.Validation("At least one line is required.");
+    public static class Errors
+    {
+        public static readonly Error NoLines =
+            Error.Create("order.no_lines", "At least one line is required.", ErrorType.Validation);
+    }
+
+    public Result Validate(PlaceOrder command) => command.Lines.Count > 0 ? Result.Success() : Errors.NoLines.WithField("lines");
 }
 
 public static class BehaviorWiring
