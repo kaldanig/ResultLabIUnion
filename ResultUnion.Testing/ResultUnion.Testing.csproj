@@ -10,8 +10,6 @@
     <IsPackable>true</IsPackable>
     <Description>Test assertions for ResultUnion: ShouldSucceed returns the value, ShouldFail("code") returns the error, ShouldHaveFieldErrors compares every field error, with failure messages that show the whole error. Works with xUnit, NUnit, MSTest and any other test framework.</Description>
     <PackageTags>result;result-pattern;testing;assertions</PackageTags>
-    <!-- Not on nuget.org yet, so there is no released version to validate against (docs/RELEASING.md). -->
-    <IsNewPackage>true</IsNewPackage>
   </PropertyGroup>
 
   <ItemGroup>

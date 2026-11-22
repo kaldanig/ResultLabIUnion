@@ -10,8 +10,6 @@
     <IsPackable>true</IsPackable>
     <Description>HTTP client integration for ResultUnion: HttpResponseMessage.ReadResultAsync turns a response into a Result, and an RFC 9457 problem details body (code, category, arguments, field errors) back into an Error, the reverse of ResultUnion.AspNetCore.</Description>
     <PackageTags>result;result-pattern;http;httpclient;problem-details;rfc9457</PackageTags>
-    <!-- Not on nuget.org yet, so there is no released version to validate against (docs/RELEASING.md). -->
-    <IsNewPackage>true</IsNewPackage>
   </PropertyGroup>
 
   <ItemGroup>
