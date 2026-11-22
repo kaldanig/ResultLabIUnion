@@ -24,6 +24,8 @@ are in the diff of those files.
   `JsonSerializer`, `Results` / `TypedResults`, `WriteAsJsonAsync` or the `HttpClient` JSON methods. Its code fix
   appends `.ToHttpResult()` / `.ToHttpResultAsync()` to an endpoint lambda's body, in projects that reference
   ResultUnion.AspNetCore.
+- A code fix for RU0009: `Map(x => error)` becomes `Bind(x => Result<T>.Failure(error))` (`MapAsync` becomes
+  `BindAsync`), so the step fails with the error and keeps its value type.
 
 ## [0.3.0] - 2026-11-22
 

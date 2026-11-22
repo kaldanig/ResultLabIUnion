@@ -13,10 +13,10 @@ compiler and the IDE as soon as a project references the package; there is nothi
 | [RU0006](#ru0006) | Info | An error created outside an error catalog | none |
 | [RU0007](#ru0007) | Info | `WithField` where the field name is not known | none |
 | [RU0008](#ru0008) | Info | A method that returns a `ValueTask` of a result | none |
-| [RU0009](#ru0009) | Warning | `Result<Error>`, an error as a success value | none |
+| [RU0009](#ru0009) | Warning | `Result<Error>`, an error as a success value | `Map` → `Bind` with a failure |
 | [RU0010](#ru0010) | Warning | A `Result` written as or read from JSON | `.ToHttpResult()` on an endpoint lambda |
 
-Rules RU0001–RU0003 and RU0010 have a code fix (the light bulb in Visual Studio and Rider, with Fix All for a document, project or solution). From the command line, `dotnet format analyzers --diagnostics RU0003 --severity warn` applies one; run one rule per call, because a fix for one rule moves the positions the next rule's diagnostics refer to.
+Rules RU0001–RU0003, RU0009 and RU0010 have a code fix (the light bulb in Visual Studio and Rider, with Fix All for a document, project or solution). From the command line, `dotnet format analyzers --diagnostics RU0003 --severity warn` applies one; run one rule per call, because a fix for one rule moves the positions the next rule's diagnostics refer to.
 
 The fixes are covered by tests that apply them with Roslyn's workspace API (`ResultUnion.Analyzers.Tests`), and were
 checked by hand in Visual Studio 2026 with the published `ResultUnion` 0.1.0 package on 2026-11-22: every fix in the
@@ -216,7 +216,11 @@ follow on the same chain are not reported again. Usually the step meant `Bind` (
 `Ensure` (a condition) or `MapError` (a different error). `Result<Error[]>` and other types that contain errors are
 not reported.
 
-No code fix: which step was meant depends on the code.
+**Code fix:** for `Map` / `MapAsync` with a lambda whose body is an `Error` (also after `await`), the step fails with
+that error and keeps the value type: `user.Map(u => Errors.Blocked(u.Id))` becomes
+`user.Bind(u => Result<User>.Failure(Errors.Blocked(u.Id)))`. Where only some values should fail, `Ensure` says so
+better; the condition is not in the code, so change it by hand then. A `Result<Error>` written out as a type, a generic
+method closed over `Error` and a method group get no fix.
 
 ## RU0010
 

@@ -47,7 +47,7 @@ Why it is built this way, with the alternatives that were considered: [docs/DESI
 | `ResultUnion.Testing` | Test assertions for any test framework: `ShouldSucceed()`, `ShouldFail("code")`, `ShouldHaveFieldErrors(...)` |
 | `ResultUnion.Templates` | `dotnet new resultunion-api`: a Minimal API with one feature that follows the conventions, and its tests |
 | `ResultUnion.Analyzers` | Roslyn analyzers shipped inside the `ResultUnion` package: a discarded `Result`, `async` code in `Result.Try`, `Map` that should be `Bind` ([docs/ANALYZERS.md](docs/ANALYZERS.md)) |
-| `ResultUnion.CodeFixes` | The code fixes for those rules (`_ =`, `TryAsync`, `Bind`, `ToHttpResult`), in a separate assembly because they need Roslyn's Workspaces; shipped next to the analyzers |
+| `ResultUnion.CodeFixes` | The code fixes for those rules (`_ =`, `TryAsync`, `Bind`, `Bind` with a failure, `ToHttpResult`), in a separate assembly because they need Roslyn's Workspaces; shipped next to the analyzers |
 | `ResultUnion.Tests` | xUnit v3 tests for `ResultUnion`; no ASP.NET Core dependency |
 | `ResultUnion.AspNetCore.Tests` | xUnit v3 tests for `ResultUnion.AspNetCore`, including the JSON a client receives |
 | `ResultUnion.Grpc.Tests` | xUnit v3 tests for `ResultUnion.Grpc`, including server-to-client round trips |
@@ -775,8 +775,8 @@ as above, only that exception type becomes an error and everything else propagat
 
 ## Analyzers
 
-The `ResultUnion` package includes Roslyn analyzers, so mistakes show up as compiler warnings (RU0001–RU0003 and
-RU0010 with a code fix in the IDE), and the library's conventions as suggestions:
+The `ResultUnion` package includes Roslyn analyzers, so mistakes show up as compiler warnings (RU0001–RU0003,
+RU0009 and RU0010 with a code fix in the IDE), and the library's conventions as suggestions:
 
 | Rule | Finds |
 |---|---|
