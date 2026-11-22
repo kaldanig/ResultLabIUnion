@@ -14,7 +14,7 @@ public class ResultFactoryTests
         where TResponse : IResultFactory<TResponse>
         => role == "admin" ? handler() : TResponse.Failure(Forbidden);
 
-    // A transaction-like wrapper: reads the handler's outcome through IResultState.
+    // A transaction-like wrapper: reads the handler's outcome through IAnyResult.
     private static TResponse InTransaction<TResponse>(Func<TResponse> handler, List<string> log)
         where TResponse : IResultFactory<TResponse>
     {

@@ -145,7 +145,7 @@ contract to a command and the result to their protocol. The role for `ListUsers`
 | `Result<T>` | A union of two cases: a `T` value (success) or an `Error` (failure). `T` cannot be `null`. |
 | `Result` | The outcome of an operation without a value: success, or an `Error`. Not a union. |
 | `Error` | `Code`, `Message`, `Type` (`ErrorType`), an optional `Field` and nested `Details`. Compared by value. |
-| `IResultState`, `IResultState<T>` | Common interfaces, so results of different types can be handled together. |
+| `IAnyResult` | Any result, whatever its value type, so results of different types can be handled together. |
 
 A `default` result is never a half-initialised state: it is a failure carrying `Error.DefaultResult`.
 
@@ -270,7 +270,7 @@ Result form = Result.CombineAll(
 // one failure: returned unchanged
 ```
 
-Both have an overload for `IEnumerable<IResultState>`, which accepts `Result<T>` of different types (each one is boxed).
+Both have an overload for `IEnumerable<IAnyResult>`, which accepts `Result<T>` of different types (each one is boxed).
 
 To keep the values, pass two to four `Result<T>` arguments: `CombineAll` then returns a tuple on success, and
 reports every error on failure. `Map` and `Bind` on a tuple result take one parameter per value, so a factory can
@@ -284,7 +284,7 @@ Result<User> user = Result.CombineAll(
 ```
 
 Mixing `Result` and `Result<T>` arguments is not supported by these overloads; call `ToResult()` on the generic ones
-and use the plain `CombineAll`, or use the `IEnumerable<IResultState>` overload.
+and use the plain `CombineAll`, or use the `IEnumerable<IAnyResult>` overload.
 
 ### Collections
 
@@ -366,7 +366,7 @@ public static async Task<TResponse> RequireRoleAsync<TResponse>(string role, Fun
         return TResponse.Failure(Error.Forbidden("Admins only."));   // the handler does not run
 
     var response = await handler();
-    // IResultFactory<T> is also an IResultState: response.IsSuccess / response.Error are available here.
+    // IResultFactory<T> is also an IAnyResult: response.IsSuccess / response.Error are available here.
     return response;
 }
 ```

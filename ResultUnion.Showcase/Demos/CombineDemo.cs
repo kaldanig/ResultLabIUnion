@@ -12,7 +12,7 @@ internal static class CombineDemo
             Error.Forbidden("Admins only."),
             Error.Conflict("Already exists.")));
 
-        // IEnumerable<IResultState> overload: mixes Result<T> of different types (each one is boxed).
+        // IEnumerable<IAnyResult> overload: mixes Result<T> of different types (each one is boxed).
         Demo.Show("Validate(\"dan@example.com\", \"28\")", ValidateFirst("dan@example.com", "28"));
         Demo.Show("Validate(\"dan@\", \"abc\")  // first wins", ValidateFirst("dan@", "abc"));
 

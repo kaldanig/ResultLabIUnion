@@ -16,7 +16,7 @@ public static class AuthorisationBehavior
 
         var response = await handler();
 
-        // IResultFactory<T> is also an IResultState, so the behavior can inspect the outcome (log, commit or roll back, …).
+        // IResultFactory<T> is also an IAnyResult, so the behavior can inspect the outcome (log, commit or roll back, …).
         Console.WriteLine($"    [audit] {requiredRole} action {(response.IsSuccess ? "succeeded" : $"failed: {response.Error.Code}")}");
 
         return response;

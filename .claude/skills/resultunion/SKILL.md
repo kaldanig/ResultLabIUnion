@@ -76,7 +76,7 @@ add `Activity` code for that.
 
 **Let generic behaviors use `IResultFactory<TSelf>`.** A pipeline behavior that wraps handlers returning any result type
 constrains `where TResponse : IResultFactory<TResponse>` and short-circuits with `TResponse.Failure(error)`; the
-interface extends `IResultState`, so the same constraint lets it read `IsSuccess` and `Error`. A behavior only works if
+interface extends `IAnyResult`, so the same constraint lets it read `IsSuccess` and `Error`. A behavior only works if
 the call goes through it: wire it where the handler is called (the endpoint, a DI decorator) rather than only
 registering it, and if a host has nothing to plug in yet (no authentication for an authorization behavior), say so
 instead of leaving it out silently.

@@ -12,7 +12,7 @@ was checked with a small program, and the observed output is quoted.
 - **Types:** [1 Unions](#1-result-is-a-c-15-union) · [2 Structs](#2-results-are-readonly-record-structs) ·
   [3 Default is a failure](#3-a-default-result-is-a-failure) · [4 Value decided by IsSuccess](#4-the-union-case-is-decided-by-issuccess)
 - **API:** [5 Bind](#5-bind-not-then) · [6 No implicit operators on Result&lt;T&gt;](#6-no-user-defined-conversions-on-resultt) ·
-  [7 TryGetResultValue](#7-trygetresultvalue-and-hidden-union-members) · [8 IResultState](#8-iresultstate-not-iresult) ·
+  [7 TryGetResultValue](#7-trygetresultvalue-and-hidden-union-members) · [8 IAnyResult](#8-ianyresult-not-iresult) ·
   [9 IResultFactory](#9-iresultfactorytself-has-failure-but-no-success)
 - **Async:** [10 Task](#10-task-not-valuetask) · [11 Eager validation](#11-arguments-are-validated-eagerly) ·
   [12 Cancellation tokens](#12-cancellation-tokens-are-passed-by-closure) · [13 Sequential collections](#13-combineallasync-is-sequential) ·
@@ -73,7 +73,7 @@ equality for free, and no defensive copies.
 
 **Alternatives.** Classes would allocate for every result and could be `null`, which a result type should rule out.
 
-**Consequences.** Results stored as `IResultState` (for example in `Combine(IEnumerable<IResultState>)`) are boxed; the
+**Consequences.** Results stored as `IAnyResult` (for example in `Combine(IEnumerable<IAnyResult>)`) are boxed; the
 XML docs say so. Structs have a `default` value, which [3](#3-a-default-result-is-a-failure) deals with.
 
 ### 3. A default result is a failure
@@ -149,15 +149,24 @@ result.TryGetValue(out var user)   // error CS0121: the call is ambiguous
 **Consequences.** `Value` boxes value types; users never need it. Visual Studio ignores `EditorBrowsable` for project
 references in the same solution, so the hiding only shows for package consumers.
 
-### 8. IResultState, not IResult
+### 8. IAnyResult, not IResult
 
 **Context.** The common interface was first called `IResult`. ASP.NET Core's Web SDK imports
 `Microsoft.AspNetCore.Http`, whose `IResult` is the core Minimal API type, so any web project using both would hit
-CS0104 (ambiguous reference).
+CS0104 (ambiguous reference). Its first published name, `IResultState`, described what it holds rather than what it is
+for, and came with an `IResultState<T>` that added `ResultValue` and that no API of the library took.
 
-**Decision.** `IResultState` / `IResultState<T>`.
+**Decision.** `IAnyResult`: any result, whatever its value type, with `IsSuccess`, `IsFailure` and `Error`. It is what
+`Combine(IEnumerable<IAnyResult>)` and `CombineAll` take and what `IResultFactory<TSelf>` extends. There is no generic
+counterpart: code that knows the value type uses `Result<T>` itself.
 
-**Consequences.** Renamed before anything was published, so no compatibility cost.
+**Alternatives.** `IResultInterface` repeats what the `I` says; `IOutcome` brings a second word for the same thing;
+`IResultBase` is FluentResults' name. Keeping `IResultState` as an obsolete interface beside the new one would have
+needed a second set of `Combine` overloads, for a package with few users yet.
+
+**Consequences.** Renamed in 0.3.0, a binary breaking change allowed before 1.0 (`CompatibilitySuppressions.xml`
+records it for package validation): `IResultState` becomes `IAnyResult`, and `IResultState<T>` is removed. Code that
+only uses `Result`, `Result<T>` and `IResultFactory<TSelf>` is not affected.
 
 ### 9. IResultFactory&lt;TSelf&gt; has Failure but no Success
 
@@ -165,7 +174,7 @@ CS0104 (ambiguous reference).
 `Result<OrderId>`, `Result<UserDto>`… and must short-circuit with a failure of a type they only know as `TResponse`.
 
 **Decision.** `IResultFactory<out TSelf>` with `static abstract TSelf Failure(Error)`, implemented by both result types.
-It extends `IResultState`, so a behavior can also inspect `IsSuccess` / `Error` (for example to commit or roll back).
+It extends `IAnyResult`, so a behavior can also inspect `IsSuccess` / `Error` (for example to commit or roll back).
 
 **Alternatives.** Reflection or per-type behavior registrations. A generic `Success` was left out on purpose: a
 successful `Result<T>` needs a value the behavior does not have.

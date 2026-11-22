@@ -42,7 +42,7 @@ public class CombineAllTests
     [Fact]
     public void Enumerable_MixedTypes_GroupsEveryFailure()
     {
-        IResultState[] results =
+        IAnyResult[] results =
         [
             Result<string>.Failure(EmailRequired),
             Result<int>.Success(30),
@@ -66,8 +66,8 @@ public class CombineAllTests
     [Fact]
     public void Enumerable_NullArguments_Throw()
     {
-        Assert.Throws<ArgumentNullException>(() => Result.CombineAll((IEnumerable<IResultState>)null!));
-        Assert.Throws<ArgumentNullException>(() => Result.CombineAll(new IResultState[] { Result.Success(), null! }));
+        Assert.Throws<ArgumentNullException>(() => Result.CombineAll((IEnumerable<IAnyResult>)null!));
+        Assert.Throws<ArgumentNullException>(() => Result.CombineAll(new IAnyResult[] { Result.Success(), null! }));
     }
 
     [Fact]

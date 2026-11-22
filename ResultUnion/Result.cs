@@ -5,9 +5,13 @@ using System.Runtime.CompilerServices;
 
 namespace ResultUnion;
 
-/// <summary>The outcome of an operation that either succeeds or fails with an <see cref="ResultUnion.Error"/>.</summary>
-/// <remarks>Lets results of different value types be handled together, for example by <see cref="Result.Combine(IEnumerable{IResultState})"/>.</remarks>
-public interface IResultState
+/// <summary>Any result, whatever its value type: the outcome of an operation that either succeeds or fails with an <see cref="ResultUnion.Error"/>.</summary>
+/// <remarks>
+/// Lets results of different value types be handled together, for example by
+/// <see cref="Result.Combine(IEnumerable{IAnyResult})"/>, and lets generic code that knows a result only as a type
+/// parameter read its outcome (<see cref="IResultFactory{TSelf}"/> extends it).
+/// </remarks>
+public interface IAnyResult
 {
     /// <summary>Gets a value indicating whether the operation succeeded.</summary>
     bool IsSuccess { get; }
@@ -19,16 +23,6 @@ public interface IResultState
     /// <remarks>A <see langword="default"/>-constructed result is a failure carrying <see cref="Error.DefaultResult"/>.</remarks>
     /// <exception cref="InvalidOperationException">The result is a success.</exception>
     Error Error { get; }
-}
-
-/// <summary>The outcome of an operation that either succeeds with a <typeparamref name="T"/> value or fails with an <see cref="ResultUnion.Error"/>.</summary>
-/// <typeparam name="T">The type of the success value.</typeparam>
-public interface IResultState<out T> : IResultState
-    where T : notnull
-{
-    /// <summary>Gets the value produced by the operation.</summary>
-    /// <exception cref="InvalidOperationException">The result is a failure.</exception>
-    T ResultValue { get; }
 }
 
 /// <summary>Lets generic code create a failed result of a type it only knows as a type parameter.</summary>
@@ -48,7 +42,7 @@ public interface IResultState<out T> : IResultState
 /// generic code does not have. Success comes from the wrapped handler.
 /// </para>
 /// </remarks>
-public interface IResultFactory<out TSelf> : IResultState
+public interface IResultFactory<out TSelf> : IAnyResult
     where TSelf : IResultFactory<TSelf>
 {
     /// <summary>Creates a failed result carrying <paramref name="error"/>.</summary>
@@ -82,7 +76,7 @@ public interface IResultFactory<out TSelf> : IResultState
 /// </remarks>
 [Union]
 [DebuggerDisplay("{ToString(),nq}")]
-public readonly record struct Result<T> : IUnion, IResultState<T>, IResultFactory<Result<T>>
+public readonly record struct Result<T> : IUnion, IResultFactory<Result<T>>
     where T : notnull
 {
     private readonly T? _value;
@@ -130,7 +124,8 @@ public readonly record struct Result<T> : IUnion, IResultState<T>, IResultFactor
         return IsFailure;
     }
 
-    /// <inheritdoc/>
+    /// <summary>Gets the value produced by the operation.</summary>
+    /// <exception cref="InvalidOperationException">The result is a failure.</exception>
     /// <remarks>Named <c>ResultValue</c> because <see cref="Value"/> is the union's case, as required by <see cref="IUnion"/>.</remarks>
     public T ResultValue => IsSuccess
         ? _value!
@@ -538,7 +533,7 @@ public readonly partial record struct Result : IResultFactory<Result>
     /// <summary>Returns a success when every result succeeded; otherwise the first failure, in enumeration order.</summary>
     /// <remarks>Accepts <see cref="Result{T}"/> instances too, at the cost of boxing each one. Enumeration stops at the first failure.</remarks>
     /// <exception cref="ArgumentNullException"><paramref name="results"/> is <see langword="null"/>, or contains a <see langword="null"/> element before the first failure.</exception>
-    public static Result Combine(IEnumerable<IResultState> results)
+    public static Result Combine(IEnumerable<IAnyResult> results)
     {
         ArgumentNullException.ThrowIfNull(results);
 
@@ -582,7 +577,7 @@ public readonly partial record struct Result : IResultFactory<Result>
     /// several are grouped into <see cref="Error.Validation(IEnumerable{Error})"/>.
     /// </remarks>
     /// <exception cref="ArgumentNullException"><paramref name="results"/> is <see langword="null"/>, or contains a <see langword="null"/> element.</exception>
-    public static Result CombineAll(IEnumerable<IResultState> results)
+    public static Result CombineAll(IEnumerable<IAnyResult> results)
     {
         ArgumentNullException.ThrowIfNull(results);
 

@@ -29,7 +29,7 @@ public sealed class PlaceOrderHandler(IOrderRepository orders) : ICommandHandler
 ```
 
 `Result` and every `Result<T>` implement `IResultFactory<TSelf>`, which has one member, `static TSelf Failure(Error)`,
-and extends `IResultState` (`IsSuccess`, `IsFailure`, `Error`). So code that knows the response only as `TResponse`
+and extends `IAnyResult` (`IsSuccess`, `IsFailure`, `Error`). So code that knows the response only as `TResponse`
 can create a failure and read the outcome. There is no generic `Success`: a behavior never has the value a successful
 `Result<Guid>` would need, and it does not need one, because success always comes from the handler.
 

@@ -13,9 +13,16 @@ are in the diff of those files.
 
 #### Changed
 
+- **Breaking:** `IResultState` is renamed `IAnyResult`, and `Combine` / `CombineAll` take `IEnumerable<IAnyResult>`.
+  The members (`IsSuccess`, `IsFailure`, `Error`) are the same; replace the name.
 - `Result` and `Result<T>` compare by what they expose: the case, then the value of a success or the error of a
   failure. A `default` result now equals `Failure(Error.DefaultResult)` (`==`, `Equals` and `GetHashCode`); before, the
   record equality compared the fields, and the two were not equal.
+
+#### Removed
+
+- **Breaking:** `IResultState<T>`. No API of the library took it; use `Result<T>`, or `IAnyResult` for results of
+  different value types.
 
 ### ResultUnion (analyzers)
 

@@ -53,7 +53,7 @@ public class ResultTests
     [Fact]
     public void CombineEnumerable_AcceptsGenericResults()
     {
-        IResultState[] results = [Result.Success(), Result<int>.Success(1), Result<int>.Failure(Second), Result.Failure(First)];
+        IAnyResult[] results = [Result.Success(), Result<int>.Success(1), Result<int>.Failure(Second), Result.Failure(First)];
 
         Assert.Same(Second, Result.Combine(results).Error);
         Assert.True(Result.Combine([Result.Success(), Result<int>.Success(1)]).IsSuccess);
@@ -62,8 +62,8 @@ public class ResultTests
     [Fact]
     public void CombineEnumerable_NullArguments_Throw()
     {
-        Assert.Throws<ArgumentNullException>(() => Result.Combine((IEnumerable<IResultState>)null!));
-        Assert.Throws<ArgumentNullException>(() => Result.Combine(new IResultState[] { null! }));
+        Assert.Throws<ArgumentNullException>(() => Result.Combine((IEnumerable<IAnyResult>)null!));
+        Assert.Throws<ArgumentNullException>(() => Result.Combine(new IAnyResult[] { null! }));
     }
 
     [Fact]
