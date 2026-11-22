@@ -31,6 +31,9 @@ Three differences change how code reads, not only what it is called:
 - **Async is `Task`.** Every operation has an `…Async` form on `Task<Result<T>>`, so a chain has one `await` at its
   end, and the `CancellationToken` goes into the delegates by closure.
 
+What the move costs or saves at run time, for the same use case in each library, is in
+[Benchmarks](../BENCHMARKS.md#against-other-libraries).
+
 ## A value object
 
 With FluentResults, the code travels as metadata:

@@ -9,7 +9,7 @@ Time and allocations of ResultUnion, measured with BenchmarkDotNet. The benchmar
 | Machine | AMD Ryzen 9 7950X3D, Windows 11 |
 | Tool | BenchmarkDotNet 0.16.0-preview.2, out-of-process, default job, memory diagnoser |
 
-Run them yourself (about 25 minutes; `--filter '*Async*'` for one class):
+Run them yourself (about 30 minutes; `--filter '*Async*'` for one class):
 
 ```powershell
 dotnet run -c Release --project ResultUnion.Benchmarks -- --filter '*'
@@ -44,6 +44,9 @@ BenchmarkDotNet exits with 0 even when a benchmark fails; the project returns 1 
 - **A failure costs nanoseconds, an exception microseconds.** A cached catalog error is about 300× cheaper than
   `throw` + `catch`.
 - **A pipeline costs a few nanoseconds more than `if` code:** 10–13 ns against 7–8 ns for four steps.
+- **Against other libraries, ResultUnion and ErrorOr are in the same range, and FluentResults and exceptions are
+  not.** For one use case with every failure reported: 16–87 ns for ResultUnion, 11–35 ns for ErrorOr, 127–405 ns
+  for FluentResults (which allocates on success too), and about 930 ns for an exception at the first failure.
 - **Async chains allocate a task per step that creates a value.** With Runtime Async the plain `async` baseline
   allocates nothing, so a chain's 256 B is the library's own cost: small next to any real I/O (a database call is
   100,000+ ns), but visible in a tight loop.
@@ -98,6 +101,40 @@ dictionary; it is still about 25× cheaper than an exception.
 Failures allocate the grouped error (`Details`). The first measurement showed 24 B on the success path: the tuple
 `Map` and `Bind` wrapped the delegate in a lambda, which allocated a closure on every call. They now read the tuple
 directly.
+
+## Against other libraries
+
+The same use case written four times, each the way its library's documentation writes it: an email (needs an `@`)
+and a password (8 characters) validated together, with every failure reported. ResultUnion uses `CombineAll` and
+catalog errors (the email's with its value as an argument), FluentResults `Result.Merge`, ErrorOr a list of its
+`Error` structs, and the exception version throws at the first failure, since an exception cannot report both. The code is
+`ComparisonBenchmarks.cs`; FluentResults 4.0.0 and ErrorOr 2.1.1.
+
+| Input | ResultUnion | ErrorOr | FluentResults | Exceptions |
+|---|---:|---:|---:|---:|
+| valid | 17 ns, 80 B | 11 ns, 80 B | 127 ns, 848 B | 1.8 ns, 0 B |
+| one invalid (the password) | 16 ns, 112 B | 22 ns, 200 B | 312 ns, 1,640 B | 933 ns, 424 B |
+| two invalid | 87 ns, 632 B | 35 ns, 392 B | 405 ns, 2,280 B | 938 ns, 496 B |
+
+How to read it:
+
+- **Valid input.** The 80 B in ResultUnion and ErrorOr are the three records the use case creates (the email, the
+  password and the account); the libraries add nothing. The exception version creates no value objects and the JIT
+  removed its one allocation, so its 1.8 ns is the cost of two checks: the price of the Result pattern on success is
+  the 10–15 ns of building and combining results. FluentResults allocates its result objects and error lists on
+  success too.
+- **One failure.** A cached catalog error (`static readonly`) is free, so ResultUnion's failure costs about what its
+  success does; ErrorOr builds a list for the error.
+- **Two failures.** ResultUnion builds the email error with its argument (a dictionary: about 45 ns and 320 B on its
+  own, see [A failure against an exception](#a-failure-against-an-exception)) and a grouped error for the two. ErrorOr's
+  errors here carry no values. The argument is what lets a client translate the message
+  ([Translating error messages](articles/localization.md)), and its dictionary accounts for most of the 52 ns
+  between the two.
+- **Exceptions** cost about 900 ns per failure whatever the input, 10 to 60 times the results, and report only the
+  first failure.
+
+None of these numbers matter next to a database call (100,000 ns and more). They matter in a loop that validates many
+values, and there the difference that counts is between results of either kind and exceptions.
 
 ## Async chains, Runtime Async against state machines
 

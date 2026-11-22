@@ -13,6 +13,9 @@
 
   <ItemGroup>
     <PackageReference Include="BenchmarkDotNet" Version="0.16.0-preview.2" />
+    <!-- Only for ComparisonBenchmarks: the same use case written with each library. -->
+    <PackageReference Include="FluentResults" Version="4.0.0" />
+    <PackageReference Include="ErrorOr" Version="2.1.1" />
   </ItemGroup>
 
   <ItemGroup>
