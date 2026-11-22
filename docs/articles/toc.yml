@@ -12,3 +12,5 @@
   href: migration.md
 - name: Translating error messages
   href: localization.md
+- name: Seeing failures in telemetry
+  href: telemetry.md

@@ -32,7 +32,8 @@ public Result<User> Register(string? email, string? age) =>
   minutes.
 - [Guide](../../README.md): the types, pipelines, async, ASP.NET Core, gRPC, JSON, OpenTelemetry and DDD, with examples.
 - Articles: [EF Core](../articles/ef-core.md), [pipeline behaviors](../articles/pipeline-behaviors.md),
-  [testing](../articles/testing.md) and [translating error messages](../articles/localization.md).
+  [testing](../articles/testing.md), [translating error messages](../articles/localization.md) and
+  [seeing failures in telemetry](../articles/telemetry.md).
 - [Moving from FluentResults or ErrorOr](../articles/migration.md): the same code in each library, and how to move a
   feature at a time.
 - [Design decisions](../DESIGN.md): why the library is built this way, with the alternatives that were rejected.

@@ -662,6 +662,9 @@ service's span, which carries `grpc.status_code` and the same `resultunion.error
 `resultunion.errors` counts its failures by code; restart `grpcclient` from the dashboard for another round. The
 AppHost sets each demo's OTLP endpoint and service name; the demos' own OpenTelemetry setup is unchanged.
 
+What to look at in a dashboard, what to alert on, and how to test what a use case records:
+[Seeing failures in telemetry](docs/articles/telemetry.md).
+
 ## Testing: `ResultUnion.Testing`
 
 Assertions for tests of code that returns results, for any test framework. A success returns its value, a failure its
@@ -882,8 +885,9 @@ the result (`EnsureAsync`, `TapAsync`, `TapErrorAsync`) reuse their source task.
 
 New to the library? Start with [Getting started](docs/articles/getting-started.md), then the articles on
 [EF Core](docs/articles/ef-core.md), [pipeline behaviors](docs/articles/pipeline-behaviors.md),
-[testing](docs/articles/testing.md) and [translating error messages](docs/articles/localization.md). Coming from
-another Result library: [Moving from FluentResults or ErrorOr](docs/articles/migration.md).
+[testing](docs/articles/testing.md), [translating error messages](docs/articles/localization.md) and
+[seeing failures in telemetry](docs/articles/telemetry.md). Coming from another Result library:
+[Moving from FluentResults or ErrorOr](docs/articles/migration.md).
 
 This guide, the articles, the other pages in `docs/` and an API reference for the packages are also built as a website with DocFX
 (`docfx.json`, the landing page and navigation in `docs/site/`). How to build it locally and publish it on GitHub Pages:

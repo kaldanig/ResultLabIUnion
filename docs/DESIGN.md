@@ -504,6 +504,16 @@ OpenTelemetry API package would add a dependency to every consumer for no gain.
 attributes are namespaced (`resultunion.error.code`), so they never clash with the `error.type` that the HTTP and gRPC
 instrumentations set from the status code. The RU0001 analyzer treats `Record` on a variable like `Tap`.
 
+**Namespaces.** `Record` and `RecordAsync` (`ResultTelemetryExtensions`) are in the namespace `ResultUnion`, although
+the file is in `Diagnostics/`; `ResultTelemetry` and its constants are in `ResultUnion.Diagnostics`. The rule is the
+one the library follows everywhere: an extension used in a pipeline is in `ResultUnion`, where `Bind`, `Map` and the
+async extensions in `Async/` are, so `using ResultUnion;` is enough to end a pipeline with `.RecordAsync(...)`. A type
+that code names (`ResultTelemetry.MeterName` in the OpenTelemetry setup, `ResultTelemetry.TagActivity`, the JSON
+converters in `ResultUnion.Serialization`) is in the namespace of its folder, which is used in a few places at startup
+or at a boundary. A separate `using ResultUnion.Diagnostics;` for `RecordAsync` would be forgotten in the handlers
+that need it, and the method would look missing. Both namespaces are part of the 1.0 API
+([44](#44-what-1x-promises)).
+
 ## DDD
 
 ### 28. Error catalogs per domain concept
