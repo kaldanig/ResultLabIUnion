@@ -9,6 +9,11 @@ are in the diff of those files.
 
 ## [Unreleased]
 
+## [1.0.0-rc.2] - 2026-11-22
+
+The public API of the libraries is the same as in 1.0.0-rc.1; this candidate adds the item templates and a code fix,
+so that they are tried before 1.0.0.
+
 ### ResultUnion.Templates
 
 - `dotnet new resultunion-api --database sqlite`: the products are stored in SQLite through EF Core, with the value
@@ -36,7 +41,6 @@ are in the diff of those files.
   `<entity>.changed_concurrently` (`ErrorType.Concurrency`, 409). The store checks the version as it writes (in
   memory under its lock, in SQLite with `ExecuteUpdate`/`ExecuteDelete` filtered on the version).
   `resultunion-feature-tests --crud` tests both paths.
-- CI runs the template test on Windows too, against the packages of the same run.
 - In Visual Studio's "Create a new project" dialog, `resultunion-api` shows its two options (the database and leaving
   out the tests) with names and descriptions; every template's options have display names for IDEs.
 
@@ -277,7 +281,8 @@ The first release. Requires .NET 11 (C# 15 unions).
 - `RpcException.ToError()` for clients, restoring type, code, message, arguments and field violations.
 - Failures that leave a service tag the call's span with the error code and category.
 
-[Unreleased]: https://github.com/kaldanig/ResultLabIUnion/compare/v1.0.0-rc.1...HEAD
+[Unreleased]: https://github.com/kaldanig/ResultLabIUnion/compare/v1.0.0-rc.2...HEAD
+[1.0.0-rc.2]: https://github.com/kaldanig/ResultLabIUnion/compare/v1.0.0-rc.1...v1.0.0-rc.2
 [1.0.0-rc.1]: https://github.com/kaldanig/ResultLabIUnion/compare/v0.5.0...v1.0.0-rc.1
 [0.5.0]: https://github.com/kaldanig/ResultLabIUnion/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/kaldanig/ResultLabIUnion/compare/v0.3.0...v0.4.0

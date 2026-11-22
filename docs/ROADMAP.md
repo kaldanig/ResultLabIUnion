@@ -12,6 +12,10 @@ ResultUnion.Http, ResultUnion.Testing and ResultUnion.Templates) and the outcome
 Grpc.StatusProto and FluentValidation. Runtime Async, which the libraries are compiled with, is a supported .NET 11
 feature, no longer a preview.
 
+1.0.0-rc.2 has the same API as rc.1. It adds the item templates (`resultunion-valueobject`, `resultunion-feature`,
+`resultunion-feature-tests`), `--database sqlite` for `resultunion-api` and a code fix for RU0005, so that they are
+tried before 1.0.0.
+
 Before 1.0 a minor version may contain breaking changes; each one is listed under **Changed** or **Removed** in the
 changelog, with an "Upgrading from" section for the version before.
 
@@ -24,8 +28,8 @@ changelog, with an "Upgrading from" section for the version before.
    RU0009 and RU0010 are warnings, RU0006–RU0008 suggestions (Info). An ID is never reused for another rule.
 3. ~~**Write the compatibility promise into the documentation**~~. Done: this page's "Versioning in 1.x" section,
    linked from the README and CONTRIBUTING, and the release checklist in RELEASING.md.
-4. **Release 1.0.0-rc.1** with the deprecated members removed. It stays out for at least four weeks; issues that need
-   an API change go into a further release candidate.
+4. ~~**Release 1.0.0-rc.1**~~ with the deprecated members removed. Done on 2026-11-22, followed by 1.0.0-rc.2. It
+   stays out for at least four weeks; issues that need an API change go into a further release candidate.
 5. **Release 1.0.0** from the last release candidate when no issue needs an API change. The package validation
    baseline then becomes 1.0.0, and from that release on, a CP error in `dotnet pack` means the change waits for 2.0.
 
