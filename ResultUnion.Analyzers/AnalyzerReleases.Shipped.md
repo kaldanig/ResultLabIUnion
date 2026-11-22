@@ -23,3 +23,11 @@ RU0006 | Usage | Info | Error created outside an error catalog
 RU0007 | Usage | Info | Field set where the field name is not known
 RU0008 | Usage | Info | ValueTask of a Result
 RU0009 | Usage | Warning | Result<Error>, an error as a success value
+
+## Release 0.4.0
+
+### New Rules
+
+Rule ID | Category | Severity | Notes
+--------|----------|----------|-------
+RU0010 | Usage | Warning | A Result written as or read from JSON

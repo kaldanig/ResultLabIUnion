@@ -9,6 +9,19 @@ are in the diff of those files.
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-11-22
+
+### Upgrading from 0.3.0
+
+- **A result is no longer written as JSON.** Serializing or deserializing a `Result` or `Result<T>` throws
+  `NotSupportedException`. If an endpoint returns a result directly, it used to send a failure as `200 OK` with the
+  error as the body; now the request fails with a 500 and a message that says to use `ToHttpResult`. Find these places
+  by building: RU0010 reports them, and its code fix adds `.ToHttpResult()` / `.ToHttpResultAsync()`. Where a result
+  went into a message or a cache, send the value or the `Error` instead; `Error` serializes as before.
+- **One new warning:** RU0010. A project with `TreatWarningsAsErrors` fails on it until the places it reports are
+  fixed; each one is a response or message that did not say what the code meant.
+- Nothing else changes: the public API is the same as in 0.3.0.
+
 ### ResultUnion
 
 #### Changed
@@ -160,7 +173,8 @@ The first release. Requires .NET 11 (C# 15 unions).
 - `RpcException.ToError()` for clients, restoring type, code, message, arguments and field violations.
 - Failures that leave a service tag the call's span with the error code and category.
 
-[Unreleased]: https://github.com/kaldanig/ResultLabIUnion/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/kaldanig/ResultLabIUnion/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/kaldanig/ResultLabIUnion/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/kaldanig/ResultLabIUnion/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/kaldanig/ResultLabIUnion/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/kaldanig/ResultLabIUnion/releases/tag/v0.1.0
