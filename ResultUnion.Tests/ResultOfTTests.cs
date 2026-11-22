@@ -26,6 +26,31 @@ public class ResultOfTTests
         Assert.Throws<InvalidOperationException>(() => result.ResultValue);
     }
 
+    // A shared exception instance would share its stack trace and Data between throws, across threads too.
+    [Fact]
+    public void ResultValue_OnFailure_ThrowsANewExceptionEachTime()
+    {
+        var result = Result<int>.Failure(NotFound);
+
+        var first = Assert.Throws<InvalidOperationException>(() => result.ResultValue);
+        var second = Assert.Throws<InvalidOperationException>(() => result.ResultValue);
+
+        Assert.NotSame(first, second);
+        Assert.Equal("Cannot access 'ResultValue' when the 'Result' is a failure.", first.Message);
+    }
+
+    [Fact]
+    public void Error_OnSuccess_ThrowsANewExceptionEachTime()
+    {
+        var result = Result<int>.Success(5);
+
+        var first = Assert.Throws<InvalidOperationException>(() => result.Error);
+        var second = Assert.Throws<InvalidOperationException>(() => result.Error);
+
+        Assert.NotSame(first, second);
+        Assert.Equal("Cannot access 'Error' when the 'Result' is a success.", first.Message);
+    }
+
     [Fact]
     public void Default_IsFailureWithDefaultResultError()
     {
@@ -38,7 +63,8 @@ public class ResultOfTTests
     [Fact]
     public void Constructor_NullValue_Throws()
     {
-        Assert.Throws<ArgumentNullException>(() => new Result<string>((string)null!));
+        var exception = Assert.Throws<ArgumentNullException>(() => new Result<string>((string)null!));
+        Assert.Equal("value", exception.ParamName);
     }
 
     [Fact]

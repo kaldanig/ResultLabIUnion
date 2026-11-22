@@ -17,6 +17,18 @@ public class ResultTests
     }
 
     [Fact]
+    public void Error_OnSuccess_ThrowsANewExceptionEachTime()
+    {
+        var result = Result.Success();
+
+        var first = Assert.Throws<InvalidOperationException>(() => result.Error);
+        var second = Assert.Throws<InvalidOperationException>(() => result.Error);
+
+        Assert.NotSame(first, second);
+        Assert.Equal("Cannot access 'Error' when the 'Result' is a success.", first.Message);
+    }
+
+    [Fact]
     public void Failure_ExposesError()
     {
         Result result = First;
