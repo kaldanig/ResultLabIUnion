@@ -47,6 +47,8 @@ BenchmarkDotNet exits with 0 even when a benchmark fails; the project returns 1 
 - **Against other libraries, ResultUnion and ErrorOr are in the same range, and FluentResults and exceptions are
   not.** For one use case with every failure reported: 16–87 ns for ResultUnion, 11–35 ns for ErrorOr, 127–405 ns
   for FluentResults (which allocates on success too), and about 930 ns for an exception at the first failure.
+- **A failed gRPC call costs about a microsecond more on each side.** Building the rich status and reading it back
+  take 0.6–1.3 µs and 2–5 KB per failure, with every field reported; a successful call pays nothing.
 - **Async chains allocate a task per step that creates a value.** With Runtime Async the plain `async` baseline
   allocates nothing, so a chain's 256 B is the library's own cost: small next to any real I/O (a database call is
   100,000+ ns), but visible in a tight loop.
@@ -135,6 +137,23 @@ How to read it:
 
 None of these numbers matter next to a database call (100,000 ns and more). They matter in a loop that validates many
 values, and there the difference that counts is between results of either kind and exceptions.
+
+## gRPC errors
+
+A failure that leaves a gRPC service becomes a rich status (`google.rpc.Status` with an `ErrorInfo` and, for
+validation, a `BadRequest`), serialized into the call's trailers, and `ToError()` reads it back on the client. The code
+is `GrpcMappingBenchmarks.cs`. Unlike the rest of this page, these numbers are from a run of that class alone, on the
+same machine, on 2026-11-23.
+
+| Failure | `ToRpcStatus` | `ToRpcException` (service) | `ToError` (client) |
+|---|---:|---:|---:|
+| not found, one argument | 375 ns, 1.3 KB | 611 ns, 2.2 KB | 598 ns, 2.6 KB |
+| two invalid fields, with arguments | 914 ns, 3.1 KB | 1,263 ns, 4.5 KB | 1,067 ns, 5.0 KB |
+
+`ToRpcException` is what `GetValueOrThrowRpcAsync` does with a failure: the status and its serialization into the
+trailers. The cost grows with what the error carries, since every argument and field travels in the details, and it is
+paid only for a failure. Next to the call itself, a network round trip with HTTP/2 framing, it is small; it matters
+only for a service that fails most of its calls in a tight loop.
 
 ## Async chains, Runtime Async against state machines
 

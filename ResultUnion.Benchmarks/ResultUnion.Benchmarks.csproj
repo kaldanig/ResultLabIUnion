@@ -20,6 +20,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ResultUnion\ResultUnion.csproj" />
+    <ProjectReference Include="..\ResultUnion.Grpc\ResultUnion.Grpc.csproj" />
   </ItemGroup>
 
 </Project>

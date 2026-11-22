@@ -89,7 +89,9 @@ Where an error leaves some other way, such as a message consumer, tag the span y
 
 **Which errors, how often.** Group `resultunion.errors` by `error.type`. A new code at the top after a release is
 usually the first sign of a change in behavior; filter by `resultunion.operation` to see one use case. In Prometheus,
-where the exporter turns the name into `resultunion_errors_total` and the attributes into labels:
+which turns the name into `resultunion_errors_total` and the attributes into the labels `error_type`,
+`resultunion_error_category` and `resultunion_operation` (as Prometheus 3's OTLP receiver does with its default
+settings):
 
 ```text
 sum by (error_type) (rate(resultunion_errors_total[5m]))
