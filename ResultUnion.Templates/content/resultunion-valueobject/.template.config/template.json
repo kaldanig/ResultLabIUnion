@@ -1,10 +1,13 @@
 {
   "$schema": "http://json.schemastore.org/template",
   "author": "Giorgi Kaldani",
-  "classifications": [ "Code", "Result pattern" ],
+  "classifications": [
+    "Code",
+    "Result pattern"
+  ],
   "identity": "ResultUnion.Templates.ValueObject",
   "name": "ResultUnion value object",
-  "description": "A string value object with its error catalog: Create returns Result<T>, the codes are declared once, and the arguments are in the errors for clients that translate them.",
+  "description": "A value object with its error catalog: Create returns Result<T>, the codes are declared once, and the arguments are in the errors for clients that translate them. A string with a maximum length, or an int or decimal with a range.",
   "shortName": "resultunion-valueobject",
   "sourceName": "ValueName",
   "tags": {
@@ -31,12 +34,55 @@
       },
       "replaces": "TargetNamespace"
     },
+    "ValueType": {
+      "type": "parameter",
+      "datatype": "choice",
+      "defaultValue": "string",
+      "description": "What the value object holds.",
+      "replaces": "VALUE_TYPE",
+      "choices": [
+        {
+          "choice": "string",
+          "description": "A string: required, trimmed, at most --max-length characters."
+        },
+        {
+          "choice": "int",
+          "description": "An int from --min to --max."
+        },
+        {
+          "choice": "decimal",
+          "description": "A decimal from --min to --max."
+        }
+      ]
+    },
+    "IsString": {
+      "type": "computed",
+      "value": "(ValueType == \"string\")"
+    },
+    "IsDecimal": {
+      "type": "computed",
+      "value": "(ValueType == \"decimal\")"
+    },
     "MaxLength": {
       "type": "parameter",
       "datatype": "integer",
       "defaultValue": "100",
-      "description": "The most characters a value may have.",
+      "description": "The most characters a string value may have.",
       "replaces": "VALUE_MAX_LENGTH"
+    },
+    "Min": {
+      "type": "parameter",
+      "datatype": "text",
+      "defaultValue": "1",
+      "description": "The smallest int or decimal value allowed, a C# number such as 1 or 0.01.",
+      "replaces": "VALUE_LOWEST"
+    },
+    "Max": {
+      "type": "parameter",
+      "datatype": "text",
+      "defaultValue": "1000",
+      "description": "The largest int or decimal value allowed.",
+      "replaces": "VALUE_HIGHEST"
     },
     "Code": {
       "type": "derived",
@@ -52,10 +98,32 @@
     }
   },
   "forms": {
-    "kebab": { "identifier": "kebabCase" },
-    "dashToUnderscore": { "identifier": "replace", "pattern": "-", "replacement": "_" },
-    "dashToSpace": { "identifier": "replace", "pattern": "-", "replacement": " " },
-    "snakeCase": { "identifier": "chain", "steps": [ "kebab", "dashToUnderscore" ] },
-    "words": { "identifier": "chain", "steps": [ "kebab", "dashToSpace" ] }
+    "kebab": {
+      "identifier": "kebabCase"
+    },
+    "dashToUnderscore": {
+      "identifier": "replace",
+      "pattern": "-",
+      "replacement": "_"
+    },
+    "dashToSpace": {
+      "identifier": "replace",
+      "pattern": "-",
+      "replacement": " "
+    },
+    "snakeCase": {
+      "identifier": "chain",
+      "steps": [
+        "kebab",
+        "dashToUnderscore"
+      ]
+    },
+    "words": {
+      "identifier": "chain",
+      "steps": [
+        "kebab",
+        "dashToSpace"
+      ]
+    }
   }
 }

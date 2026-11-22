@@ -68,6 +68,86 @@ public sealed class ValueObjectTemplateTests
 
     [Fact]
     public void The_default_length_is_100() => Sku.Create(new string('a', 101)).ShouldFail("sku.too_long");
+
+    [Fact]
+    public void An_int_is_in_its_range()
+    {
+        Assert.Equal(99, Quantity.Create(99).ShouldSucceed().Value);
+        Quantity.Create(null).ShouldFail("quantity.required");
+        Quantity.Create(100).ShouldFail("quantity.out_of_range").ShouldHaveArgument("max", 99);
+    }
+
+    [Fact]
+    public void A_decimal_is_in_its_range()
+    {
+        Assert.Equal(0.01m, UnitPrice.Create(0.01m).ShouldSucceed().Value);
+        UnitPrice.Create(0m).ShouldFail("unit_price.out_of_range").ShouldHaveArgument("min", 0.01m);
+    }
+}
+EOF
+
+# The feature template, registered in Program.cs as its post-action asks, and called over HTTP.
+(cd "$work/Shop/src/Shop" \
+  && dotnet new resultunion-valueobject -n Quantity --value-type int --max 99 --debug:custom-hive "$hive" \
+  && dotnet new resultunion-valueobject -n UnitPrice --value-type decimal --min 0.01 --max 100000 --debug:custom-hive "$hive" \
+  && dotnet new resultunion-feature -n OrderLine --debug:custom-hive "$hive" \
+  && dotnet new resultunion-feature -n Category --plural Categories --debug:custom-hive "$hive")
+for file in OrderLines/OrderLine.cs OrderLines/OrderLineName.cs OrderLines/OrderLineRepository.cs OrderLines/OrderLineService.cs \
+            OrderLines/OrderLineFeature.cs Categories/CategoryFeature.cs; do
+  [ -e "$work/Shop/src/Shop/$file" ] || { echo "::error::resultunion-feature did not create $file"; exit 1; }
+done
+sed -i 's/^builder.Services.AddScoped<ProductService>();/&\nbuilder.Services.AddOrderLines();\nbuilder.Services.AddCategories();/; s/^app.MapProducts();/&\napp.MapOrderLines();\napp.MapCategories();/' \
+  "$work/Shop/src/Shop/Program.cs"
+sed -i 's/^using Shop.Products;/&\nusing Shop.Categories;\nusing Shop.OrderLines;/' "$work/Shop/src/Shop/Program.cs"
+cat > "$work/Shop/tests/Shop.Tests/FeatureTemplateTests.cs" <<'EOF'
+using System.Net;
+using System.Net.Http.Json;
+using System.Text.Json;
+using Microsoft.AspNetCore.Mvc.Testing;
+
+namespace Shop.Tests;
+
+public sealed class FeatureTemplateTests(WebApplicationFactory<Program> factory) : IClassFixture<WebApplicationFactory<Program>>
+{
+    private static CancellationToken Ct => TestContext.Current.CancellationToken;
+
+    private readonly HttpClient _client = factory.CreateClient();
+
+    [Fact]
+    public async Task A_created_entity_is_found_and_its_name_is_then_taken()
+    {
+        var name = $"Line {Guid.NewGuid()}";
+        var created = await _client.PostAsJsonAsync("/order-lines", new { name }, Ct);
+        Assert.Equal(HttpStatusCode.Created, created.StatusCode);
+
+        var found = await _client.GetAsync(created.Headers.Location, Ct);
+        Assert.Equal(name, (await found.Content.ReadFromJsonAsync<JsonElement>(Ct)).GetProperty("name").GetString());
+
+        var again = await _client.PostAsJsonAsync("/order-lines", new { name = name.ToUpperInvariant() }, Ct);
+        Assert.Equal(HttpStatusCode.Conflict, again.StatusCode);
+        Assert.Equal("order_line.name_taken", await CodeOf(again));
+    }
+
+    [Fact]
+    public async Task An_empty_name_is_a_validation_problem()
+    {
+        var response = await _client.PostAsJsonAsync("/categories", new { name = " " }, Ct);
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        Assert.Equal("category_name.required", await CodeOf(response));
+    }
+
+    [Fact]
+    public async Task A_missing_entity_is_404()
+    {
+        var response = await _client.GetAsync($"/categories/{Guid.NewGuid()}", Ct);
+
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+        Assert.Equal("category.not_found", await CodeOf(response));
+    }
+
+    private static async Task<string?> CodeOf(HttpResponseMessage response) =>
+        (await response.Content.ReadFromJsonAsync<JsonElement>(Ct)).GetProperty("code").GetString();
 }
 EOF
 (cd "$work/Shop" && dotnet build -warnaserror && dotnet test)

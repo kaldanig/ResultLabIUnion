@@ -25,3 +25,14 @@ dotnet new resultunion-valueobject -n CustomerEmail --max-length 254
 `resultunion-valueobject` adds a string value object to an existing project: `Create` returns `Result<T>`, and its
 `Errors` catalog declares `customer_email.required` and `customer_email.too_long` (with the `length` and `maxLength`
 arguments). The namespace is the project's `RootNamespace`, read from a restored project; `--namespace` sets another.
+`--value-type int` or `--value-type decimal` makes a number from `--min` to `--max` instead, with
+`<name>.out_of_range`.
+
+```powershell
+dotnet new resultunion-feature -n OrderLine
+```
+
+`resultunion-feature` adds a feature in the shape of the products to a Minimal API project, in the folder
+`OrderLines/`: the entity and its name with error catalogs, an in-memory repository, a service whose use cases are
+`Result` pipelines, and endpoints at `/order-lines`. Register it in `Program.cs` with `builder.Services.AddOrderLines()`
+and `app.MapOrderLines()`. `--plural Categories` sets the plural where adding an s is wrong.

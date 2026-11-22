@@ -18,7 +18,14 @@ are in the diff of those files.
   case adds the product with one `EnsureAsync`.
 - An item template, `dotnet new resultunion-valueobject -n CustomerEmail`: a string value object with its `Errors`
   catalog in an existing project. The codes and messages come from the name (`customer_email.required`), the
-  namespace from the project's `RootNamespace` or `--namespace`, the limit from `--max-length`.
+  namespace from the project's `RootNamespace` or `--namespace`, the limit from `--max-length`. `--value-type int` or
+  `decimal` makes a number with a range instead (`--min`, `--max`, `quantity.out_of_range` with `value`, `min` and
+  `max`).
+- An item template, `dotnet new resultunion-feature -n OrderLine`: a feature in the shape of the products, in its own
+  folder (`OrderLines/`): an entity and its name as value objects with catalogs (`order_line.not_found`,
+  `order_line.name_taken`, `order_line_name.required`), an in-memory repository, a service of `Result` pipelines and
+  endpoints at `/order-lines`, registered with `AddOrderLines()` and `MapOrderLines()`. `--plural` sets the plural
+  when adding an s is wrong.
 
 ### ResultUnion (analyzers)
 

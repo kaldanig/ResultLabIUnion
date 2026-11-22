@@ -8,6 +8,18 @@
     "MaxLength": {
       "longName": "max-length",
       "shortName": ""
+    },
+    "ValueType": {
+      "longName": "value-type",
+      "shortName": ""
+    },
+    "Min": {
+      "longName": "min",
+      "shortName": ""
+    },
+    "Max": {
+      "longName": "max",
+      "shortName": ""
     }
   }
 }

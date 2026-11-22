@@ -1,0 +1,103 @@
+{
+  "$schema": "http://json.schemastore.org/template",
+  "author": "Giorgi Kaldani",
+  "classifications": [ "Web", "WebAPI", "Code", "Result pattern" ],
+  "identity": "ResultUnion.Templates.Feature",
+  "name": "ResultUnion feature",
+  "description": "A feature for a Minimal API in the shape of resultunion-api's products: an entity and a value object with error catalogs, a repository, a service whose use cases are Result pipelines, and endpoints that return problem responses.",
+  "shortName": "resultunion-feature",
+  "sourceName": "Widget",
+  "tags": {
+    "language": "C#",
+    "type": "item"
+  },
+  "symbols": {
+    "Namespace": {
+      "type": "parameter",
+      "datatype": "text",
+      "description": "The namespace the feature's folder goes under. By default the project's root namespace."
+    },
+    "RootNamespace": {
+      "type": "bind",
+      "binding": "msbuild:RootNamespace",
+      "defaultValue": "MyApp"
+    },
+    "TargetNamespace": {
+      "type": "generated",
+      "generator": "coalesce",
+      "parameters": {
+        "sourceVariableName": "Namespace",
+        "fallbackVariableName": "RootNamespace"
+      },
+      "replaces": "TargetNamespace"
+    },
+    "Plural": {
+      "type": "parameter",
+      "datatype": "text",
+      "description": "The plural of the name, for the folder, the namespace, the route and the metrics. By default the name with an s."
+    },
+    "DefaultPlural": {
+      "type": "derived",
+      "valueSource": "name",
+      "valueTransform": "addS"
+    },
+    "PluralName": {
+      "type": "generated",
+      "generator": "coalesce",
+      "parameters": {
+        "sourceVariableName": "Plural",
+        "fallbackVariableName": "DefaultPlural"
+      },
+      "replaces": "Gizmos",
+      "fileRename": "Gizmos"
+    },
+    "EntityCode": {
+      "type": "derived",
+      "valueSource": "name",
+      "valueTransform": "snakeCase",
+      "replaces": "ENTITY_CODE"
+    },
+    "EntityWords": {
+      "type": "derived",
+      "valueSource": "name",
+      "valueTransform": "words",
+      "replaces": "ENTITY_WORDS"
+    },
+    "PluralCode": {
+      "type": "derived",
+      "valueSource": "PluralName",
+      "valueTransform": "snakeCase",
+      "replaces": "PLURAL_CODE"
+    },
+    "PluralRoute": {
+      "type": "derived",
+      "valueSource": "PluralName",
+      "valueTransform": "kebab",
+      "replaces": "PLURAL_ROUTE"
+    },
+    "PluralWords": {
+      "type": "derived",
+      "valueSource": "PluralName",
+      "valueTransform": "words",
+      "replaces": "ENTITY_PLURAL_WORDS"
+    }
+  },
+  "forms": {
+    "addS": { "identifier": "replace", "pattern": "$", "replacement": "s" },
+    "kebab": { "identifier": "kebabCase" },
+    "dashToUnderscore": { "identifier": "replace", "pattern": "-", "replacement": "_" },
+    "dashToSpace": { "identifier": "replace", "pattern": "-", "replacement": " " },
+    "snakeCase": { "identifier": "chain", "steps": [ "kebab", "dashToUnderscore" ] },
+    "words": { "identifier": "chain", "steps": [ "kebab", "dashToSpace" ] }
+  },
+  "postActions": [
+    {
+      "actionId": "AC1156F7-BB77-4DB8-B28F-24EEBCCA1E5C",
+      "description": "Register the feature in Program.cs.",
+      "manualInstructions": [
+        { "text": "Call the two methods of the new ...Feature class in Program.cs: builder.Services.Add<Plural>() and app.Map<Plural>()." }
+      ],
+      "continueOnError": true
+    }
+  ]
+}

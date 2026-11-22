@@ -169,12 +169,22 @@ status of its `ErrorType`. `ProducesErrors` documents those responses in OpenAPI
 
 ## Adding a feature of your own
 
-Copy the shape of `Products` for each new concept, say `Orders`:
+Copy the shape of `Products` for each new concept, say `Orders`. The package's feature template writes that shape for
+you, in the folder `Orders/` of the current project:
+
+```powershell
+dotnet new resultunion-feature -n Order
+```
+
+It creates `Order` with `not_found` and `name_taken`, `OrderName`, `IOrderRepository` with an in-memory store,
+`OrderService` (create and find) and endpoints at `/orders`; register them in `Program.cs` with
+`builder.Services.AddOrders()` and `app.MapOrders()`. `--plural Categories` sets the plural where adding an s is wrong.
+Then grow it step by step:
 
 1. **Value objects** for the inputs that have rules (`Quantity`, `OrderNote`), each with its `Errors` catalog and a
    `Create` that returns a result. An input with a rule is a value object even when it is a single string; the entity
-   then takes only validated parts. The package's item template writes a string one in the shape of `ProductName`,
-   in the current folder:
+   then takes only validated parts. The value object template writes one in the shape of `ProductName`, in the
+   current folder:
 
    ```powershell
    dotnet new resultunion-valueobject -n OrderNote --max-length 500
@@ -182,8 +192,9 @@ Copy the shape of `Products` for each new concept, say `Orders`:
 
    The codes and messages come from the name (`order_note.required`, `order_note.too_long`, "The order note is
    required."), and the namespace is the project's `RootNamespace`. That namespace is read from a restored project;
-   in a new project, or for a subfolder, pass `--namespace Shop.Orders`. Then change the rules to what the value
-   needs.
+   in a new project, or for a subfolder, pass `--namespace Shop.Orders`. A number takes `--value-type int` or
+   `decimal` with `--min` and `--max` (`dotnet new resultunion-valueobject -n Quantity --value-type int --max 99`,
+   which fails with `quantity.out_of_range`). Then change the rules to what the value needs.
 2. **The entity** (`Order`) with its own catalog for the errors about it: `not_found`, and the domain rules
    (`order.already_shipped` as a `BusinessRule`, a conflict as `Conflict`).
 3. **A repository interface** that returns `null` for a missing entity; the service turns that into the catalog error

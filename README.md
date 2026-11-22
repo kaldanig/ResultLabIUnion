@@ -684,7 +684,10 @@ warnings as errors and runs their tests.
 
 In an existing project, `dotnet new resultunion-valueobject -n CustomerEmail` adds a string value object in the same
 shape as `ProductName`: its codes (`customer_email.required`, `customer_email.too_long`) and messages come from the
-name, the namespace from the project (`--namespace` sets another), and `--max-length` sets the limit (100 by default).
+name, the namespace from the project (`--namespace` sets another), and `--max-length` sets the limit (100 by default);
+`--value-type int` or `decimal` makes a number with a range (`--min`, `--max`). `dotnet new resultunion-feature -n
+OrderLine` adds a whole feature in that shape, in `OrderLines/`, with endpoints at `/order-lines` that `AddOrderLines()`
+and `MapOrderLines()` register.
 
 A walk-through of the generated code, the responses it sends and how to add a feature of your own:
 [Starting a project from the template](docs/articles/templates.md).
