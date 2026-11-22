@@ -11,10 +11,7 @@ public sealed class ProductService(IProductRepository products)
                 ProductName.Create(command.Name).MapError(e => e.WithField("name")),
                 Price.Create(command.Price).MapError(e => e.WithField("price")))
             .Map(Product.Create)                                                // (name, price) => Product
-            .EnsureAsync(
-                async product => !await products.NameExistsAsync(product.Name, ct),
-                product => Product.Errors.NameTaken(product.Name))
-            .TapAsync(product => products.AddAsync(product, ct))
+            .EnsureAsync(product => products.AddAsync(product, ct))             // a taken name fails here
             .RecordAsync("products.create");                                    // failures counted by code
 
     public Task<Result<Product>> FindAsync(Guid id, CancellationToken ct) =>

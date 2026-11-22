@@ -1,3 +1,7 @@
+#if (Sqlite)
+using Microsoft.EntityFrameworkCore;
+using ResultUnionApi.Data;
+#endif
 using ResultUnionApi.Products;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -5,10 +9,21 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddOpenApi();
 builder.Services.AddProblemDetails();                   // unhandled exceptions become problem responses too
 
+#if (Sqlite)
+builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlite(builder.Configuration.GetConnectionString("Products")));
+builder.Services.AddScoped<IProductRepository, EfProductRepository>();
+#else
 builder.Services.AddSingleton<IProductRepository, InMemoryProductRepository>();
+#endif
 builder.Services.AddScoped<ProductService>();
 
 var app = builder.Build();
+#if (Sqlite)
+
+// Creates the database on the first start. A real application uses migrations instead (dotnet ef migrations add).
+using (var scope = app.Services.CreateScope())
+    scope.ServiceProvider.GetRequiredService<AppDbContext>().Database.EnsureCreated();
+#endif
 
 app.UseExceptionHandler();
 

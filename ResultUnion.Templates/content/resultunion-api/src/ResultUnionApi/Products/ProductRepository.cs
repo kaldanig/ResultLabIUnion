@@ -1,31 +1,37 @@
-using System.Collections.Concurrent;
-
 namespace ResultUnionApi.Products;
 
-/// <summary>Where products are stored. A lookup returns <see langword="null"/>; the service turns that into an error.</summary>
+/// <summary>
+/// Where products are stored. A lookup returns <see langword="null"/>, which the service turns into an error; adding a
+/// product whose name is taken is the store's answer, a failure with <see cref="Product.Errors.NameTaken"/>.
+/// </summary>
 public interface IProductRepository
 {
     Task<Product?> FindAsync(Guid id, CancellationToken ct);
 
-    Task<bool> NameExistsAsync(ProductName name, CancellationToken ct);
-
-    Task AddAsync(Product product, CancellationToken ct);
+    Task<Result> AddAsync(Product product, CancellationToken ct);
 }
 
-/// <summary>Keeps products in memory; replace it with a database (EF Core, Dapper, …) and keep the interface.</summary>
+/// <summary>Keeps products in memory, for a start or for tests; a database goes behind the same interface.</summary>
 public sealed class InMemoryProductRepository : IProductRepository
 {
-    private readonly ConcurrentDictionary<Guid, Product> _products = new();
+    private readonly Dictionary<Guid, Product> _products = [];
+    private readonly Lock _gate = new();
 
-    public Task<Product?> FindAsync(Guid id, CancellationToken ct) =>
-        Task.FromResult(_products.GetValueOrDefault(id));
-
-    public Task<bool> NameExistsAsync(ProductName name, CancellationToken ct) =>
-        Task.FromResult(_products.Values.Any(p => string.Equals(p.Name.Value, name.Value, StringComparison.OrdinalIgnoreCase)));
-
-    public Task AddAsync(Product product, CancellationToken ct)
+    public Task<Product?> FindAsync(Guid id, CancellationToken ct)
     {
-        _products[product.Id] = product;
-        return Task.CompletedTask;
+        lock (_gate)
+            return Task.FromResult(_products.GetValueOrDefault(id));
+    }
+
+    public Task<Result> AddAsync(Product product, CancellationToken ct)
+    {
+        lock (_gate)
+        {
+            if (_products.Values.Any(p => string.Equals(p.Name.Value, product.Name.Value, StringComparison.OrdinalIgnoreCase)))
+                return Task.FromResult<Result>(Product.Errors.NameTaken(product.Name));
+
+            _products[product.Id] = product;
+            return Task.FromResult(Result.Success());
+        }
     }
 }

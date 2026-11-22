@@ -22,6 +22,20 @@
     "Tests": {
       "type": "computed",
       "value": "(!NoTests)"
+    },
+    "Database": {
+      "type": "parameter",
+      "datatype": "choice",
+      "defaultValue": "inmemory",
+      "description": "Where the products are stored.",
+      "choices": [
+        { "choice": "inmemory", "description": "In memory: nothing to set up, gone when the application stops." },
+        { "choice": "sqlite", "description": "SQLite through EF Core, with a unique index on the name." }
+      ]
+    },
+    "Sqlite": {
+      "type": "computed",
+      "value": "(Database == \"sqlite\")"
     }
   },
   "sources": [
@@ -30,6 +44,10 @@
         {
           "condition": "(NoTests)",
           "exclude": [ "tests/**" ]
+        },
+        {
+          "condition": "(!Sqlite)",
+          "exclude": [ "src/ResultUnionApi/Data/**", "src/ResultUnionApi/Products/EfProductRepository.cs" ]
         }
       ]
     }

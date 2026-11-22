@@ -4,6 +4,10 @@
     "NoTests": {
       "longName": "no-tests",
       "shortName": ""
+    },
+    "Database": {
+      "longName": "database",
+      "shortName": ""
     }
   }
 }

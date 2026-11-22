@@ -9,6 +9,14 @@ are in the diff of those files.
 
 ## [Unreleased]
 
+### ResultUnion.Templates
+
+- `dotnet new resultunion-api --database sqlite`: the products are stored in SQLite through EF Core, with the value
+  objects converted to their values, a case-insensitive unique index on the name, and its violation returned as
+  `product.name_taken`. The HTTP tests use a temporary database file.
+- In both variants, `IProductRepository.AddAsync` returns a `Result`: a taken name is the store's answer, and the use
+  case adds the product with one `EnsureAsync`.
+
 ### ResultUnion (analyzers)
 
 - A code fix for RU0005: with a `CancellationToken` in scope, the catch gets `when (!ct.IsCancellationRequested)`, so

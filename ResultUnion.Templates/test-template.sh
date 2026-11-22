@@ -32,7 +32,21 @@ dotnet new install "$template" --debug:custom-hive "$hive"
 echo "::group::resultunion-api"
 dotnet new resultunion-api -n Shop -o "$work/Shop" --debug:custom-hive "$hive"
 cp "$work/nuget.config" "$work/Shop/"
+if [ -e "$work/Shop/src/Shop/Data" ] || [ -e "$work/Shop/src/Shop/Products/EfProductRepository.cs" ]; then
+  echo "::error::the in-memory project contains the SQLite files"
+  exit 1
+fi
 (cd "$work/Shop" && dotnet build -warnaserror && dotnet test)
+echo "::endgroup::"
+
+echo "::group::resultunion-api --database sqlite"
+dotnet new resultunion-api -n Store -o "$work/Store" --database sqlite --debug:custom-hive "$hive"
+cp "$work/nuget.config" "$work/Store/"
+if [ ! -e "$work/Store/src/Store/Data/AppDbContext.cs" ]; then
+  echo "::error::--database sqlite did not add the DbContext"
+  exit 1
+fi
+(cd "$work/Store" && dotnet build -warnaserror && dotnet test)
 echo "::endgroup::"
 
 echo "::group::resultunion-api --no-tests"

@@ -15,7 +15,8 @@ dotnet new resultunion-api -n Shop
 ```
 
 `-n` names the solution, the projects and their namespaces (`Shop`, `Shop.Products`, `Shop.Tests`). `--no-tests`
-leaves the test project out. The projects reference the ResultUnion packages of the template's own version, so
+leaves the test project out, and `--database sqlite` stores the products in SQLite through EF Core instead of in
+memory. The projects reference the ResultUnion packages of the template's own version, so
 `dotnet new install ResultUnion.Templates::1.0.0-rc.1` creates a project on the release candidate.
 
 ```text
@@ -24,11 +25,13 @@ Shop/
 ├── src/Shop/
 │   ├── Program.cs
 │   ├── Shop.http                  requests for every outcome
+│   ├── Data/AppDbContext.cs       with --database sqlite: the database and its value conversions
 │   └── Products/
 │       ├── ProductName.cs         value object with its Errors catalog
 │       ├── Price.cs               value object with its Errors catalog
 │       ├── Product.cs             entity with its Errors catalog
 │       ├── ProductRepository.cs   interface and an in-memory implementation
+│       ├── EfProductRepository.cs with --database sqlite: EF Core, a unique index on the name
 │       ├── ProductService.cs      the use cases
 │       └── ProductEndpoints.cs    POST /products, GET /products/{id}
 └── tests/Shop.Tests/
@@ -112,8 +115,9 @@ with clients, so it is never invented at the call site:
 `ProductName.Create` returns `Result<ProductName>`: the catalog error or the value. It does not set `Field`: whether the
 request calls the input `name` or `title` is the caller's business.
 
-**A use case is one pipeline.** `CombineAll` validates every input at once and sets the field names; the domain rule
-(a name that is taken) runs only when the input is valid; the product is stored only when every step succeeded:
+**A use case is one pipeline.** `CombineAll` validates every input at once and sets the field names; the product is
+stored only when every input is valid, and a name that is taken is the store's answer, a failure that keeps the rest of
+the chain from running:
 
 ```csharp
     public Task<Result<Product>> CreateAsync(CreateProduct command, CancellationToken ct) =>
@@ -121,12 +125,25 @@ request calls the input `name` or `title` is the caller's business.
                 ProductName.Create(command.Name).MapError(e => e.WithField("name")),
                 Price.Create(command.Price).MapError(e => e.WithField("price")))
             .Map(Product.Create)                                                // (name, price) => Product
-            .EnsureAsync(
-                async product => !await products.NameExistsAsync(product.Name, ct),
-                product => Product.Errors.NameTaken(product.Name))
-            .TapAsync(product => products.AddAsync(product, ct))
+            .EnsureAsync(product => products.AddAsync(product, ct))             // a taken name fails here
             .RecordAsync("products.create");                                    // failures counted by code
 ```
+
+`IProductRepository.AddAsync` returns a `Task<Result>`, so `EnsureAsync` keeps the product on success. With
+`--database sqlite` the EF Core repository checks the name first and also catches the unique index's violation, for
+two requests that check at the same time:
+
+```csharp
+        catch (DbUpdateException ex) when (ex.InnerException is SqliteException { SqliteExtendedErrorCode: 2067 })   // UNIQUE constraint failed
+        {
+            db.Entry(product).State = EntityState.Detached;
+            return Product.Errors.NameTaken(product.Name);
+        }
+```
+
+The database file (`products.db`) is created on the first start with `EnsureCreated`; a real application moves to
+migrations (`dotnet ef migrations add Initial`). The HTTP tests point the application at a temporary file of their
+own.
 
 `RecordAsync` counts failures by code in OpenTelemetry (`resultunion.errors`), so a dashboard shows which errors
 happen and how often.
@@ -171,7 +188,7 @@ Copy the shape of `Products` for each new concept, say `Orders`:
 Build after each step: the ResultUnion analyzers point out the usual slips, such as a result that is discarded, `Map`
 where `Bind` belongs, or an endpoint that returns a result instead of a response (RU0001, RU0003, RU0010).
 
-For storage, replace `InMemoryProductRepository` with a database behind the same interface; the
+For storage, start with `--database sqlite`, or put another database behind the same interface; the
 [EF Core article](ef-core.md) shows lookups, unique constraints and concurrency as results. For checks that apply to
 every use case (validation, authorisation, transactions), see [pipeline behaviors](pipeline-behaviors.md), and for more
 on the assertions, [testing](testing.md).

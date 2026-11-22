@@ -10,6 +10,9 @@
     <!-- Brings ResultUnion itself and its analyzers. -->
     <PackageReference Include="ResultUnion.AspNetCore" Version="RESULTUNION_VERSION" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="11.0.0" />
+<!--#if (Sqlite)-->
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="11.0.0" />
+<!--#endif-->
   </ItemGroup>
 
   <ItemGroup>

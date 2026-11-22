@@ -673,12 +673,13 @@ dotnet new install ResultUnion.Templates
 dotnet new resultunion-api -n Shop
 ```
 
-The template creates a solution with a Minimal API and a test project (`--no-tests` leaves the tests out). Its one
-feature, products, shows each convention in place: value objects with `Errors` catalogs (`ProductName`, `Price`), a
-use case as one pipeline (`CombineAll` for every invalid field, `EnsureAsync` for a name that is taken, `RecordAsync`
-for the failure metric), endpoints with `ToHttpResultAsync` and `ProducesErrors`, and tests with
+The template creates a solution with a Minimal API and a test project (`--no-tests` leaves the tests out;
+`--database sqlite` stores the products in SQLite through EF Core instead of in memory). Its one feature, products,
+shows each convention in place: value objects with `Errors` catalogs (`ProductName`, `Price`), a use case as one
+pipeline (`CombineAll` for every invalid field, `EnsureAsync` with the store's answer for a name that is taken,
+`RecordAsync` for the failure metric), endpoints with `ToHttpResultAsync` and `ProducesErrors`, and tests with
 `ShouldSucceedAsync` / `ShouldFailAsync("code")` and `WebApplicationFactory`. The projects reference the ResultUnion
-packages of the template's own version. CI creates both variants from every build of the template and builds them with
+packages of the template's own version. CI creates the variants from every build of the template and builds them with
 warnings as errors and runs their tests.
 
 A walk-through of the generated code, the responses it sends and how to add a feature of your own:

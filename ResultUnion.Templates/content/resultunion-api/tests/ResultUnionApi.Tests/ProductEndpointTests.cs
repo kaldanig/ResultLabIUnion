@@ -10,7 +10,14 @@ public sealed class ProductEndpointTests(WebApplicationFactory<Program> factory)
 {
     private static CancellationToken Ct => TestContext.Current.CancellationToken;
 
+#if (Sqlite)
+    // A database file of its own, so the tests never touch the application's.
+    private readonly HttpClient _client = factory
+        .WithWebHostBuilder(host => host.UseSetting("ConnectionStrings:Products", $"Data Source={Path.Combine(Path.GetTempPath(), $"products-{Guid.NewGuid():N}.db")}"))
+        .CreateClient();
+#else
     private readonly HttpClient _client = factory.CreateClient();
+#endif
 
     [Fact]
     public async Task A_valid_product_is_201_with_its_location()
