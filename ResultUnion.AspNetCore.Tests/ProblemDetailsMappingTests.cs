@@ -116,6 +116,25 @@ public class ProblemDetailsMappingTests
     }
 
     [Fact]
+    public void Details_are_equal_by_value_including_their_arguments()
+    {
+        var minimum = new Dictionary<string, object?> { ["minimum"] = 8 };
+        var detail = new ProblemErrorDetail("password.too_short", "password", "Too short.", minimum);
+
+        Assert.Equal(detail, new ProblemErrorDetail("password.too_short", "password", "Too short.", new Dictionary<string, object?> { ["minimum"] = 8 }));
+        Assert.Equal(detail.GetHashCode(), new ProblemErrorDetail("password.too_short", "password", "Too short.", new Dictionary<string, object?> { ["minimum"] = 8 }).GetHashCode());
+        Assert.Equal(new ProblemErrorDetail("a", null, "m"), new ProblemErrorDetail("a", null, "m", new Dictionary<string, object?>())); // none = empty
+
+        Assert.NotEqual(detail, new ProblemErrorDetail("password.too_short", "password", "Too short.", new Dictionary<string, object?> { ["minimum"] = 10 }));
+        Assert.NotEqual(detail, new ProblemErrorDetail("password.too_short", "password", "Too short.", new Dictionary<string, object?> { ["maximum"] = 8 }));
+        Assert.NotEqual(detail, new ProblemErrorDetail("password.too_short", "password", "Too short."));
+        Assert.NotEqual(detail, new ProblemErrorDetail("password.weak", "password", "Too short.", minimum));
+        Assert.NotEqual(detail, new ProblemErrorDetail("password.too_short", "secret", "Too short.", minimum));
+        Assert.NotEqual(detail, new ProblemErrorDetail("password.too_short", "password", "Short.", minimum));
+        Assert.False(detail.Equals(null));
+    }
+
+    [Fact]
     public void ErrorWithoutArguments_HasNoArgumentsExtension()
     {
         Assert.False(Error.NotFound("x").ToProblemDetails().Extensions.ContainsKey("arguments"));

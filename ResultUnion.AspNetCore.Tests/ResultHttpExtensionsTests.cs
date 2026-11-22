@@ -84,6 +84,22 @@ public class ResultHttpExtensionsTests
         Assert.Equal(409, problem.StatusCode);
     }
 
+    [Fact]
+    public async Task The_untyped_overloads_send_the_problem_on_failure_sync_and_async()
+    {
+        IResult redirect() => TypedResults.Redirect("/elsewhere");
+
+        Assert.IsType<RedirectHttpResult>(Result.Success().ToHttpResult(redirect));
+        Assert.Equal(409, Assert.IsType<ProblemHttpResult>(Result.Failure(Taken).ToHttpResult(redirect)).StatusCode);
+        Assert.Equal(409, Assert.IsType<ProblemHttpResult>(Result<int>.Failure(Taken).ToHttpResult(_ => redirect())).StatusCode);
+        Assert.Throws<ArgumentNullException>(() => Result.Success().ToHttpResult((Func<IResult>)(() => null!)));
+
+        Assert.IsType<RedirectHttpResult>(await Task.FromResult(Result<int>.Success(1)).ToHttpResultAsync(_ => redirect()));
+        Assert.IsType<RedirectHttpResult>(await Task.FromResult(Result.Success()).ToHttpResultAsync(redirect));
+        Assert.IsType<ProblemHttpResult>(await Task.FromResult(Result<int>.Failure(Taken)).ToHttpResultAsync(_ => redirect()));
+        Assert.IsType<ProblemHttpResult>(await Task.FromResult(Result.Failure(Taken)).ToHttpResultAsync(redirect));
+    }
+
     // Result
 
     [Fact]

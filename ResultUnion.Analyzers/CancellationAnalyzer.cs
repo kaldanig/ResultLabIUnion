@@ -53,19 +53,11 @@ public sealed class CancellationAnalyzer : DiagnosticAnalyzer
     }
 
     // A return in the handler itself (not in a lambda or local function declared there) whose value is a result or an
-    // error, including an error converted to a result.
+    // error. The returned value's type is the one after the conversion to the return type, so an error or a fallback
+    // value (return -1; in a method returning Result<int>) that becomes a result counts too.
     private static bool ReturnsAResult(IOperation handler) =>
         Descendants(handler).OfType<IReturnOperation>().Any(ret =>
-        {
-            var value = ret.ReturnedValue;
-            while (value is IConversionOperation { IsImplicit: true } conversion)
-            {
-                if (IsError(conversion.Operand.Type))
-                    return true;
-                value = conversion.Operand;
-            }
-            return value is not null && (ResultTypes.IsResultOrTaskOfResult(value.Type) || IsError(value.Type));
-        });
+            ret.ReturnedValue is { } value && (ResultTypes.IsResultOrTaskOfResult(value.Type) || IsError(value.Type)));
 
     private static IEnumerable<IOperation> Descendants(IOperation operation)
     {

@@ -116,6 +116,7 @@ public sealed class CompletedSourceTests
         Assert.Same(boom, await Assert.ThrowsAsync<InvalidOperationException>(() => task));
         Assert.Same(boom, await Assert.ThrowsAsync<InvalidOperationException>(() => Five().TapAsync((Action<int>)(_ => throw boom))));
         Assert.Same(boom, await Assert.ThrowsAsync<InvalidOperationException>(() => Ok().BindAsync((Func<Result>)(() => throw boom))));
+        Assert.Same(boom, await Assert.ThrowsAsync<InvalidOperationException>(() => Five().BindAsync((Func<int, Result>)(_ => throw boom))));
     }
 
     [Fact]
@@ -139,6 +140,10 @@ public sealed class CompletedSourceTests
 
         Assert.Same(boom, await Assert.ThrowsAsync<InvalidOperationException>(() => bind));
         Assert.Same(boom, await Assert.ThrowsAsync<InvalidOperationException>(() => match));
+        Assert.Same(boom, await Assert.ThrowsAsync<InvalidOperationException>(
+            () => Result<int>.Success(1).MatchAsync((Func<int, Task>)(_ => throw boom), _ => Task.CompletedTask)));
+        Assert.Same(boom, await Assert.ThrowsAsync<InvalidOperationException>(
+            () => Result.Success().MatchAsync((Func<Task>)(() => throw boom), _ => Task.CompletedTask)));
     }
 
     [Fact]
@@ -147,6 +152,8 @@ public sealed class CompletedSourceTests
         var task = Result<int>.Success(1).BindAsync<int, int>(_ => null!);
 
         await Assert.ThrowsAsync<NullReferenceException>(() => task);
+        await Assert.ThrowsAsync<NullReferenceException>(() => Result<int>.Success(1).MatchAsync((Func<int, Task>)(_ => null!), _ => Task.CompletedTask));
+        await Assert.ThrowsAsync<NullReferenceException>(() => Result.Success().MatchAsync((Func<Task>)(() => null!), _ => Task.CompletedTask));
     }
 
     [Fact]

@@ -148,6 +148,42 @@ public sealed class ErrorJsonConverterTests
     }
 
     [Fact]
+    public void Every_kind_of_argument_value_is_written_as_json()
+    {
+        var original = Error.Validation("x")
+            .WithArgument("short", (short)-3)
+            .WithArgument("byte", (byte)7)
+            .WithArgument("uint", 4_000_000_000u)
+            .WithArgument("ulong", 18_000_000_000_000_000_000ul)
+            .WithArgument("double", 0.5d)
+            .WithArgument("float", 0.25f)
+            .WithArgument("dateTime", new DateTime(2026, 11, 22, 10, 30, 0, DateTimeKind.Utc))
+            .WithArgument("dateTimeOffset", new DateTimeOffset(2026, 11, 22, 10, 30, 0, TimeSpan.FromHours(4)))
+            .WithArgument("dateOnly", new DateOnly(2026, 11, 22))
+            .WithArgument("timeSpan", TimeSpan.FromMinutes(90))
+            .WithArgument("element", JsonDocument.Parse("""{"a":[1,true]}""").RootElement)
+            .WithArgument("record", new Limit("age", 18));
+
+        using var json = JsonDocument.Parse(Serialize(original));
+        var arguments = json.RootElement.GetProperty("arguments");
+
+        Assert.Equal("-3", arguments.GetProperty("short").GetRawText());
+        Assert.Equal("7", arguments.GetProperty("byte").GetRawText());
+        Assert.Equal("4000000000", arguments.GetProperty("uint").GetRawText());
+        Assert.Equal("18000000000000000000", arguments.GetProperty("ulong").GetRawText());
+        Assert.Equal("0.5", arguments.GetProperty("double").GetRawText());
+        Assert.Equal("0.25", arguments.GetProperty("float").GetRawText());
+        Assert.Equal("\"2026-11-22T10:30:00Z\"", arguments.GetProperty("dateTime").GetRawText());
+        Assert.Equal("\"2026-11-22T10:30:00+04:00\"", arguments.GetProperty("dateTimeOffset").GetRawText());
+        Assert.Equal("\"2026-11-22\"", arguments.GetProperty("dateOnly").GetRawText());
+        Assert.Equal("\"01:30:00\"", arguments.GetProperty("timeSpan").GetRawText());
+        Assert.Equal("""{"a":[1,true]}""", arguments.GetProperty("element").GetRawText());
+        Assert.Equal("""{"Name":"age","Value":18}""", arguments.GetProperty("record").GetRawText()); // other types: JsonSerializer
+    }
+
+    private sealed record Limit(string Name, int Value);
+
+    [Fact]
     public void Retry_after_seconds_stays_a_number()
     {
         var original = Error.TooManyRequests("Slow down.").WithArgument("retryAfterSeconds", 30);

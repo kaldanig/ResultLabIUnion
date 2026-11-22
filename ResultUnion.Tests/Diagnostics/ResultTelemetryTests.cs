@@ -47,9 +47,10 @@ public sealed class ResultTelemetryTests
         _ = Result<int>.Failure(TooYoung).Record("tests.every_type");
         _ = await Task.FromResult(Result.Failure(TooYoung)).RecordAsync("tests.every_type");
         _ = await Task.FromResult(Result<int>.Failure(TooYoung)).RecordAsync("tests.every_type");
+        _ = await Pending(Result.Failure(TooYoung)).RecordAsync("tests.every_type");
         _ = await Pending(Result<int>.Failure(TooYoung)).RecordAsync("tests.every_type");
 
-        Assert.Equal(5, capture.For("tests.every_type").Count);
+        Assert.Equal(6, capture.For("tests.every_type").Count);
     }
 
     [Fact]
@@ -137,7 +138,7 @@ public sealed class ResultTelemetryTests
         _ = Result<int>.Failure(TooYoung).Record("tests.no_listener");   // no meter listener: does not throw
     }
 
-    private static async Task<Result<int>> Pending(Result<int> result)
+    private static async Task<T> Pending<T>(T result)
     {
         await Task.Yield();
         return result;

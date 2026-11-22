@@ -47,6 +47,20 @@ public sealed class InlineErrorTests
     }
 
     [Fact]
+    public async Task Translating_another_system_s_code_is_fine()
+    {
+        var diagnostics = await Analyze("""
+            class Client
+            {
+                // The code comes from the response: nothing is invented here.
+                Error Translate(string code, string message) => Error.Create(code, message, ErrorType.Conflict);
+            }
+            """);
+
+        Assert.Empty(diagnostics);
+    }
+
+    [Fact]
     public async Task Grouping_existing_errors_is_fine()
     {
         var diagnostics = await Analyze("""
@@ -85,6 +99,21 @@ public sealed class FieldSetTooEarlyTests
     }
 
     [Fact]
+    public async Task A_nullable_simple_input_is_one_input_too()
+    {
+        var diagnostics = await Analyze("""
+            sealed record Age(int Value)
+            {
+                static readonly Error Required = Error.Validation("Required.");
+
+                public static Result<Age> Create(int? input) => input is { } value ? new Age(value) : Required.WithField("age");
+            }
+            """);
+
+        Assert.Equal([("RU0007", 5)], diagnostics);
+    }
+
+    [Fact]
     public async Task WithField_in_an_error_catalog_is_reported()
     {
         var diagnostics = await Analyze("""
@@ -119,6 +148,9 @@ public sealed class FieldSetTooEarlyTests
             {
                 // The handler reads the request, so it knows what the input is called.
                 public static Result<Email> Register(string? email) => Email.Create(email).MapError(e => e.WithField("email"));
+
+                // Outside any method: no factory to blame.
+                static readonly Func<Error, Error> Named = e => e.WithField("email");
             }
             """);
 
@@ -140,6 +172,7 @@ public sealed class ValueTaskResultTests
                 ValueTask<Result<int>> Find() => ValueTask.FromResult(Result<int>.Success(1));
                 ValueTask<Result> Check() => ValueTask.FromResult(Result.Success());
                 ValueTask<Result> Pending => ValueTask.FromResult(Result.Success());
+                ValueTask<Result> Later { get => ValueTask.FromResult(Result.Success()); }
 
                 async Task<int> M()
                 {
@@ -149,7 +182,7 @@ public sealed class ValueTaskResultTests
             }
             """);
 
-        Assert.Equal([("RU0008", 3), ("RU0008", 4), ("RU0008", 5), ("RU0008", 10)], diagnostics);
+        Assert.Equal([("RU0008", 3), ("RU0008", 4), ("RU0008", 5), ("RU0008", 6), ("RU0008", 11)], diagnostics);
     }
 
     [Fact]

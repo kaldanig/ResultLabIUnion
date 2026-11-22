@@ -155,4 +155,80 @@ public sealed class UncheckedAccessAnalyzerTests
 
         Assert.Empty(diagnostics);
     }
+
+    // ---- the shapes of a check -----------------------------------------------------------------------------------------
+
+    [Fact]
+    public async Task Locals_are_tracked_like_parameters()
+    {
+        var diagnostics = await Analyze("""
+                    var parsed = Parse("1");
+                    if (parsed.IsFailure) return -1;
+                    var a = parsed.ResultValue;
+                    var later = Parse("2");
+                    var b = later.ResultValue;
+            """);
+
+        Assert.Equal([("RU0004", FirstLine + 4)], diagnostics);
+    }
+
+    [Fact]
+    public async Task Exits_through_both_branches_or_an_or_condition_guard_the_rest()
+    {
+        var diagnostics = await Analyze("""
+                    if (r.IsFailure) { if (other.IsSuccess) return 1; else return 2; }
+                    if (other.IsFailure || plain.IsFailure) return 3;
+                    var a = r.ResultValue + other.ResultValue;
+                    plain.Error?.ToString();
+            """);
+
+        // plain is known to be a success after the second line.
+        Assert.Equal([("RU0004", FirstLine + 3)], diagnostics);
+    }
+
+    [Fact]
+    public async Task Comparisons_with_a_literal_on_either_side_guard_and_others_do_not()
+    {
+        var diagnostics = await Analyze("""
+                    if (false == r.IsSuccess) { var a = r.Error; }
+                    if (true != r.IsFailure) { var b = r.ResultValue; }
+                    if (r.IsSuccess == other.IsSuccess) { var c = r.ResultValue; }
+            """);
+
+        Assert.Equal([("RU0004", FirstLine + 2)], diagnostics);
+    }
+
+    [Fact]
+    public async Task The_union_TryGetValue_overloads_guard_by_their_out_type()
+    {
+        var diagnostics = await Analyze("""
+                    if (r.TryGetValue(out int value)) { var a = r.ResultValue; }
+                    if (r.TryGetValue(out Error? error)) { var b = r.Error; }
+                    if (other.TryGetValue(out Error? failure)) { var c = other.ResultValue; }
+            """);
+
+        Assert.Equal([("RU0004", FirstLine + 2)], diagnostics);
+    }
+
+    [Fact]
+    public async Task Properties_and_static_members_are_tracked()
+    {
+        var diagnostics = await AnalyzeAsync("""
+            class C
+            {
+                static Result<int> Shared = Result<int>.Success(1);
+                Result<int> Current => Result<int>.Success(1);
+
+                int M()
+                {
+                    if (Shared.IsFailure) return -1;
+                    if (Current.IsSuccess) { return Current.ResultValue + Shared.ResultValue; }
+                    return C.Shared.ResultValue + Current.ResultValue;
+                }
+            }
+            """, new UncheckedAccessAnalyzer());
+
+        // Current is known to be a failure on the last line; Shared, as C.Shared too, a success.
+        Assert.Equal([("RU0004", 10)], diagnostics);
+    }
 }

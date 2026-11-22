@@ -135,7 +135,8 @@ catch (TaskCanceledException) when (!ct.IsCancellationRequested)     // fine: Ht
 
 Let cancellation propagate, as `Result.Try` and `Result.TryAsync` do. HttpClient reports its own timeout as a
 `TaskCanceledException`; a `when (!cancellationToken.IsCancellationRequested)` filter tells it apart and is not
-reported. A catch that rethrows, or returns something that is not a result or an error, is not reported either.
+reported. A fallback value counts too: `return -1;` in a method that returns `Result<int>` becomes a success. A catch
+that rethrows, or returns something that does not become a result or an error, is not reported.
 
 No code fix: whether to remove the catch, rethrow or add a filter depends on what the code is for.
 

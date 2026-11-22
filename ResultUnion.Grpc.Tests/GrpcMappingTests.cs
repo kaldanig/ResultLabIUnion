@@ -37,11 +37,23 @@ public class GrpcMappingTests
     }
 
     [Theory]
-    [InlineData(StatusCode.InvalidArgument, ErrorType.Validation)]
-    [InlineData(StatusCode.AlreadyExists, ErrorType.Conflict)]
-    [InlineData(StatusCode.DeadlineExceeded, ErrorType.Unavailable)]
-    [InlineData(StatusCode.Aborted, ErrorType.Concurrency)]
+    [InlineData(StatusCode.OK, ErrorType.Unexpected)]
+    [InlineData(StatusCode.Cancelled, ErrorType.Unexpected)]
     [InlineData(StatusCode.Unknown, ErrorType.Unexpected)]
+    [InlineData(StatusCode.InvalidArgument, ErrorType.Validation)]
+    [InlineData(StatusCode.DeadlineExceeded, ErrorType.Unavailable)]
+    [InlineData(StatusCode.NotFound, ErrorType.NotFound)]
+    [InlineData(StatusCode.AlreadyExists, ErrorType.Conflict)]
+    [InlineData(StatusCode.PermissionDenied, ErrorType.Forbidden)]
+    [InlineData(StatusCode.ResourceExhausted, ErrorType.TooManyRequests)]
+    [InlineData(StatusCode.FailedPrecondition, ErrorType.Conflict)]
+    [InlineData(StatusCode.Aborted, ErrorType.Concurrency)]
+    [InlineData(StatusCode.OutOfRange, ErrorType.Validation)]
+    [InlineData(StatusCode.Unimplemented, ErrorType.Unexpected)]
+    [InlineData(StatusCode.Internal, ErrorType.Unexpected)]
+    [InlineData(StatusCode.Unavailable, ErrorType.Unavailable)]
+    [InlineData(StatusCode.DataLoss, ErrorType.Unexpected)]
+    [InlineData(StatusCode.Unauthenticated, ErrorType.Unauthorized)]
     public void ToErrorType_MapsStatusCodesBack(StatusCode code, ErrorType expected)
     {
         Assert.Equal(expected, code.ToErrorType());
@@ -64,6 +76,25 @@ public class GrpcMappingTests
         Assert.Equal("BusinessRule", info.Metadata["type"]);
         Assert.Equal("18", info.Metadata["minimumAge"]);
         Assert.Null(status.GetDetail<BadRequest>());
+    }
+
+    [Fact]
+    public void ToRpcStatus_WritesArgumentValuesAsInvariantText()
+    {
+        var error = Error.Conflict("Taken.")
+            .WithArgument("price", 9.5m)
+            .WithArgument("none", null)
+            .WithArgument("email", "ann@example.com")
+            .WithArgument("flag", true)
+            .WithArgument("uri", new Uri("https://example.com/a"));
+
+        var metadata = error.ToRpcStatus().GetDetail<ErrorInfo>().Metadata;
+
+        Assert.Equal("9.5", metadata["price"]);   // not "9,5" in another culture
+        Assert.Equal("", metadata["none"]);
+        Assert.Equal("ann@example.com", metadata["email"]);
+        Assert.Equal("True", metadata["flag"]);
+        Assert.Equal("https://example.com/a", metadata["uri"]);
     }
 
     [Fact]

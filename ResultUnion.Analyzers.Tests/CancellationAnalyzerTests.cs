@@ -46,10 +46,16 @@ public sealed class CancellationAnalyzerTests
                     try { work(); return Error.Validation("ok"); }
                     catch (OperationCanceledException) { return Error.Unexpected("Cancelled."); }
                 }
+
+                async Task<Result<int>> E(Func<Task<int>> work)
+                {
+                    try { return await work(); }
+                    catch (OperationCanceledException) { return -1; }   // a fallback value becomes a success
+                }
             }
             """);
 
-        Assert.Equal([("RU0005", 6), ("RU0005", 12), ("RU0005", 18)], diagnostics);
+        Assert.Equal([("RU0005", 6), ("RU0005", 12), ("RU0005", 18), ("RU0005", 24)], diagnostics);
     }
 
     [Fact]

@@ -93,6 +93,8 @@ public sealed class ResultAssertionsTests
             "Expected the argument 'beta', but the error has arguments alpha=1, zeta=2: validation.failed: Invalid. (Validation, arguments alpha=1, zeta=2).",
             Message(() => error.ShouldHaveArgument("beta", 1)));
         Assert.Equal("Expected the argument 'alpha' to be null, but it is 1.", Message(() => error.ShouldHaveArgument("alpha", null)));
+        Assert.Equal("Expected the argument 'pair' to be null, but it is [a, 1].",   // not IFormattable: its ToString
+            Message(() => error.WithArgument("pair", KeyValuePair.Create("a", 1)).ShouldHaveArgument("pair", null)));
     }
 
     [Fact]

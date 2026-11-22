@@ -138,4 +138,31 @@ public sealed class MalformedProblemTests
 
         Assert.False(string.IsNullOrWhiteSpace(error.Message));
     }
+
+    [Fact]
+    public async Task A_group_of_another_type_keeps_the_top_level_error()
+    {
+        // ResultUnion groups only validation errors, so a conflict with several details cannot be rebuilt as a group.
+        using var response = Response(HttpStatusCode.Conflict, """
+            {"code":"order.conflict","detail":"Two problems.","category":"Conflict","details":[
+              {"code":"order.shipped","message":"Shipped."},
+              {"code":"order.paid","message":"Paid."}
+            ]}
+            """);
+
+        var error = await response.ReadErrorAsync(Ct);
+
+        Assert.Equal(("order.conflict", "Two problems.", ErrorType.Conflict), (error.Code, error.Message, error.Type));
+        Assert.Empty(error.Details);
+    }
+
+    [Fact]
+    public async Task A_response_reads_as_a_result_without_a_value()
+    {
+        using var success = new HttpResponseMessage(HttpStatusCode.NoContent);
+        using var failure = Response(HttpStatusCode.NotFound, """{"code":"user.not_found","detail":"No user."}""");
+
+        Assert.True((await success.ReadResultAsync(Ct)).IsSuccess);
+        Assert.Equal("user.not_found", (await failure.ReadResultAsync(Ct)).Error.Code);
+    }
 }
