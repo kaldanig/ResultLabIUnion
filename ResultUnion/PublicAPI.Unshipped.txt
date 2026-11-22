@@ -1,5 +1,1 @@
 #nullable enable
-static ResultUnion.ErrorTypeExtensions.get_IsTransient(ResultUnion.ErrorType type) -> bool
-ResultUnion.ErrorTypeExtensions.extension(ResultUnion.ErrorType).IsTransient.get -> bool
-*REMOVED*ResultUnion.ErrorTypeExtensions.extension(ResultUnion.ErrorType).IsTransient() -> bool
-*REMOVED*static ResultUnion.ErrorTypeExtensions.IsTransient(this ResultUnion.ErrorType type) -> bool

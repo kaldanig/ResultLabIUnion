@@ -9,6 +9,17 @@ are in the diff of those files.
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-11-22
+
+### Upgrading from 0.4.0
+
+- **`type.IsTransient()` is now `type.IsTransient`**, a property like `error.IsTransient`. Remove the parentheses; a
+  library compiled against 0.4.0 that called it must be recompiled. `error.IsTransient` is unchanged.
+- **Two names are deprecated**, with a warning that says what to use: `ErrorType.ToStatusCode()` is now
+  `ToHttpStatusCode()`, and `GetValueOrThrowRpc(onSuccess)` on a `Result` without a value is now
+  `ToReplyOrThrowRpc(onSuccess)` (`…Async` too). The old names keep working until 1.0, which removes them; a project
+  with `TreatWarningsAsErrors` fails on the warning until the call is renamed.
+
 ### ResultUnion
 
 #### Changed
@@ -203,7 +214,8 @@ The first release. Requires .NET 11 (C# 15 unions).
 - `RpcException.ToError()` for clients, restoring type, code, message, arguments and field violations.
 - Failures that leave a service tag the call's span with the error code and category.
 
-[Unreleased]: https://github.com/kaldanig/ResultLabIUnion/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/kaldanig/ResultLabIUnion/compare/v0.5.0...HEAD
+[0.5.0]: https://github.com/kaldanig/ResultLabIUnion/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/kaldanig/ResultLabIUnion/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/kaldanig/ResultLabIUnion/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/kaldanig/ResultLabIUnion/compare/v0.1.0...v0.2.0

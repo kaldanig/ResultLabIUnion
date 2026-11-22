@@ -8,6 +8,7 @@ ResultUnion.AspNetCore.ProblemDetailsMapping
 ResultUnion.AspNetCore.ProblemDetailsMapping.extension(ResultUnion.Error!)
 ResultUnion.AspNetCore.ProblemDetailsMapping.extension(ResultUnion.Error!).ToProblemDetails() -> Microsoft.AspNetCore.Mvc.ProblemDetails!
 ResultUnion.AspNetCore.ProblemDetailsMapping.extension(ResultUnion.ErrorType)
+ResultUnion.AspNetCore.ProblemDetailsMapping.extension(ResultUnion.ErrorType).ToHttpStatusCode() -> int
 ResultUnion.AspNetCore.ProblemDetailsMapping.extension(ResultUnion.ErrorType).ToStatusCode() -> int
 ResultUnion.AspNetCore.ProblemErrorDetail
 ResultUnion.AspNetCore.ProblemErrorDetail.<Clone>$() -> ResultUnion.AspNetCore.ProblemErrorDetail!
@@ -42,6 +43,7 @@ ResultUnion.AspNetCore.ResultHttpExtensions.extension<T>(System.Threading.Tasks.
 ResultUnion.AspNetCore.ResultHttpExtensions.extension<T>(System.Threading.Tasks.Task<ResultUnion.Result<T>>!).ToHttpResultAsync(System.Func<T, Microsoft.AspNetCore.Http.IResult!>! onSuccess) -> System.Threading.Tasks.Task<Microsoft.AspNetCore.Http.IResult!>!
 ResultUnion.AspNetCore.ResultHttpExtensions.extension<T>(System.Threading.Tasks.Task<ResultUnion.Result<T>>!).ToHttpResultAsync<TSuccess>(System.Func<T, TSuccess>! onSuccess) -> System.Threading.Tasks.Task<Microsoft.AspNetCore.Http.HttpResults.Results<TSuccess, Microsoft.AspNetCore.Http.HttpResults.ProblemHttpResult!>!>!
 static ResultUnion.AspNetCore.EndpointProblemMetadataExtensions.ProducesErrors<TBuilder>(this TBuilder builder, params ResultUnion.ErrorType[]! types) -> TBuilder
+static ResultUnion.AspNetCore.ProblemDetailsMapping.ToHttpStatusCode(this ResultUnion.ErrorType type) -> int
 static ResultUnion.AspNetCore.ProblemDetailsMapping.ToProblemDetails(this ResultUnion.Error! error) -> Microsoft.AspNetCore.Mvc.ProblemDetails!
 static ResultUnion.AspNetCore.ProblemDetailsMapping.ToStatusCode(this ResultUnion.ErrorType type) -> int
 static ResultUnion.AspNetCore.ProblemErrorDetail.operator !=(ResultUnion.AspNetCore.ProblemErrorDetail? left, ResultUnion.AspNetCore.ProblemErrorDetail? right) -> bool

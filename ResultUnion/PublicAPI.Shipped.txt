@@ -45,7 +45,7 @@ ResultUnion.ErrorTypeExtensions
 ResultUnion.ErrorTypeExtensions.extension(ResultUnion.Error!)
 ResultUnion.ErrorTypeExtensions.extension(ResultUnion.Error!).IsTransient.get -> bool
 ResultUnion.ErrorTypeExtensions.extension(ResultUnion.ErrorType)
-ResultUnion.ErrorTypeExtensions.extension(ResultUnion.ErrorType).IsTransient() -> bool
+ResultUnion.ErrorTypeExtensions.extension(ResultUnion.ErrorType).IsTransient.get -> bool
 ResultUnion.IAnyResult
 ResultUnion.IAnyResult.Error.get -> ResultUnion.Error!
 ResultUnion.IAnyResult.IsFailure.get -> bool
@@ -256,7 +256,7 @@ static ResultUnion.Error.Unexpected(string! message) -> ResultUnion.Error!
 static ResultUnion.Error.Validation(string! message) -> ResultUnion.Error!
 static ResultUnion.Error.Validation(System.Collections.Generic.IEnumerable<ResultUnion.Error!>! details) -> ResultUnion.Error!
 static ResultUnion.ErrorTypeExtensions.get_IsTransient(ResultUnion.Error! error) -> bool
-static ResultUnion.ErrorTypeExtensions.IsTransient(this ResultUnion.ErrorType type) -> bool
+static ResultUnion.ErrorTypeExtensions.get_IsTransient(ResultUnion.ErrorType type) -> bool
 static ResultUnion.Result.Combine(params System.ReadOnlySpan<ResultUnion.Result> results) -> ResultUnion.Result
 static ResultUnion.Result.Combine(System.Collections.Generic.IEnumerable<ResultUnion.IAnyResult!>! results) -> ResultUnion.Result
 static ResultUnion.Result.CombineAll(params System.ReadOnlySpan<ResultUnion.Result> results) -> ResultUnion.Result

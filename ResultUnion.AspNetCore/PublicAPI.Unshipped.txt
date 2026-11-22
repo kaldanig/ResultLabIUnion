@@ -1,3 +1,1 @@
 #nullable enable
-ResultUnion.AspNetCore.ProblemDetailsMapping.extension(ResultUnion.ErrorType).ToHttpStatusCode() -> int
-static ResultUnion.AspNetCore.ProblemDetailsMapping.ToHttpStatusCode(this ResultUnion.ErrorType type) -> int
