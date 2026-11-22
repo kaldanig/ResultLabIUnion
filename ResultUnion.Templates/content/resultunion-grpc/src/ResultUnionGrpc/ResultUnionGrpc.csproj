@@ -16,6 +16,9 @@
     <PackageReference Include="ResultUnion.Grpc" Version="RESULTUNION_VERSION" />
     <PackageReference Include="Grpc.AspNetCore" Version="2.85.0" />
     <PackageReference Include="Grpc.AspNetCore.Server.Reflection" Version="2.85.0" />
+<!--#if (Sqlite)-->
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="11.0.0" />
+<!--#endif-->
   </ItemGroup>
 
   <ItemGroup>

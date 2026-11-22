@@ -1,6 +1,5 @@
 using Grpc.Core;
 using Grpc.Net.Client;
-using Microsoft.AspNetCore.Mvc.Testing;
 using ResultUnion.Grpc;
 using ResultUnionGrpc.Products.V1;
 
@@ -10,16 +9,16 @@ namespace ResultUnionGrpc.Tests;
 /// The service in memory, called through the generated gRPC client: what a client receives, failures included. A .NET
 /// client turns a failed call back into an <see cref="Error"/> with <c>ToError()</c>, with the same codes and fields.
 /// </summary>
-public sealed class ProductCatalogTests : IClassFixture<WebApplicationFactory<Program>>, IDisposable
+public sealed class ProductCatalogTests : IClassFixture<ServiceFactory>, IDisposable
 {
     private static CancellationToken Ct => TestContext.Current.CancellationToken;
 
     private readonly GrpcChannel _channel;
     private readonly ProductCatalog.ProductCatalogClient _client;
 
-    public ProductCatalogTests(WebApplicationFactory<Program> factory)
+    public ProductCatalogTests(ServiceFactory factory)
     {
-        _channel = GrpcChannel.ForAddress(factory.Server.BaseAddress, new GrpcChannelOptions { HttpHandler = factory.Server.CreateHandler() });
+        _channel = factory.CreateChannel();
         _client = new ProductCatalog.ProductCatalogClient(_channel);
     }
 

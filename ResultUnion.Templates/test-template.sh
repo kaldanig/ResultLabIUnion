@@ -146,7 +146,19 @@ dotnet new resultunion-grpc -n Catalog -o "$work/Catalog" --debug:custom-hive "$
 cp "$work/nuget.config" "$work/Catalog/"
 grep -q '^package catalog.products.v1;' "$work/Catalog/src/Catalog/Protos/products.proto" \
   || { echo "::error::resultunion-grpc did not name the proto package after the project"; exit 1; }
+if [ -e "$work/Catalog/src/Catalog/Data" ] || [ -e "$work/Catalog/src/Catalog/Products/EfProductRepository.cs" ]; then
+  echo "::error::the in-memory gRPC project contains the SQLite files"
+  exit 1
+fi
 (cd "$work/Catalog" && dotnet build -warnaserror && dotnet test)
+echo "::endgroup::"
+
+echo "::group::resultunion-grpc --database sqlite"
+dotnet new resultunion-grpc -n Warehouse -o "$work/Warehouse" --database sqlite --debug:custom-hive "$hive"
+cp "$work/nuget.config" "$work/Warehouse/"
+[ -e "$work/Warehouse/src/Warehouse/Data/AppDbContext.cs" ] \
+  || { echo "::error::resultunion-grpc --database sqlite did not add the DbContext"; exit 1; }
+(cd "$work/Warehouse" && dotnet build -warnaserror && dotnet test)
 echo "::endgroup::"
 
 echo "::group::resultunion-grpc --no-tests"

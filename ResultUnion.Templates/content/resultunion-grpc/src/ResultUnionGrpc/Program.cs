@@ -1,24 +1,30 @@
-using Grpc.Reflection;
+#if (Sqlite)
+using Microsoft.EntityFrameworkCore;
+using ResultUnionGrpc.Data;
+#endif
+using ResultUnionGrpc;
 using ResultUnionGrpc.Products;
-using ResultUnionGrpc.Products.V1;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddGrpc();
+builder.Services.AddGrpcReflectionWithErrorDetails();   // grpcurl and Postman discover the services and read failures
 
-// Reflection lets grpcurl, Postman and others discover the service. By default it describes only the service's own
-// messages; with error_details.proto as well, they show a failure's ErrorInfo and BadRequest as JSON instead of bytes.
-// A new gRPC service goes into this list too.
-builder.Services.AddGrpcReflection();
-string[] reflectedServices = [ProductCatalog.Descriptor.FullName];
-var reflectedFiles = SymbolRegistry.FromFiles([ProductCatalog.Descriptor.File, Google.Rpc.ErrorDetailsReflection.Descriptor]);
-builder.Services.AddSingleton(new ReflectionServiceImpl(reflectedServices, reflectedFiles));
-builder.Services.AddSingleton(new ReflectionV1ServiceImpl(reflectedServices, reflectedFiles));
-
+#if (Sqlite)
+builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlite(builder.Configuration.GetConnectionString("Products")));
+builder.Services.AddScoped<IProductRepository, EfProductRepository>();
+#else
 builder.Services.AddSingleton<IProductRepository, InMemoryProductRepository>();
+#endif
 builder.Services.AddScoped<ProductService>();
 
 var app = builder.Build();
+#if (Sqlite)
+
+// Creates the database on the first start. A real application uses migrations instead (dotnet ef migrations add).
+using (var scope = app.Services.CreateScope())
+    scope.ServiceProvider.GetRequiredService<AppDbContext>().Database.EnsureCreated();
+#endif
 
 app.MapGrpcService<ProductCatalogService>();
 app.MapGrpcReflectionService();

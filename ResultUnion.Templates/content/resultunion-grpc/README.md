@@ -55,7 +55,7 @@ grpcurl -plaintext -d '{ "id": "42" }' localhost:5090 resultuniongrpc.products.v
 
 For a failure, grpcurl prints the status code, the message and the status details: an `ErrorInfo` with the code, the
 type and the arguments in `metadata`, and, for validation, a `BadRequest` with every invalid field. It can read them
-because `Program.cs` adds `error_details.proto` to what reflection describes. A .NET client reads them back as an
+because `GrpcReflection.cs` adds `error_details.proto` to what reflection describes. A .NET client reads them back as an
 `Error` with `ToError()`, as the tests do.
 
 ## What is where
@@ -66,7 +66,11 @@ because `Program.cs` adds `error_details.proto` to what reflection describes. A 
 | `Products/ProductName.cs`, `Price.cs` | Value objects. Each declares its errors in a nested `Errors` catalog with stable codes (`product_name.required`). |
 | `Products/Product.cs` | The entity, created from validated parts, with its own catalog (`product.invalid_id`, `product.not_found`, `product.name_taken`). |
 | `Products/ProductService.cs` | The use cases, each one pipeline: `CombineAll` reports every invalid field, `EnsureAsync` the store's answer for a taken name, `RecordAsync` counts failures. |
-| `Program.cs` | The host: the service, and reflection that also describes `error_details.proto`, so grpcurl shows a failure's details as JSON. |
+<!--#if (Sqlite)-->
+| `Data/AppDbContext.cs`, `Products/EfProductRepository.cs` | SQLite through EF Core: value objects stored as their value, a unique index on the name, its violation turned into `product.name_taken`. The database (`products.db`) is created on the first start; move to migrations (`dotnet ef migrations add Initial`) for a real application. |
+<!--#endif-->
+| `Program.cs` | The host: the services, the store and reflection. |
+| `GrpcReflection.cs` | `AddGrpcReflectionWithErrorDetails`: reflection for every service mapped with `MapGrpcService`, plus `error_details.proto`, so grpcurl shows a failure's details as JSON. A new service needs no change here. |
 | `Products/ProductCatalogService.cs` | `GetValueOrThrowRpcAsync`: a success is the reply, a failure an `RpcException` whose status code comes from the error's type, with an `ErrorInfo` (the code and arguments) and, for validation, a `BadRequest` with every invalid field. |
 | `tests/` | `ShouldSucceedAsync` / `ShouldFailAsync("code")` from ResultUnion.Testing, and calls through the generated client with `WebApplicationFactory`, where `ToError()` turns a failed call back into an `Error`, and a check that reflection describes the status detail types. |
 

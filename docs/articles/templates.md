@@ -285,6 +285,9 @@ turns a failed call back into an `Error`, with the same codes and fields, and on
         return Result.TryAsync(() => _client.CreateProductAsync(request, cancellationToken: Ct).ResponseAsync, (RpcException ex) => ex.ToError());
 ```
 
-The service has reflection, so `grpcurl -plaintext localhost:5090 list` shows it, and `--no-tests` leaves the test
-project out. `resultunion-valueobject` works in this project as in any other; `resultunion-feature` writes Minimal API
+The service has reflection, so `grpcurl -plaintext localhost:5090 list` shows it. `AddGrpcReflectionWithErrorDetails`
+describes every service mapped with `MapGrpcService`, and `error_details.proto` as well, so grpcurl and Postman show a
+failure's `ErrorInfo` and `BadRequest` as JSON; the project's README has a grpcurl call for each outcome.
+`--database sqlite` stores the products in SQLite through EF Core, as `resultunion-api` does, and `--no-tests` leaves
+the test project out. `resultunion-valueobject` works in this project as in any other; `resultunion-feature` writes Minimal API
 endpoints, so for a new gRPC feature copy the shape of `Products` and add its methods to the `.proto` file.

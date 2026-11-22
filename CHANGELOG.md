@@ -16,7 +16,9 @@ are in the diff of those files.
   and, for validation, a `BadRequest` with every invalid field. The tests call the service through the generated
   client over `WebApplicationFactory` and read a failed call back with `ToError()`. `--no-tests` leaves them out. The
   project's README has a grpcurl call for each outcome, and reflection also describes `error_details.proto`, so
-  grpcurl and Postman show a failure's `ErrorInfo` and `BadRequest` as JSON.
+  grpcurl and Postman show a failure's `ErrorInfo` and `BadRequest` as JSON; every service mapped with
+  `MapGrpcService` is described without a list to keep. `--database sqlite` stores the products in SQLite through EF
+  Core, as `resultunion-api --database sqlite` does.
 - `resultunion-feature --crud --database sqlite`: a rename to a taken name is answered by the unique index alone
   (`name_taken` from the constraint violation of `ExecuteUpdate`), without a check before it that a concurrent rename
   could pass.
