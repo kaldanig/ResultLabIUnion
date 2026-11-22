@@ -1,5 +1,8 @@
 blank_issues_enabled: false
 contact_links:
+  - name: A question, or feedback on the 1.0 release candidate
+    url: https://github.com/kaldanig/ResultLabIUnion/discussions
+    about: Ask how to do something, or say what reads wrong or is missing, in Discussions.
   - name: Report a security vulnerability
     url: https://github.com/kaldanig/ResultLabIUnion/security/advisories/new
     about: Report it privately, not as a public issue (SECURITY.md).

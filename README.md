@@ -868,7 +868,9 @@ behavior, the wire formats and the analyzer rules): [docs/ROADMAP.md](docs/ROADM
 
 ## Contributing
 
-Issues and pull requests are welcome. How to build, test and what a pull request needs:
+Questions and feedback go to [Discussions](https://github.com/kaldanig/ResultLabIUnion/discussions); for the 1.0
+release candidate, the [feedback thread](https://github.com/kaldanig/ResultLabIUnion/discussions/2) says what helps
+most. Issues and pull requests are welcome. How to build, test and what a pull request needs:
 [CONTRIBUTING.md](https://github.com/kaldanig/ResultLabIUnion/blob/master/CONTRIBUTING.md). Everyone who takes part
 follows the [code of conduct](https://github.com/kaldanig/ResultLabIUnion/blob/master/CODE_OF_CONDUCT.md).
 
