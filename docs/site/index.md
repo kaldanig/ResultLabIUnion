@@ -31,8 +31,10 @@ public Result<User> Register(string? email, string? age) =>
 - [Getting started](../articles/getting-started.md): one feature from a value object to an HTTP endpoint, in fifteen
   minutes.
 - [Guide](../../README.md): the types, pipelines, async, ASP.NET Core, gRPC, JSON, OpenTelemetry and DDD, with examples.
-- Articles: [EF Core](../articles/ef-core.md), [pipeline behaviors](../articles/pipeline-behaviors.md) and
-  [testing](../articles/testing.md).
+- Articles: [EF Core](../articles/ef-core.md), [pipeline behaviors](../articles/pipeline-behaviors.md),
+  [testing](../articles/testing.md) and [translating error messages](../articles/localization.md).
+- [Moving from FluentResults or ErrorOr](../articles/migration.md): the same code in each library, and how to move a
+  feature at a time.
 - [Design decisions](../DESIGN.md): why the library is built this way, with the alternatives that were rejected.
 - [Analyzers](../ANALYZERS.md): the mistakes the compiler catches for you, and their code fixes.
 - [Benchmarks](../BENCHMARKS.md): time and allocations against exceptions.

@@ -14,7 +14,7 @@ namespace ResultUnion.Articles.Tests;
 /// </summary>
 public sealed partial class ArticleCodeTests(WebApplicationFactory<Program> factory) : IClassFixture<WebApplicationFactory<Program>>
 {
-    private static readonly string Root = FindRoot();
+    internal static readonly string Root = FindRoot();
 
     public static TheoryData<string> Articles =>
         [.. Directory.GetFiles(Path.Combine(Root, "docs", "articles"), "*.md").Select(path => Path.GetFileName(path)).Order(StringComparer.Ordinal)];

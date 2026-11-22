@@ -8,3 +8,7 @@
   href: pipeline-behaviors.md
 - name: Testing
   href: testing.md
+- name: Moving from FluentResults or ErrorOr
+  href: migration.md
+- name: Translating error messages
+  href: localization.md

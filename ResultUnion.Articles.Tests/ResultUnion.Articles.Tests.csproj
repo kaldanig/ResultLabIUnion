@@ -23,11 +23,15 @@
     <PackageReference Include="xunit.v3" Version="4.0.3" />
     <PackageReference Include="xunit.runner.visualstudio" Version="4.0.1" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="11.0.0" />
+    <!-- Only for docs/articles/migration.md: the "before" code compiles and runs next to the ResultUnion version. -->
+    <PackageReference Include="FluentResults" Version="4.0.0" />
+    <PackageReference Include="ErrorOr" Version="2.1.1" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\ResultUnion.Articles\ResultUnion.Articles.csproj" />
     <ProjectReference Include="..\ResultUnion.Testing\ResultUnion.Testing.csproj" />
+    <ProjectReference Include="..\ResultUnion.Http\ResultUnion.Http.csproj" />
   </ItemGroup>
 
 </Project>

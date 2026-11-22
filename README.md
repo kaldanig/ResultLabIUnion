@@ -862,8 +862,9 @@ the result (`EnsureAsync`, `TapAsync`, `TapErrorAsync`) reuse their source task.
 ## Documentation site
 
 New to the library? Start with [Getting started](docs/articles/getting-started.md), then the articles on
-[EF Core](docs/articles/ef-core.md), [pipeline behaviors](docs/articles/pipeline-behaviors.md) and
-[testing](docs/articles/testing.md).
+[EF Core](docs/articles/ef-core.md), [pipeline behaviors](docs/articles/pipeline-behaviors.md),
+[testing](docs/articles/testing.md) and [translating error messages](docs/articles/localization.md). Coming from
+another Result library: [Moving from FluentResults or ErrorOr](docs/articles/migration.md).
 
 This guide, the articles, the other pages in `docs/` and an API reference for the packages are also built as a website with DocFX
 (`docfx.json`, the landing page and navigation in `docs/site/`). How to build it locally and publish it on GitHub Pages:
