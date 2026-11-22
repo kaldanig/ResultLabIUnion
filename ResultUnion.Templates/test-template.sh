@@ -150,6 +150,19 @@ if [ -e "$work/Catalog/src/Catalog/Data" ] || [ -e "$work/Catalog/src/Catalog/Pr
   echo "::error::the in-memory gRPC project contains the SQLite files"
   exit 1
 fi
+
+# A gRPC feature with rename and delete, and its tests: the .proto lands in Protos/, which the project compiles.
+(cd "$work/Catalog" && dotnet restore \
+  && dotnet new resultunion-feature -n Supplier -o src/Catalog --grpc --crud --debug:custom-hive "$hive" \
+  && dotnet new resultunion-feature-tests -n Supplier -o tests/Catalog.Tests --grpc --crud --debug:custom-hive "$hive")
+[ -e "$work/Catalog/src/Catalog/Protos/suppliers.proto" ] && [ -e "$work/Catalog/src/Catalog/Suppliers/SupplierCatalogService.cs" ] \
+  || { echo "::error::resultunion-feature --grpc did not add the contract and the service"; exit 1; }
+if [ -e "$work/Catalog/src/Catalog/Grpc" ] || [ -e "$work/Catalog/tests/Catalog.Tests/Suppliers/SupplierEndpointTests.cs" ]; then
+  echo "::error::resultunion-feature --grpc left the HTTP files or its Grpc folder"
+  exit 1
+fi
+sed -i 's/^builder.Services.AddScoped<ProductService>();/&\nbuilder.Services.AddSuppliers();/; s/^app.MapGrpcService<ProductCatalogService>();/&\napp.MapSuppliers();/; s/^using Catalog.Products;/&\nusing Catalog.Suppliers;/' \
+  "$work/Catalog/src/Catalog/Program.cs"
 (cd "$work/Catalog" && dotnet build -warnaserror && dotnet test)
 echo "::endgroup::"
 
@@ -158,6 +171,15 @@ dotnet new resultunion-grpc -n Warehouse -o "$work/Warehouse" --database sqlite 
 cp "$work/nuget.config" "$work/Warehouse/"
 [ -e "$work/Warehouse/src/Warehouse/Data/AppDbContext.cs" ] \
   || { echo "::error::resultunion-grpc --database sqlite did not add the DbContext"; exit 1; }
+
+# A gRPC feature in SQLite, in the application's DbContext, with its tests.
+(cd "$work/Warehouse" && dotnet restore \
+  && dotnet new resultunion-feature -n StorageBin -o src/Warehouse --grpc --database sqlite --debug:custom-hive "$hive" \
+  && dotnet new resultunion-feature-tests -n StorageBin -o tests/Warehouse.Tests --grpc --database sqlite --debug:custom-hive "$hive")
+sed -i 's/^builder.Services.AddScoped<ProductService>();/&\nbuilder.Services.AddStorageBins<AppDbContext>();/; s/^app.MapGrpcService<ProductCatalogService>();/&\napp.MapStorageBins();/; s/^using Warehouse.Products;/&\nusing Warehouse.StorageBins;/' \
+  "$work/Warehouse/src/Warehouse/Program.cs"
+sed -i 's/^        var product = modelBuilder.Entity<Product>();/        modelBuilder.ApplyConfiguration(new Warehouse.StorageBins.StorageBinConfiguration());\n&/' \
+  "$work/Warehouse/src/Warehouse/Data/AppDbContext.cs"
 (cd "$work/Warehouse" && dotnet build -warnaserror && dotnet test)
 echo "::endgroup::"
 

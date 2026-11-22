@@ -4,12 +4,13 @@
   "classifications": [
     "Web",
     "WebAPI",
+    "gRPC",
     "Code",
     "Result pattern"
   ],
   "identity": "ResultUnion.Templates.Feature",
   "name": "ResultUnion feature",
-  "description": "A feature for a Minimal API in the shape of resultunion-api's products: an entity and a value object with error catalogs, a repository, a service whose use cases are Result pipelines, and endpoints that return problem responses.",
+  "description": "A feature in the shape of the templates' products: an entity and a value object with error catalogs, a repository, a service whose use cases are Result pipelines, and Minimal API endpoints that return problem responses, or with --grpc a gRPC service whose failures become rich statuses.",
   "shortName": "resultunion-feature",
   "sourceName": "Widget",
   "tags": {
@@ -74,7 +75,8 @@
       "type": "derived",
       "valueSource": "PluralName",
       "valueTransform": "snakeCase",
-      "replaces": "PLURAL_CODE"
+      "replaces": "PLURAL_CODE",
+      "fileRename": "PLURAL_CODE"
     },
     "PluralRoute": {
       "type": "derived",
@@ -115,6 +117,13 @@
       "datatype": "bool",
       "defaultValue": "false",
       "description": "Also rename and delete, with a version that keeps two clients from overwriting each other (409 changed_concurrently)."
+    },
+    "Grpc": {
+      "type": "parameter",
+      "displayName": "gRPC",
+      "datatype": "bool",
+      "defaultValue": "false",
+      "description": "A gRPC service and its .proto contract instead of Minimal API endpoints, for a project made with resultunion-grpc."
     }
   },
   "forms": {
@@ -153,7 +162,7 @@
   },
   "postActions": [
     {
-      "condition": "(!Sqlite)",
+      "condition": "(!Sqlite && !Grpc)",
       "actionId": "AC1156F7-BB77-4DB8-B28F-24EEBCCA1E5C",
       "description": "Register the feature in Program.cs.",
       "manualInstructions": [
@@ -164,12 +173,23 @@
       "continueOnError": true
     },
     {
-      "condition": "(Sqlite)",
+      "condition": "(Sqlite && !Grpc)",
       "actionId": "AC1156F7-BB77-4DB8-B28F-24EEBCCA1E5C",
       "description": "Register the feature in Program.cs and its entity in the DbContext.",
       "manualInstructions": [
         {
           "text": "Call builder.Services.Add<Plural><AppDbContext>() and app.Map<Plural>() in Program.cs, and modelBuilder.ApplyConfiguration(new ...Configuration()) in the DbContext's OnModelCreating."
+        }
+      ],
+      "continueOnError": true
+    },
+    {
+      "condition": "(Grpc)",
+      "actionId": "AC1156F7-BB77-4DB8-B28F-24EEBCCA1E5C",
+      "description": "Register the feature in Program.cs; the contract is in Protos/.",
+      "manualInstructions": [
+        {
+          "text": "Call builder.Services.Add<Plural>() (Add<Plural><AppDbContext>() with --database sqlite, and apply the ...Configuration in OnModelCreating) and app.Map<Plural>() in Program.cs. The contract is Protos/<plural>.proto: resultunion-grpc compiles every file in Protos/; another project needs a Protobuf item for it."
         }
       ],
       "continueOnError": true
@@ -184,6 +204,36 @@
             "Gizmos/EfWidgetRepository.cs",
             "Gizmos/WidgetConfiguration.cs"
           ]
+        },
+        {
+          "condition": "(!Grpc)",
+          "exclude": [
+            "Grpc/**"
+          ]
+        },
+        {
+          "condition": "(Grpc && !Crud)",
+          "exclude": [
+            "Gizmos/WidgetFeature.cs",
+            "Grpc/PLURAL_CODE.crud.proto"
+          ],
+          "rename": {
+            "Grpc/WidgetFeature.cs": "Gizmos/WidgetFeature.cs",
+            "Grpc/WidgetCatalogService.cs": "Gizmos/WidgetCatalogService.cs",
+            "Grpc/PLURAL_CODE.proto": "Protos/PLURAL_CODE.proto"
+          }
+        },
+        {
+          "condition": "(Grpc && Crud)",
+          "exclude": [
+            "Gizmos/WidgetFeature.cs",
+            "Grpc/PLURAL_CODE.proto"
+          ],
+          "rename": {
+            "Grpc/WidgetFeature.cs": "Gizmos/WidgetFeature.cs",
+            "Grpc/WidgetCatalogService.cs": "Gizmos/WidgetCatalogService.cs",
+            "Grpc/PLURAL_CODE.crud.proto": "Protos/PLURAL_CODE.proto"
+          }
         }
       ]
     }

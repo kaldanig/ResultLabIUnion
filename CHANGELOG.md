@@ -19,6 +19,10 @@ are in the diff of those files.
   grpcurl and Postman show a failure's `ErrorInfo` and `BadRequest` as JSON; every service mapped with
   `MapGrpcService` is described without a list to keep. `--database sqlite` stores the products in SQLite through EF
   Core, as `resultunion-api --database sqlite` does.
+- `resultunion-feature --grpc` writes a gRPC service and its contract (`Protos/<plural>.proto`) instead of Minimal API
+  endpoints, with `--crud` and `--database sqlite` as before; the id arrives as text and `ParseId` reports one that is
+  not a GUID as `<entity>.invalid_id`. `resultunion-feature-tests --grpc` calls the service through the generated
+  client and reads each failure back with `ToError()`. `resultunion-grpc` now compiles every file in `Protos/`.
 - `resultunion-feature --crud --database sqlite`: a rename to a taken name is answered by the unique index alone
   (`name_taken` from the constraint violation of `ExecuteUpdate`), without a check before it that a concurrent rename
   could pass.

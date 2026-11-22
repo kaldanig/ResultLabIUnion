@@ -1,0 +1,50 @@
+// The contract of the ENTITY_PLURAL_WORDS. Failures are not part of these messages: they travel in the call's status
+// (google.rpc.Status with ErrorInfo and BadRequest), built from the error by ResultUnion.Grpc.
+
+syntax = "proto3";
+
+package PLURAL_CODE.v1;
+
+option csharp_namespace = "TargetNamespace.Gizmos.V1";
+
+import "google/protobuf/empty.proto";
+
+service WidgetCatalog {
+  // INVALID_ARGUMENT for a missing or long name, FAILED_PRECONDITION for a taken one.
+  rpc CreateWidget (CreateWidgetRequest) returns (WidgetReply);
+
+  // INVALID_ARGUMENT for an id that is not a GUID, NOT_FOUND for an unknown one.
+  rpc GetWidget (GetWidgetRequest) returns (WidgetReply);
+
+  // A new name with the version the client read: ABORTED (changed_concurrently) for a stale version, then
+  // FAILED_PRECONDITION for a taken name, NOT_FOUND, INVALID_ARGUMENT.
+  rpc RenameWidget (RenameWidgetRequest) returns (WidgetReply);
+
+  // NOT_FOUND, or ABORTED (changed_concurrently) for a stale version.
+  rpc RemoveWidget (RemoveWidgetRequest) returns (google.protobuf.Empty);
+}
+
+message CreateWidgetRequest {
+  string name = 1;
+}
+
+message GetWidgetRequest {
+  string id = 1;
+}
+
+message RenameWidgetRequest {
+  string id = 1;
+  string name = 2;
+  int32 version = 3;
+}
+
+message RemoveWidgetRequest {
+  string id = 1;
+  int32 version = 2;
+}
+
+message WidgetReply {
+  string id = 1;
+  string name = 2;
+  int32 version = 3;
+}

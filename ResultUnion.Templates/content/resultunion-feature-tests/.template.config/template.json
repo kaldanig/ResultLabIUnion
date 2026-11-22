@@ -8,7 +8,7 @@
   ],
   "identity": "ResultUnion.Templates.FeatureTests",
   "name": "ResultUnion feature tests",
-  "description": "Tests for a feature made with resultunion-feature: its use cases without HTTP, one for each code they return, and its endpoints over HTTP with WebApplicationFactory, using ResultUnion.Testing.",
+  "description": "Tests for a feature made with resultunion-feature: its use cases without a host, one for each code they return, and its endpoints over HTTP with WebApplicationFactory, or with --grpc its gRPC service through the generated client, using ResultUnion.Testing.",
   "shortName": "resultunion-feature-tests",
   "sourceName": "Widget",
   "tags": {
@@ -128,6 +128,13 @@
       "datatype": "bool",
       "defaultValue": "false",
       "description": "Also test rename and delete, for a feature made with --crud."
+    },
+    "Grpc": {
+      "type": "parameter",
+      "displayName": "gRPC",
+      "datatype": "bool",
+      "defaultValue": "false",
+      "description": "Test the feature's gRPC service, for a feature made with resultunion-feature --grpc."
     }
   },
   "forms": {
@@ -168,5 +175,26 @@
       "pattern": "\\.Tests$",
       "replacement": ""
     }
-  }
+  },
+  "sources": [
+    {
+      "modifiers": [
+        {
+          "condition": "(!Grpc)",
+          "exclude": [
+            "Grpc/**"
+          ]
+        },
+        {
+          "condition": "(Grpc)",
+          "exclude": [
+            "Gizmos/WidgetEndpointTests.cs"
+          ],
+          "rename": {
+            "Grpc/WidgetCatalogTests.cs": "Gizmos/WidgetCatalogTests.cs"
+          }
+        }
+      ]
+    }
+  ]
 }

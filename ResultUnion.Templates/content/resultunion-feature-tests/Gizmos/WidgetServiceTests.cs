@@ -6,7 +6,7 @@ using Xunit;
 namespace TargetNamespace.Gizmos;
 
 /// <summary>
-/// The use cases without HTTP, one test for each code they can return. The assertions return the value or the
+/// The use cases without a host, one test for each code they can return. The assertions return the value or the
 /// error, so a test reads the outcome in one line and asserts on codes and fields, never on messages.
 /// </summary>
 public sealed class WidgetServiceTests

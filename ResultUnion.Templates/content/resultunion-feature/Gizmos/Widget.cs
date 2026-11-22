@@ -22,6 +22,12 @@ public sealed class Widget
         public static Error NameTaken(WidgetName name) =>
             Error.Create("ENTITY_CODE.name_taken", $"The name '{name}' is taken.", ErrorType.Conflict)
                 .WithArgument("name", name.Value);
+#if (Grpc)
+
+        public static Error InvalidId(string value) =>
+            Error.Create("ENTITY_CODE.invalid_id", $"'{value}' is not a ENTITY_WORDS id.", ErrorType.Validation)
+                .WithArgument("value", value);
+#endif
 #if (Crud)
 
         /// <summary>Someone changed it since the client read it: reload, then try again.</summary>
@@ -56,5 +62,11 @@ public sealed class Widget
     }
 
     public static Widget Create(WidgetName name) => new(Guid.NewGuid(), name);
+#endif
+#if (Grpc)
+
+    /// <summary>An id as a gRPC client sends it: protobuf has no GUID type, so it arrives as text.</summary>
+    public static Result<Guid> ParseId(string? input) =>
+        Guid.TryParse(input, out var id) ? id : Errors.InvalidId(input ?? string.Empty);
 #endif
 }

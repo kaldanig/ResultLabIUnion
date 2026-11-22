@@ -289,5 +289,22 @@ The service has reflection, so `grpcurl -plaintext localhost:5090 list` shows it
 describes every service mapped with `MapGrpcService`, and `error_details.proto` as well, so grpcurl and Postman show a
 failure's `ErrorInfo` and `BadRequest` as JSON; the project's README has a grpcurl call for each outcome.
 `--database sqlite` stores the products in SQLite through EF Core, as `resultunion-api` does, and `--no-tests` leaves
-the test project out. `resultunion-valueobject` works in this project as in any other; `resultunion-feature` writes Minimal API
-endpoints, so for a new gRPC feature copy the shape of `Products` and add its methods to the `.proto` file.
+the test project out. `resultunion-valueobject` works in this project as in any other.
+
+A second gRPC feature comes from the feature templates with `--grpc`, from the solution folder after a `dotnet restore`:
+
+```powershell
+dotnet new resultunion-feature -n Supplier -o src/Catalog --grpc
+```
+
+```powershell
+dotnet new resultunion-feature-tests -n Supplier -o tests/Catalog.Tests --grpc
+```
+
+Instead of endpoints, the feature gets its contract in `Protos/suppliers.proto` (the project compiles every file in
+`Protos/`) and `SupplierCatalogService`, whose methods end with `GetValueOrThrowRpcAsync`; the id arrives as text and
+`Supplier.ParseId` turns one that is not a GUID into `supplier.invalid_id` on the field `id`. Register it with
+`builder.Services.AddSuppliers()` and `app.MapSuppliers()`; reflection finds the new service by itself. `--crud` adds
+`RenameSupplier` and `RemoveSupplier` with the version, a stale one being `ABORTED` with
+`supplier.changed_concurrently`, and `--database sqlite` stores it in the application's DbContext. The tests call the
+service through the generated client and read each failure back with `ToError()`.

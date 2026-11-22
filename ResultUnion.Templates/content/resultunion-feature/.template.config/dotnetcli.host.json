@@ -16,6 +16,10 @@
     "Crud": {
       "longName": "crud",
       "shortName": ""
+    },
+    "Grpc": {
+      "longName": "grpc",
+      "shortName": ""
     }
   }
 }

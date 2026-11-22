@@ -7,8 +7,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <!-- The server base class for the service and the client for the tests (and for other .NET callers). -->
-    <Protobuf Include="Protos\products.proto" GrpcServices="Both" />
+    <!-- Every contract in Protos/, with the server base classes for the services and the clients for the tests (and
+         for other .NET callers). A feature made with resultunion-feature and its grpc option adds its own file there. -->
+    <Protobuf Include="Protos\*.proto" GrpcServices="Both" />
   </ItemGroup>
 
   <ItemGroup>
