@@ -64,6 +64,7 @@ Why it is built this way, with the alternatives that were considered: [docs/DESI
 | `ResultUnion.WebApi.Tests` | Integration tests for the Web API: the real app in memory (`WebApplicationFactory`), real HTTP requests, the problem JSON a client receives, the Georgian translation and the OpenAPI document |
 | `ResultUnion.GrpcService` | The same use cases as a gRPC service (`Protos/demo.proto`), failures as rich gRPC statuses |
 | `ResultUnion.GrpcClient` | A console client for the gRPC service that turns every `RpcException` back into an `Error` |
+| `ResultUnion.AppHost` | Runs the Web API, the gRPC service and the client together under Aspire, with their telemetry in Aspire's dashboard |
 
 ```bash
 dotnet build ResultLabIUnion.slnx
@@ -646,6 +647,19 @@ Open the login link the container prints (`http://localhost:18888/login?t=…`),
 - **Structured logs:** the use cases' own log lines, such as `Registration rejected: user.too_young`.
 
 The dashboard is a development tool. Without the container the API runs as before; the exporter just has nowhere to send.
+
+All the demos at once, with no container, under [Aspire](https://aspire.dev/):
+
+```powershell
+dotnet run --project ResultUnion.AppHost --launch-profile http
+```
+
+`ResultUnion.AppHost` starts the Web API, the gRPC service and the gRPC client, and opens Aspire's dashboard (its login
+link is in the output). The client runs every call of the gRPC demo once; each call is one trace across both
+resources, from the client's span (with the error it read back from the status, through `RecordAsync`) to the
+service's span, which carries `grpc.status_code` and the same `resultunion.error.code`. The service's
+`resultunion.errors` counts its failures by code; restart `grpcclient` from the dashboard for another round. The
+AppHost sets each demo's OTLP endpoint and service name; the demos' own OpenTelemetry setup is unchanged.
 
 ## Testing: `ResultUnion.Testing`
 

@@ -13,6 +13,10 @@
   <ItemGroup>
     <PackageReference Include="Grpc.AspNetCore" Version="2.85.0" />
     <PackageReference Include="Grpc.AspNetCore.Server.Reflection" Version="2.85.0" />
+    <!-- OpenTelemetry over OTLP: under ResultUnion.AppHost, to the Aspire dashboard. -->
+    <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.21.0" />
+    <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.21.0" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.21.0" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1,8 +1,12 @@
-﻿using System.Text;
+﻿using System.Diagnostics;
+using System.Text;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using Grpc.Net.Client;
+using OpenTelemetry;
+using OpenTelemetry.Trace;
 using ResultUnion;
+using ResultUnion.Diagnostics;
 using ResultUnion.Grpc;
 using ResultUnion.GrpcDemo;
 
@@ -10,6 +14,14 @@ using ResultUnion.GrpcDemo;
 // RpcException is translated (into an Error, by ResultUnion.Grpc); the code below never catches anything itself.
 
 Console.OutputEncoding = Encoding.UTF8;
+
+// Traces over OTLP to OTEL_EXPORTER_OTLP_ENDPOINT, set by ResultUnion.AppHost. Each call is a span of its own, with the
+// HTTP/2 request under it and the service's span under that, so one trace shows both sides of a call.
+using var tracing = Sdk.CreateTracerProviderBuilder()
+    .AddSource(ClientTelemetry.Source.Name)
+    .AddHttpClientInstrumentation()
+    .AddOtlpExporter()
+    .Build();
 
 var address = args.FirstOrDefault() ?? "http://localhost:5259";
 using var channel = GrpcChannel.ForAddress(address);
@@ -51,7 +63,11 @@ return;
 static async Task Call<TReply>(string label, Func<Task<TReply>> call)
     where TReply : notnull
 {
-    Result<TReply> result = await Result.TryAsync(call, (RpcException ex) => ex.ToError());
+    using var activity = ClientTelemetry.Source.StartActivity(label);
+
+    // Record puts the restored error on the client's span too: the same code and category as on the service's side.
+    Result<TReply> result = await Result.TryAsync(call, (RpcException ex) => ex.ToError())
+        .RecordAsync("grpc_client.call");
 
     Console.WriteLine();
     if (result.TryGetResultValue(out var reply))
@@ -93,4 +109,9 @@ static void Write(ConsoleColor color, string text)
     Console.ForegroundColor = color;
     Console.WriteLine(text);
     Console.ResetColor();
+}
+
+internal static class ClientTelemetry
+{
+    public static readonly ActivitySource Source = new("ResultUnion.GrpcClient");
 }

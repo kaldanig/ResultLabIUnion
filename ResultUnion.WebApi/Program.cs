@@ -26,8 +26,9 @@ builder.Services.AddSampleApplication();                // use cases and in-memo
 // OpenTelemetry over OTLP to OTEL_EXPORTER_OTLP_ENDPOINT (http://localhost:4317 in launchSettings.json), for example the
 // standalone Aspire Dashboard (see the README). Adding ResultUnion's meter is the only ResultUnion-specific line: the
 // failure counter comes from RecordAsync in the use cases, and problem responses tag the request spans by themselves.
+// Under ResultUnion.AppHost, Aspire sets OTEL_SERVICE_NAME to the resource's name; the dashboard matches on it.
 builder.Services.AddOpenTelemetry()
-    .ConfigureResource(resource => resource.AddService("ResultUnion.WebApi"))
+    .ConfigureResource(resource => resource.AddService(builder.Configuration["OTEL_SERVICE_NAME"] ?? "ResultUnion.WebApi"))
     .WithTracing(tracing => tracing.AddAspNetCoreInstrumentation(options =>
         options.Filter = context => IsApiRequest(context.Request.Path)))
     .WithMetrics(metrics => metrics

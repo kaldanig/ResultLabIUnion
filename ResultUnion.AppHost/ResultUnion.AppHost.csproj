@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Runs the demos together under Aspire: the Web API, the gRPC service and the gRPC client, with their traces,
+       metrics (ResultUnion's failure counter included) and logs in the Aspire dashboard. The demos are found by their
+       paths in AppHost.cs, not referenced here. -->
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net11.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <UserSecretsId>24ddf2ac-2b98-4b73-a084-16ae82adab35</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Aspire.Hosting.AppHost" Version="17.0.0" />
+    <PackageReference Include="Aspire.Hosting.Dotnet" Version="17.0.0" />
+  </ItemGroup>
+
+</Project>
