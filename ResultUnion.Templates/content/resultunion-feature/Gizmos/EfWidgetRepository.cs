@@ -34,12 +34,10 @@ public sealed class EfWidgetRepository<TContext>(TContext db) : IWidgetRepositor
     }
 #if (Crud)
 
-    // One UPDATE ... WHERE Id = @id AND Version = @expected: a row changed in between is not overwritten.
+    // One UPDATE ... WHERE Id = @id AND Version = @expected: a row changed in between is not overwritten, and the
+    // unique index answers for a taken name (nothing is tracked, so there is nothing to undo after it).
     public async Task<Result> UpdateAsync(Widget changed, int expectedVersion, CancellationToken ct)
     {
-        if (await db.Set<Widget>().AnyAsync(e => e.Id != changed.Id && e.Name == changed.Name, ct))
-            return Widget.Errors.NameTaken(changed.Name);
-
         try
         {
             var rows = await db.Set<Widget>()

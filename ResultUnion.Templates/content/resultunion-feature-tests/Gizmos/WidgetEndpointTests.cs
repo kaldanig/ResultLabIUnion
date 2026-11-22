@@ -2,24 +2,35 @@ using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
 using Microsoft.AspNetCore.Mvc.Testing;
+#if (Crud)
+using Microsoft.Extensions.DependencyInjection;
+using APP_NAMESPACE.Gizmos;
+using ResultUnion.Testing;
+#endif
 using Xunit;
 
 namespace TargetNamespace.Gizmos;
 
 /// <summary>The application in memory, called over HTTP: what a client receives, problem responses included.</summary>
-public sealed class WidgetEndpointTests(WebApplicationFactory<Program> factory) : IClassFixture<WebApplicationFactory<Program>>
+public sealed class WidgetEndpointTests : IClassFixture<WebApplicationFactory<Program>>
 {
     private static CancellationToken Ct => TestContext.Current.CancellationToken;
 
+    private readonly WebApplicationFactory<Program> _app;
+    private readonly HttpClient _client;
+
+    public WidgetEndpointTests(WebApplicationFactory<Program> factory)
+    {
 #if (Sqlite)
-    // A database file of its own, so the tests never touch the application's. "Products" is the connection string of
-    // resultunion-api --database sqlite; use the application's own name.
-    private readonly HttpClient _client = factory
-        .WithWebHostBuilder(host => host.UseSetting("ConnectionStrings:Products", $"Data Source={Path.Combine(Path.GetTempPath(), $"PLURAL_ROUTE-{Guid.NewGuid():N}.db")}"))
-        .CreateClient();
+        // A database file of its own, so the tests never touch the application's. "Products" is the connection string
+        // of resultunion-api --database sqlite; use the application's own name.
+        _app = factory.WithWebHostBuilder(host =>
+            host.UseSetting("ConnectionStrings:Products", $"Data Source={Path.Combine(Path.GetTempPath(), $"PLURAL_ROUTE-{Guid.NewGuid():N}.db")}"));
 #else
-    private readonly HttpClient _client = factory.CreateClient();
+        _app = factory;
 #endif
+        _client = _app.CreateClient();
+    }
 
     [Fact]
     public async Task A_created_ENTITY_CODE_is_201_and_found_at_its_location()
@@ -95,6 +106,41 @@ public sealed class WidgetEndpointTests(WebApplicationFactory<Program> factory) 
         var again = await _client.DeleteAsync($"/PLURAL_ROUTE/{id}?version={version}", Ct);
         Assert.Equal(HttpStatusCode.NotFound, again.StatusCode);
         Assert.Equal("ENTITY_CODE.not_found", await CodeOf(again));
+    }
+
+    [Fact]
+    public async Task A_rename_to_a_taken_name_is_409()
+    {
+        var taken = $"First {Guid.NewGuid()}";
+        await _client.PostAsJsonAsync("/PLURAL_ROUTE", new { name = taken }, Ct);
+        var other = await (await _client.PostAsJsonAsync("/PLURAL_ROUTE", new { name = $"Second {Guid.NewGuid()}" }, Ct))
+            .Content.ReadFromJsonAsync<JsonElement>(Ct);
+
+        var response = await _client.PutAsJsonAsync(
+            $"/PLURAL_ROUTE/{other.GetProperty("id").GetGuid()}",
+            new { name = taken.ToUpperInvariant(), version = other.GetProperty("version").GetInt32() }, Ct);
+
+        Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
+        Assert.Equal("ENTITY_CODE.name_taken", await CodeOf(response));
+    }
+
+    // Two requests read the same version; the second one's write comes after the first one's. The service's check saw
+    // the version it read, so only the store, which compares as it writes, can refuse it.
+    [Fact]
+    public async Task The_store_refuses_a_write_from_a_version_that_changed_after_it_was_read()
+    {
+        var created = await (await _client.PostAsJsonAsync("/PLURAL_ROUTE", new { name = $"First {Guid.NewGuid()}" }, Ct))
+            .Content.ReadFromJsonAsync<JsonElement>(Ct);
+        var id = created.GetProperty("id").GetGuid();
+        using var scope = _app.Services.CreateScope();
+        var repository = scope.ServiceProvider.GetRequiredService<IWidgetRepository>();
+        var read = await repository.FindAsync(id, Ct) ?? throw new InvalidOperationException("Not stored.");
+
+        await _client.PutAsJsonAsync($"/PLURAL_ROUTE/{id}", new { name = $"Second {Guid.NewGuid()}", version = read.Version }, Ct);
+
+        var changed = read.Rename(WidgetName.Create($"Third {Guid.NewGuid()}").ShouldSucceed());
+        await repository.UpdateAsync(changed, read.Version, Ct).ShouldFailAsync("ENTITY_CODE.changed_concurrently");
+        await repository.RemoveAsync(id, read.Version, Ct).ShouldFailAsync("ENTITY_CODE.changed_concurrently");
     }
 
 #endif

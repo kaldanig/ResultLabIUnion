@@ -9,6 +9,14 @@ are in the diff of those files.
 
 ## [Unreleased]
 
+### ResultUnion.Templates
+
+- `resultunion-feature --crud --database sqlite`: a rename to a taken name is answered by the unique index alone
+  (`name_taken` from the constraint violation of `ExecuteUpdate`), without a check before it that a concurrent rename
+  could pass.
+- `resultunion-feature-tests --crud` tests the two answers that only the store can give: a rename to a taken name over
+  HTTP, and a write or removal from a version that changed after it was read, through the repository.
+
 ## [1.0.0-rc.2] - 2026-11-22
 
 The public API of the libraries is the same as in 1.0.0-rc.1; this candidate adds the item templates and a code fix,
