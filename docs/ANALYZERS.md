@@ -14,9 +14,9 @@ compiler and the IDE as soon as a project references the package; there is nothi
 | [RU0007](#ru0007) | Info | `WithField` where the field name is not known | none |
 | [RU0008](#ru0008) | Info | A method that returns a `ValueTask` of a result | none |
 | [RU0009](#ru0009) | Warning | `Result<Error>`, an error as a success value | none |
-| [RU0010](#ru0010) | Warning | A `Result` written as or read from JSON | none |
+| [RU0010](#ru0010) | Warning | A `Result` written as or read from JSON | `.ToHttpResult()` on an endpoint lambda |
 
-Rules RU0001–RU0003 have a code fix (the light bulb in Visual Studio and Rider, with Fix All for a document, project or solution). From the command line, `dotnet format analyzers --diagnostics RU0003 --severity warn` applies one; run one rule per call, because a fix for one rule moves the positions the next rule's diagnostics refer to.
+Rules RU0001–RU0003 and RU0010 have a code fix (the light bulb in Visual Studio and Rider, with Fix All for a document, project or solution). From the command line, `dotnet format analyzers --diagnostics RU0003 --severity warn` applies one; run one rule per call, because a fix for one rule moves the positions the next rule's diagnostics refer to.
 
 The fixes are covered by tests that apply them with Roslyn's workspace API (`ResultUnion.Analyzers.Tests`), and were
 checked by hand in Visual Studio 2026 with the published `ResultUnion` 0.1.0 package on 2026-11-22: every fix in the
@@ -241,4 +241,9 @@ of one, and for a result passed to, or read by, the JSON methods of `JsonSeriali
 run time: writing or reading a `Result` or `Result<T>` throws `NotSupportedException` with the same advice, for the
 cases the analyzer cannot see (a result passed on as `object`).
 
-No code fix: the response depends on the endpoint (`ToHttpResult()`, or `ToHttpResult(v => TypedResults.Created(…))`).
+**Code fix:** for an endpoint lambda with an expression body, in a project that references ResultUnion.AspNetCore, the
+body returns its response: `() => s.FindAsync(id, ct)` becomes `() => s.FindAsync(id, ct).ToHttpResultAsync()`
+(`.ToHttpResult()` for a result that is not a task), and `using ResultUnion.AspNetCore;` is added when it is missing.
+That is 200 OK with the value (204 for a `Result`) or a problem response; for another success response, such as
+201 Created, pass it: `ToHttpResultAsync(v => TypedResults.Created(…))`. A block body or a method group can return
+in several places, and a result serialized elsewhere needs a type of its own, so those get no fix.

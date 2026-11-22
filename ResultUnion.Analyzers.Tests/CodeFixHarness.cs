@@ -14,22 +14,19 @@ internal static class CodeFixHarness
 {
     public sealed record FixResult(string Code, IReadOnlyList<string> Titles);
 
-    public static async Task<FixResult> FixAsync(string source, CodeFixProvider fix)
+    /// <param name="analyzer">The analyzer that reports the fix's diagnostics; <see cref="ResultUsageAnalyzer"/> when null.</param>
+    public static async Task<FixResult> FixAsync(string source, CodeFixProvider fix, DiagnosticAnalyzer? analyzer = null)
     {
         var cancellation = TestContext.Current.CancellationToken;
+        analyzer ??= new ResultUsageAnalyzer();
 
         using var workspace = new AdhocWorkspace();
-        var project = workspace.AddProject("Snippet", LanguageNames.CSharp)
-            .WithParseOptions(new CSharpParseOptions(LanguageVersion.Preview))
-            .WithCompilationOptions(new CSharpCompilationOptions(
-                OutputKind.DynamicallyLinkedLibrary, nullableContextOptions: NullableContextOptions.Enable))
-            .WithMetadataReferences(AnalyzerHarness.References);
-        var document = project.AddDocument("Snippet.cs", AnalyzerHarness.Usings + source);
+        var document = CreateDocument(workspace, source);
 
         var titles = new List<string>();
         for (var attempt = 0; attempt < 20; attempt++)
         {
-            var diagnostic = (await AnalyzeAsync(document, cancellation))
+            var diagnostic = (await AnalyzeAsync(document, analyzer, cancellation))
                 .Where(d => fix.FixableDiagnosticIds.Contains(d.Id))
                 .OrderBy(d => d.Location.SourceSpan.Start)
                 .FirstOrDefault();
@@ -54,9 +51,31 @@ internal static class CodeFixHarness
         return new FixResult(code, titles);
     }
 
-    private static async Task<IReadOnlyList<Diagnostic>> AnalyzeAsync(Document document, CancellationToken cancellation)
+    /// <summary>The titles of the fixes offered for each diagnostic the fix handles, without applying any.</summary>
+    public static async Task<IReadOnlyList<string>> OfferedAsync(string source, CodeFixProvider fix, DiagnosticAnalyzer analyzer)
+    {
+        var cancellation = TestContext.Current.CancellationToken;
+
+        using var workspace = new AdhocWorkspace();
+        var document = CreateDocument(workspace, source);
+
+        var titles = new List<string>();
+        foreach (var diagnostic in (await AnalyzeAsync(document, analyzer, cancellation)).Where(d => fix.FixableDiagnosticIds.Contains(d.Id)))
+            await fix.RegisterCodeFixesAsync(new CodeFixContext(document, diagnostic, (action, _) => titles.Add(action.Title), cancellation));
+        return titles;
+    }
+
+    private static Document CreateDocument(AdhocWorkspace workspace, string source) =>
+        workspace.AddProject("Snippet", LanguageNames.CSharp)
+            .WithParseOptions(new CSharpParseOptions(LanguageVersion.Preview))
+            .WithCompilationOptions(new CSharpCompilationOptions(
+                OutputKind.DynamicallyLinkedLibrary, nullableContextOptions: NullableContextOptions.Enable))
+            .WithMetadataReferences(AnalyzerHarness.References)
+            .AddDocument("Snippet.cs", AnalyzerHarness.Usings + source);
+
+    private static async Task<IReadOnlyList<Diagnostic>> AnalyzeAsync(Document document, DiagnosticAnalyzer analyzer, CancellationToken cancellation)
     {
         var compilation = (await document.Project.GetCompilationAsync(cancellation))!;
-        return await compilation.WithAnalyzers([new ResultUsageAnalyzer()]).GetAnalyzerDiagnosticsAsync(cancellation);
+        return await compilation.WithAnalyzers([analyzer]).GetAnalyzerDiagnosticsAsync(cancellation);
     }
 }

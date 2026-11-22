@@ -21,7 +21,9 @@ are in the diff of those files.
 ### ResultUnion (analyzers)
 
 - RU0010 (Warning): a result written as or read from JSON: a Minimal API handler that returns one, or one passed to
-  `JsonSerializer`, `Results` / `TypedResults`, `WriteAsJsonAsync` or the `HttpClient` JSON methods.
+  `JsonSerializer`, `Results` / `TypedResults`, `WriteAsJsonAsync` or the `HttpClient` JSON methods. Its code fix
+  appends `.ToHttpResult()` / `.ToHttpResultAsync()` to an endpoint lambda's body, in projects that reference
+  ResultUnion.AspNetCore.
 
 ## [0.3.0] - 2026-11-22
 

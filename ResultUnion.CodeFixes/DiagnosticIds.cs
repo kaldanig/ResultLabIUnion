@@ -11,4 +11,7 @@ public static class DiagnosticIds
 
     /// <summary>Map with a mapper that returns a result.</summary>
     public const string MapReturnsResult = "RU0003";
+
+    /// <summary>A result written as or read from JSON, such as an endpoint handler that returns one.</summary>
+    public const string SerializedResult = "RU0010";
 }

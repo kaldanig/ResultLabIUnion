@@ -6,7 +6,7 @@ public sealed class ResultJsonAnalyzerTests
 {
     // The ASP.NET Core and System.Net.Http.Json members the rule recognizes, by the names it looks for. The harness
     // references only the BCL and ResultUnion; the repository's Web API projects run the rule against the real ones.
-    private const string Stubs = """
+    internal const string Stubs = """
 
         namespace Microsoft.AspNetCore.Routing { public interface IEndpointRouteBuilder { } }
 
