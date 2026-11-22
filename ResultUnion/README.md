@@ -33,8 +33,12 @@ var message = await RegisterAsync(command, ct) switch
 - Analyzers with code fixes included: a discarded `Result` (RU0001), `async` code in `Result.Try` (RU0002), `Map` that should be
   `Bind` (RU0003), `ResultValue` read without a check (RU0004)
 
-Requires `net11.0` (C# 15). Integrations: **ResultUnion.AspNetCore** (typed Minimal API results, problem details) and
-**ResultUnion.Grpc** (gRPC rich error model).
+Requires `net11.0` (C# 15). Integrations: **ResultUnion.AspNetCore** (typed Minimal API results, problem details),
+**ResultUnion.Grpc** (gRPC rich error model), **ResultUnion.FluentValidation**, **ResultUnion.Http** (problem details
+read back as errors) and **ResultUnion.Testing** (assertions).
+
+To start a project that follows the conventions: `dotnet new install ResultUnion.Templates`, then
+`dotnet new resultunion-api` for a Minimal API or `dotnet new resultunion-grpc` for a gRPC service.
 
 - Documentation, design notes and API reference: <https://kaldanig.github.io/ResultLabIUnion/>
 - Source: <https://github.com/kaldanig/ResultLabIUnion>
