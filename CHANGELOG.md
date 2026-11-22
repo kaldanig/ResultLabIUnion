@@ -31,6 +31,8 @@ are in the diff of those files.
 - An item template for the test project, `dotnet new resultunion-feature-tests -n OrderLine`: a test for each code the
   feature's use cases return, without HTTP, and its endpoints over HTTP with `WebApplicationFactory` (201 with the
   location, 400, 409, 404). `--database sqlite` gives the HTTP tests a database file of their own.
+- In Visual Studio's "Create a new project" dialog, `resultunion-api` shows its two options (the database and leaving
+  out the tests) with names and descriptions; every template's options have display names for IDEs.
 
 ### ResultUnion (analyzers)
 

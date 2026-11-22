@@ -18,6 +18,7 @@
   "symbols": {
     "Namespace": {
       "type": "parameter",
+      "displayName": "Namespace",
       "datatype": "text",
       "description": "The namespace the tests' folder goes under. By default the test project's root namespace."
     },
@@ -37,6 +38,7 @@
     },
     "AppNamespace": {
       "type": "parameter",
+      "displayName": "Application namespace",
       "datatype": "text",
       "description": "The namespace the feature's folder is under in the application. By default the test project's root namespace without .Tests."
     },
@@ -56,6 +58,7 @@
     },
     "Plural": {
       "type": "parameter",
+      "displayName": "Plural",
       "datatype": "text",
       "description": "The plural of the name, for the folder, the namespace, the route and the metrics. By default the name with an s."
     },
@@ -100,6 +103,7 @@
     },
     "Database": {
       "type": "parameter",
+      "displayName": "Database",
       "datatype": "choice",
       "defaultValue": "inmemory",
       "description": "Where the application stores the entities: with sqlite, the HTTP tests use a database file of their own.",

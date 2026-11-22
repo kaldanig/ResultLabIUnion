@@ -1,0 +1,17 @@
+{
+  "$schema": "http://json.schemastore.org/ide.host",
+  "symbolInfo": [
+    {
+      "id": "Database",
+      "name": { "text": "Database" },
+      "description": { "text": "Where the products are stored: in memory, or in SQLite through EF Core." },
+      "isVisible": true
+    },
+    {
+      "id": "NoTests",
+      "name": { "text": "Leave out the test project" },
+      "description": { "text": "Create only the API, without the test project that uses ResultUnion.Testing." },
+      "isVisible": true
+    }
+  ]
+}

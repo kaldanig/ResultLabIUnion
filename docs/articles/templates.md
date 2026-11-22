@@ -169,6 +169,20 @@ status of its `ErrorType`. `ProducesErrors` documents those responses in OpenAPI
 
 ## Adding a feature of your own
 
+The whole way, from the solution folder (the item templates read the namespace from the restored projects that `-o`
+points at):
+
+```powershell
+dotnet new resultunion-feature -n Order -o src/Shop
+```
+
+```powershell
+dotnet new resultunion-feature-tests -n Order -o tests/Shop.Tests
+```
+
+Then add `builder.Services.AddOrders();` and `app.MapOrders();` (with `using Shop.Orders;`) to `Program.cs`, and
+`dotnet test` runs the feature's eight tests with the rest. The sections below explain what the two templates write.
+
 Copy the shape of `Products` for each new concept, say `Orders`. The package's feature template writes that shape for
 you, in the folder `Orders/` of the current project:
 

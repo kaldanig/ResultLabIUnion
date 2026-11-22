@@ -15,6 +15,7 @@
   "symbols": {
     "NoTests": {
       "type": "parameter",
+      "displayName": "Leave out the test project",
       "datatype": "bool",
       "defaultValue": "false",
       "description": "Leave out the test project."
@@ -25,6 +26,7 @@
     },
     "Database": {
       "type": "parameter",
+      "displayName": "Database",
       "datatype": "choice",
       "defaultValue": "inmemory",
       "description": "Where the products are stored.",

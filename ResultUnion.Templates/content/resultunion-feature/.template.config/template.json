@@ -19,6 +19,7 @@
   "symbols": {
     "Namespace": {
       "type": "parameter",
+      "displayName": "Namespace",
       "datatype": "text",
       "description": "The namespace the feature's folder goes under. By default the project's root namespace."
     },
@@ -38,6 +39,7 @@
     },
     "Plural": {
       "type": "parameter",
+      "displayName": "Plural",
       "datatype": "text",
       "description": "The plural of the name, for the folder, the namespace, the route and the metrics. By default the name with an s."
     },
@@ -88,6 +90,7 @@
     },
     "Database": {
       "type": "parameter",
+      "displayName": "Database",
       "datatype": "choice",
       "defaultValue": "inmemory",
       "description": "Where the entities are stored.",

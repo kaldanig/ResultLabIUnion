@@ -17,6 +17,7 @@
   "symbols": {
     "Namespace": {
       "type": "parameter",
+      "displayName": "Namespace",
       "datatype": "text",
       "description": "The namespace of the value object. By default the project's root namespace."
     },
@@ -36,6 +37,7 @@
     },
     "ValueType": {
       "type": "parameter",
+      "displayName": "Value type",
       "datatype": "choice",
       "defaultValue": "string",
       "description": "What the value object holds.",
@@ -65,6 +67,7 @@
     },
     "MaxLength": {
       "type": "parameter",
+      "displayName": "Maximum length",
       "datatype": "integer",
       "defaultValue": "100",
       "description": "The most characters a string value may have.",
@@ -72,6 +75,7 @@
     },
     "Min": {
       "type": "parameter",
+      "displayName": "Minimum",
       "datatype": "text",
       "defaultValue": "1",
       "description": "The smallest int or decimal value allowed, a C# number such as 1 or 0.01.",
@@ -79,6 +83,7 @@
     },
     "Max": {
       "type": "parameter",
+      "displayName": "Maximum",
       "datatype": "text",
       "defaultValue": "1000",
       "description": "The largest int or decimal value allowed.",

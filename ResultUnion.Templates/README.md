@@ -18,6 +18,23 @@ stores the products in SQLite through EF Core instead of in memory.
 
 The projects reference the ResultUnion packages of the same version as the template.
 
+## A second feature, with its tests
+
+From the solution folder that `resultunion-api -n Shop` created, after a `dotnet restore`:
+
+```powershell
+dotnet new resultunion-feature -n Order -o src/Shop
+```
+
+```powershell
+dotnet new resultunion-feature-tests -n Order -o tests/Shop.Tests
+```
+
+Add `builder.Services.AddOrders();` and `app.MapOrders();` (with `using Shop.Orders;`) to `Program.cs`, and
+`dotnet test` runs the new feature's tests with the rest. Each template is described below.
+
+## The templates
+
 ```powershell
 dotnet new resultunion-valueobject -n CustomerEmail --max-length 254
 ```

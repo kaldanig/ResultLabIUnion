@@ -118,10 +118,10 @@ if [ ! -e "$work/Store/src/Store/Data/AppDbContext.cs" ]; then
 fi
 
 # A feature in SQLite, in the application's DbContext, with its tests.
-(cd "$work/Store/src/Store" && dotnet restore \
-  && dotnet new resultunion-feature -n Supplier --database sqlite --debug:custom-hive "$hive")
-(cd "$work/Store/tests/Store.Tests" && dotnet restore \
-  && dotnet new resultunion-feature-tests -n Supplier --database sqlite --debug:custom-hive "$hive")
+# From the solution folder with -o, as the README's recipe does.
+(cd "$work/Store" && dotnet restore \
+  && dotnet new resultunion-feature -n Supplier -o src/Store --database sqlite --debug:custom-hive "$hive" \
+  && dotnet new resultunion-feature-tests -n Supplier -o tests/Store.Tests --database sqlite --debug:custom-hive "$hive")
 [ -e "$work/Store/src/Store/Suppliers/EfSupplierRepository.cs" ] \
   || { echo "::error::resultunion-feature --database sqlite did not add the EF repository"; exit 1; }
 sed -i 's/^builder.Services.AddScoped<ProductService>();/&\nbuilder.Services.AddSuppliers<AppDbContext>();/; s/^app.MapProducts();/&\napp.MapSuppliers();/; s/^using Store.Products;/&\nusing Store.Suppliers;/' \
