@@ -98,8 +98,9 @@ public sealed partial class ConsulRegistration(
     private async Task StartedAsync(CancellationToken stoppingToken)
     {
         var started = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
-        using var onStarted = lifetime.ApplicationStarted.Register(() => started.TrySetResult());
-        await started.Task.WaitAsync(stoppingToken).ConfigureAwait(false);
+        var onStarted = lifetime.ApplicationStarted.Register(() => started.TrySetResult());
+        await using (onStarted.ConfigureAwait(false))
+            await started.Task.WaitAsync(stoppingToken).ConfigureAwait(false);
     }
 
     [LoggerMessage(LogLevel.Information, "Registered {Id} in Consul at {Address}.")]
