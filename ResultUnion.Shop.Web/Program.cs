@@ -15,7 +15,11 @@ foreach (var service in new[] { ShopClient.Orders, ShopClient.Inventory })
     builder.Services.AddHttpClient(service, http =>
     {
         http.BaseAddress = new Uri(address);
-        http.Timeout = TimeSpan.FromSeconds(5);
+
+        // An order waits up to 5 s for the inventory and 5 s more to release what it may have reserved, so the page
+        // waits longer than that: giving up first would blame the orders service for the inventory, and cancel the
+        // request while the orders service is still cleaning up.
+        http.Timeout = service == ShopClient.Orders ? TimeSpan.FromSeconds(15) : TimeSpan.FromSeconds(5);
     });
 }
 

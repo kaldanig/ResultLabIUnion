@@ -178,8 +178,8 @@ both. Start the inventory, the orders service and the front end, or all three un
   `customerId`) and the error's own message and code above the form, with a hint that follows the category: reload
   for `Concurrency`, try again for `Unavailable`. The app writes its own error (`shop_web.service_unreachable`) and
   the hints in the chosen language too. The inventory answers in English only; the page asks it only for products
-  that exist, so the one failure it shows from there is that the inventory cannot be reached. Stop the inventory in the Aspire dashboard to see an order refused
-  with `inventory.unavailable`.
+  that exist, so the one failure it shows from there is that the inventory cannot be reached. Stop the inventory in
+  the Aspire dashboard to see an order refused with `inventory.unavailable`.
 
 ```text
 POST /orders  (6 plums, 5 in stock)                ->  409 order.out_of_stock   {"product":"PLUM","requested":6,"available":5}

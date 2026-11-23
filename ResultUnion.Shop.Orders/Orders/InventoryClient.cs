@@ -29,18 +29,28 @@ public sealed class InventoryClient(HttpClient http)
 
     private sealed record ReserveLine(string Sku, int Quantity);
 
+    // No answer is not a refusal: the inventory may have taken the stock before the connection dropped, the timeout
+    // passed or the client of this service went away. The order is not stored, and a retry is a new order, so this one's
+    // stock is released first. If the inventory is still down, the release fails too and the stock stays held; a real
+    // system queues it (an outbox).
     public async Task<Result> ReserveAsync(Order order, CancellationToken ct)
     {
-        var reserved = await CallAsync(() => http.PostAsJsonAsync(
-            "/reservations",
-            new ReserveRequest(order.Id, [.. order.Lines.Select(line => new ReserveLine(line.Product, line.Quantity))]),
-            ct), ct).ConfigureAwait(false);
+        Result reserved;
+        try
+        {
+            reserved = await CallAsync(() => http.PostAsJsonAsync(
+                "/reservations",
+                new ReserveRequest(order.Id, [.. order.Lines.Select(line => new ReserveLine(line.Product, line.Quantity))]),
+                ct), ct).ConfigureAwait(false);
+        }
+        catch (OperationCanceledException) when (ct.IsCancellationRequested)
+        {
+            await ReleaseUnansweredAsync(order.Id).ConfigureAwait(false);
+            throw;
+        }
 
-        // No answer is not a refusal: the inventory may have taken the stock before the connection dropped or the timeout
-        // passed. The client is told to try again, and a retry is a new order, so release this one's stock first. If the
-        // inventory is still down, the release fails too and the stock stays held; a real system queues it (an outbox).
         if (reserved.TryGetError(out var error) && error.Code == Errors.Unavailable.Code)
-            _ = await ReleaseAsync(order.Id, ct).ConfigureAwait(false);
+            await ReleaseUnansweredAsync(order.Id).ConfigureAwait(false);
 
         return reserved;
     }
@@ -48,6 +58,11 @@ public sealed class InventoryClient(HttpClient http)
     // A reservation that is already gone (the inventory restarted, or a retry released it) needs no release.
     public Task<Result> ReleaseAsync(Guid orderId, CancellationToken ct) =>
         CallAsync(() => http.DeleteAsync($"/reservations/{orderId}", ct), ct, alreadyDone: "reservation.not_found");
+
+    // Not on the request's token: the client of this service leaving must not stop the release it caused. HttpClient's
+    // own timeout still bounds it.
+    private async Task ReleaseUnansweredAsync(Guid orderId) =>
+        _ = await ReleaseAsync(orderId, CancellationToken.None).ConfigureAwait(false);
 
     // The one place with a hand-written catch: a refused connection and HttpClient's own timeout are the same outcome
     // as a 503, while the caller's cancellation still propagates.
