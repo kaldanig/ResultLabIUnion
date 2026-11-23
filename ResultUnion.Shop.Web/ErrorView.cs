@@ -8,15 +8,19 @@ public sealed class ErrorView
 {
     private readonly ILookup<string, string> _byField;
 
-    public ErrorView(Error error)
+    /// <param name="error">The error, with the messages the services wrote in <paramref name="language"/>.</param>
+    /// <param name="language">The language the user picked (<c>en</c> or <c>ka</c>), for the hint the app writes itself.</param>
+    public ErrorView(Error error, string language)
     {
         Code = error.Code;
         Message = error.Message;
         Transient = error.IsTransient;
-        Hint = error.Type switch
+        Hint = (error.Type, language) switch
         {
-            ErrorType.Concurrency => "Someone changed it since you read it: reload, then try again.",
-            ErrorType.Unavailable or ErrorType.TooManyRequests => "Try again in a moment.",
+            (ErrorType.Concurrency, "ka") => "ეს სხვამ შეცვალა მას შემდეგ, რაც წაიკითხეთ: განაახლეთ და ხელახლა სცადეთ.",
+            (ErrorType.Concurrency, _) => "Someone changed it since you read it: reload, then try again.",
+            (ErrorType.Unavailable or ErrorType.TooManyRequests, "ka") => "ცოტა ხანში სცადეთ.",
+            (ErrorType.Unavailable or ErrorType.TooManyRequests, _) => "Try again in a moment.",
             _ => null,
         };
         AllOnFields = error.Flatten().All(entry => entry.Field is not null);

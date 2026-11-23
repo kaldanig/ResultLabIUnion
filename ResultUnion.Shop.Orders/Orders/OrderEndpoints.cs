@@ -4,10 +4,13 @@ namespace ResultUnion.Shop.Orders.Orders;
 
 public sealed record CancelOrderRequest(int Version);
 
-public sealed record OrderResponse(Guid Id, Guid CustomerId, IReadOnlyList<OrderLine> Lines, string Status, DateTimeOffset PlacedAt, int Version)
+public sealed record OrderLineResponse(string Product, int Quantity);
+
+public sealed record OrderResponse(Guid Id, Guid CustomerId, IReadOnlyList<OrderLineResponse> Lines, string Status, DateTimeOffset PlacedAt, int Version)
 {
     public static OrderResponse From(Order order) =>
-        new(order.Id, order.CustomerId, order.Lines, order.Status.ToString(), order.PlacedAt, order.Version);
+        new(order.Id, order.CustomerId, [.. order.Lines.Select(line => new OrderLineResponse(line.Product, line.Quantity))],
+            order.Status.ToString(), order.PlacedAt, order.Version);
 }
 
 public static class OrderEndpoints

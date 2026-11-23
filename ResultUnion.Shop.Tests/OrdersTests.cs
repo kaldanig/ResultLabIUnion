@@ -130,6 +130,21 @@ public sealed class OrdersTests(ShopFixture shop) : IClassFixture<ShopFixture>
     }
 
     [Fact]
+    public async Task A_reservation_whose_answer_is_lost_is_released_and_the_order_is_503()
+    {
+        var orders = shop.CreateOrders(() => new AnswerLost(shop.InventoryHandler()));
+        var created = await orders.PostAsJsonAsync("/customers", new { name = "Eve", email = $"eve-{Guid.NewGuid():N}@example.com" }, Ct);
+        var customerId = (await created.Content.ReadFromJsonAsync<JsonElement>(Ct)).GetProperty("id").GetGuid();
+        var before = await shop.AvailableAsync("PEAR", Ct);
+
+        var response = await orders.PostAsJsonAsync("/orders", new { customerId, lines = new[] { new { product = "PEAR", quantity = 2 } } }, Ct);
+
+        Assert.Equal(HttpStatusCode.ServiceUnavailable, response.StatusCode);
+        Assert.Equal("inventory.unavailable", await CodeOf(response));
+        Assert.Equal(before, await shop.AvailableAsync("PEAR", Ct));
+    }
+
+    [Fact]
     public async Task A_second_cancellation_is_422_and_a_stale_version_409()
     {
         var placed = await (await PlaceAsync(await CreateCustomerAsync(), ("APPLE", 1))).Content.ReadFromJsonAsync<JsonElement>(Ct);
@@ -180,5 +195,19 @@ public sealed class OrdersTests(ShopFixture shop) : IClassFixture<ShopFixture>
     {
         protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) =>
             throw new HttpRequestException("Connection refused (inventory)");
+    }
+
+    // The inventory reserves the stock, but its answer never arrives: the client sees HttpClient's timeout.
+    private sealed class AnswerLost(HttpMessageHandler inventory) : DelegatingHandler(inventory)
+    {
+        protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        {
+            var response = await base.SendAsync(request, cancellationToken);
+            if (request.Method != HttpMethod.Post)
+                return response;
+
+            response.Dispose();
+            throw new TaskCanceledException("The request was canceled due to the configured HttpClient.Timeout.");
+        }
     }
 }

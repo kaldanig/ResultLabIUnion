@@ -176,7 +176,9 @@ both. Start the inventory, the orders service and the front end, or all three un
 - **The client side.** The front end calls both services through `ShopClient`, with `ReadResultAsync` and the language
   the user picked as `Accept-Language`. `ErrorView` puts each field's messages under its input (`lines[0].quantity`,
   `customerId`) and the error's own message and code above the form, with a hint that follows the category: reload
-  for `Concurrency`, try again for `Unavailable`. Stop the inventory in the Aspire dashboard to see an order refused
+  for `Concurrency`, try again for `Unavailable`. The app writes its own error (`shop_web.service_unreachable`) and
+  the hints in the chosen language too. The inventory answers in English only; the page asks it only for products
+  that exist, so the one failure it shows from there is that the inventory cannot be reached. Stop the inventory in the Aspire dashboard to see an order refused
   with `inventory.unavailable`.
 
 ```text

@@ -27,7 +27,7 @@ public sealed class WebTests(ShopFixture shop) : IClassFixture<ShopFixture>
         var result = await client.PlaceOrderAsync(null, [new OrderLineView("APPLE", 0)], Ct);
 
         Assert.True(result.TryGetError(out var error));
-        var view = new ErrorView(error);
+        var view = new ErrorView(error, "ka");
         Assert.True(view.AllOnFields);                                          // no line of its own on the form
         Assert.Equal(["შეკვეთას მომხმარებელი სჭირდება."], view.For("customerId"));
         Assert.Equal(["რაოდენობა 1-დან 100-მდე უნდა იყოს; 0 ასე არ არის."], view.For("lines[0].quantity"));
@@ -43,7 +43,7 @@ public sealed class WebTests(ShopFixture shop) : IClassFixture<ShopFixture>
         var result = await client.PlaceOrderAsync(customer.Id, [new OrderLineView("PLUM", available + 1)], Ct);
 
         Assert.True(result.TryGetError(out var error));
-        var view = new ErrorView(error);
+        var view = new ErrorView(error, "en");
         Assert.False(view.AllOnFields);
         Assert.Equal("order.out_of_stock", view.Code);
         Assert.Equal($"Only {available} of PLUM are in stock; the order needs {available + 1}.", view.Message);
@@ -60,7 +60,7 @@ public sealed class WebTests(ShopFixture shop) : IClassFixture<ShopFixture>
 
         Assert.True(stale.TryGetError(out var error));
         Assert.Equal("customer.changed_concurrently", error.Code);
-        Assert.Equal("Someone changed it since you read it: reload, then try again.", new ErrorView(error).Hint);
+        Assert.Equal("Someone changed it since you read it: reload, then try again.", new ErrorView(error, "en").Hint);
     }
 
     [Fact]
@@ -71,10 +71,25 @@ public sealed class WebTests(ShopFixture shop) : IClassFixture<ShopFixture>
         var result = await client.CreateCustomerAsync("Ann", "ann@example.com", Ct);
 
         Assert.True(result.TryGetError(out var error));
-        var view = new ErrorView(error);
+        var view = new ErrorView(error, "en");
         Assert.Equal("shop_web.service_unreachable", view.Code);
         Assert.True(view.Transient);
         Assert.Equal("Try again in a moment.", view.Hint);
+    }
+
+    // The services translate their messages; the app's own error and hints follow the chosen language too.
+    [Fact]
+    public async Task The_apps_own_error_and_hint_are_in_the_chosen_language()
+    {
+        var client = Client(language: "ka", orders: () => new Unreachable());
+
+        var result = await client.CreateCustomerAsync("Ann", "ann@example.com", Ct);
+
+        Assert.True(result.TryGetError(out var error));
+        var view = new ErrorView(error, "ka");
+        Assert.Equal("shop_web.service_unreachable", view.Code);
+        Assert.Equal("შეკვეთების სერვისი მიუწვდომელია.", view.Message);
+        Assert.Equal("ცოტა ხანში სცადეთ.", view.Hint);
     }
 
     // Prerendering calls no service: the stock is loaded once the page is interactive.

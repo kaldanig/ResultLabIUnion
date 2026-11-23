@@ -145,7 +145,7 @@
                 stock[sku] = view.Available;
             else if (result.TryGetError(out var error))
             {
-                stockError = new ErrorView(error);
+                stockError = new ErrorView(error, Language.Code);
                 if (stockError.Transient)
                     break;          // the inventory is down: the other products would only wait for the same answer
             }
@@ -155,7 +155,7 @@
     private async Task CreateCustomerAsync()
     {
         var result = await Shop.CreateCustomerAsync(name, email, default);
-        customerError = result.TryGetError(out var error) ? new ErrorView(error) : null;
+        customerError = result.TryGetError(out var error) ? new ErrorView(error, Language.Code) : null;
         if (result.TryGetResultValue(out var created))
             UseCustomer(created);
     }
@@ -163,7 +163,7 @@
     private async Task RenameCustomerAsync()
     {
         var result = await Shop.RenameCustomerAsync(customer!.Id, newName, renameVersion, default);
-        customerError = result.TryGetError(out var error) ? new ErrorView(error) : null;
+        customerError = result.TryGetError(out var error) ? new ErrorView(error, Language.Code) : null;
         if (result.TryGetResultValue(out var renamed))
             UseCustomer(renamed);
     }
@@ -178,7 +178,7 @@
     private async Task PlaceOrderAsync()
     {
         var result = await Shop.PlaceOrderAsync(customer?.Id, lines.Select(line => new OrderLineView(line.Product ?? "", line.Quantity)), default);
-        orderError = result.TryGetError(out var error) ? new ErrorView(error) : null;
+        orderError = result.TryGetError(out var error) ? new ErrorView(error, Language.Code) : null;
         if (result.TryGetResultValue(out var placed))
             orders.Insert(0, placed);
 
@@ -188,7 +188,7 @@
     private async Task CancelOrderAsync(OrderView order)
     {
         var result = await Shop.CancelOrderAsync(order.Id, order.Version, default);
-        cancelError = result.TryGetError(out var error) ? new ErrorView(error) : null;
+        cancelError = result.TryGetError(out var error) ? new ErrorView(error, Language.Code) : null;
         if (result.TryGetResultValue(out var cancelled))
             orders[orders.IndexOf(order)] = cancelled;
 

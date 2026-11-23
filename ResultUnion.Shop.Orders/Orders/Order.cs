@@ -1,12 +1,26 @@
+using System.Text.Json.Serialization;
+
 namespace ResultUnion.Shop.Orders.Orders;
 
 /// <summary>
 /// One line of an order. It has two inputs, so it names their fields itself (<c>product</c>, <c>quantity</c>); the
-/// order adds the index (<c>lines[1].quantity</c>).
+/// order adds the index (<c>lines[1].quantity</c>). <see cref="Create"/> is the only way to make one; the constructor
+/// is for the JSON column the order stores its lines in.
 /// </summary>
-public sealed record OrderLine(string Product, int Quantity)
+public sealed record OrderLine
 {
     public const int MaxQuantity = 100;
+
+    public string Product { get; }
+
+    public int Quantity { get; }
+
+    [JsonConstructor]
+    private OrderLine(string product, int quantity)
+    {
+        Product = product;
+        Quantity = quantity;
+    }
 
     public static class Errors
     {

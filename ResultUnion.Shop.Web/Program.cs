@@ -31,7 +31,7 @@ builder.Services.AddOpenTelemetry()
 var app = builder.Build();
 
 if (!app.Environment.IsDevelopment())
-    app.UseExceptionHandler("/not-found", createScopeForErrors: true);
+    app.UseExceptionHandler("/error", createScopeForErrors: true);
 
 app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
 app.UseAntiforgery();

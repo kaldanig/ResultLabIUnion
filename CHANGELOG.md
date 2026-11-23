@@ -9,6 +9,11 @@ are in the diff of those files.
 
 ## [Unreleased]
 
+### ResultUnion.Templates
+
+- `resultunion-api` and `resultunion-grpc` end with `await app.RunAsync()`, and with `--database sqlite` they create
+  the database with `EnsureCreatedAsync` in an async scope.
+
 ## [1.0.0-rc.3] - 2026-11-23
 
 The public API of the libraries is the same as in 1.0.0-rc.1 and rc.2; this candidate adds the gRPC templates, so

@@ -29,9 +29,17 @@ public sealed class ShopClient(IHttpClientFactory clients, ShopLanguage language
 
     public static class Errors
     {
-        public static Error Unreachable(string service) =>
-            Error.Create("shop_web.service_unreachable", $"The {service} service cannot be reached.", ErrorType.Unavailable)
+        // The services translate their own messages; this one is the app's, so the app writes it in the chosen language.
+        public static Error Unreachable(string service, string language) =>
+            Error.Create("shop_web.service_unreachable", UnreachableMessage(service, language), ErrorType.Unavailable)
                 .WithArgument("service", service);
+
+        private static string UnreachableMessage(string service, string language) => (language, service) switch
+        {
+            ("ka", Orders) => "შეკვეთების სერვისი მიუწვდომელია.",
+            ("ka", Inventory) => "საწყობის სერვისი მიუწვდომელია.",
+            _ => $"The {service} service cannot be reached.",
+        };
     }
 
     public Task<Result<CustomerView>> CreateCustomerAsync(string? name, string? email, CancellationToken ct) =>
@@ -62,11 +70,11 @@ public sealed class ShopClient(IHttpClientFactory clients, ShopLanguage language
         }
         catch (HttpRequestException)
         {
-            return Errors.Unreachable(service);
+            return Errors.Unreachable(service, language.Code);
         }
         catch (TaskCanceledException) when (!ct.IsCancellationRequested)
         {
-            return Errors.Unreachable(service);
+            return Errors.Unreachable(service, language.Code);
         }
     }
 }

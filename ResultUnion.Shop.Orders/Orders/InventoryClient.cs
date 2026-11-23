@@ -29,11 +29,21 @@ public sealed class InventoryClient(HttpClient http)
 
     private sealed record ReserveLine(string Sku, int Quantity);
 
-    public Task<Result> ReserveAsync(Order order, CancellationToken ct) =>
-        CallAsync(() => http.PostAsJsonAsync(
+    public async Task<Result> ReserveAsync(Order order, CancellationToken ct)
+    {
+        var reserved = await CallAsync(() => http.PostAsJsonAsync(
             "/reservations",
             new ReserveRequest(order.Id, [.. order.Lines.Select(line => new ReserveLine(line.Product, line.Quantity))]),
-            ct), ct);
+            ct), ct).ConfigureAwait(false);
+
+        // No answer is not a refusal: the inventory may have taken the stock before the connection dropped or the timeout
+        // passed. The client is told to try again, and a retry is a new order, so release this one's stock first. If the
+        // inventory is still down, the release fails too and the stock stays held; a real system queues it (an outbox).
+        if (reserved.TryGetError(out var error) && error.Code == Errors.Unavailable.Code)
+            _ = await ReleaseAsync(order.Id, ct).ConfigureAwait(false);
+
+        return reserved;
+    }
 
     // A reservation that is already gone (the inventory restarted, or a retry released it) needs no release.
     public Task<Result> ReleaseAsync(Guid orderId, CancellationToken ct) =>
