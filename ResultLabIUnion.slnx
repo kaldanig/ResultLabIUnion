@@ -9,6 +9,9 @@
   <Project Path="ResultUnion.AspNetCore/ResultUnion.AspNetCore.csproj" />
   <Project Path="ResultUnion.Benchmarks/ResultUnion.Benchmarks.csproj" />
   <Project Path="ResultUnion.CodeFixes/ResultUnion.CodeFixes.csproj" />
+  <Project Path="ResultUnion.Consul.Converter/ResultUnion.Consul.Converter.csproj" />
+  <Project Path="ResultUnion.Consul.Rates/ResultUnion.Consul.Rates.csproj" />
+  <Project Path="ResultUnion.Consul.Tests/ResultUnion.Consul.Tests.csproj" />
   <Project Path="ResultUnion.FluentValidation.Tests/ResultUnion.FluentValidation.Tests.csproj" />
   <Project Path="ResultUnion.FluentValidation/ResultUnion.FluentValidation.csproj" />
   <Project Path="ResultUnion.Grpc.Tests/ResultUnion.Grpc.Tests.csproj" />

@@ -6,7 +6,7 @@ using Microsoft.Extensions.Logging;
 
 namespace ResultUnion.AppHost.Tests;
 
-/// <summary>Starts the AppHost once for the class: three processes, so starting it per test would be slow.</summary>
+/// <summary>Starts the AppHost once for the class: several processes and a container, so starting it per test would be slow.</summary>
 public sealed class AppHostFixture : IAsyncLifetime
 {
     private static readonly TimeSpan StartTimeout = TimeSpan.FromMinutes(2);
@@ -17,7 +17,7 @@ public sealed class AppHostFixture : IAsyncLifetime
     {
         var builder = await DistributedApplicationTestingBuilder.CreateAsync<Projects.ResultUnion_AppHost>();
 
-        // Every console line of the three demos is logged at Information; a failed test still shows their warnings.
+        // Every console line of the demos is logged at Information; a failed test still shows their warnings.
         builder.Services.AddLogging(logging => logging.AddFilter($"{builder.Environment.ApplicationName}.Resources", LogLevel.Warning));
 
         App = await builder.BuildAsync().WaitAsync(StartTimeout);
@@ -78,5 +78,32 @@ public sealed class AppHostTests(AppHostFixture fixture) : IClassFixture<AppHost
         Assert.Equal(HttpStatusCode.Created, placed.StatusCode);
         Assert.Equal(HttpStatusCode.Conflict, tooMany.StatusCode);
         Assert.Equal("order.out_of_stock", (await tooMany.Content.ReadFromJsonAsync<JsonElement>(Ct)).GetProperty("code").GetString());
+    }
+
+    // The Consul sample against a real agent in a container: the two rates replicas register themselves, and the
+    // converter, which only knows Consul's address, finds both. Until they have registered, it answers 503
+    // discovery.no_healthy_instance, so the test asks until Consul lists two.
+    [Fact]
+    public async Task The_converter_finds_both_rates_replicas_through_Consul()
+    {
+        await fixture.App.ResourceNotifications.WaitForResourceAsync("converter", KnownResourceStates.Running, Ct).WaitAsync(WaitTimeout, Ct);
+        using var converter = fixture.App.CreateHttpClient("converter", "http");
+        using var waiting = CancellationTokenSource.CreateLinkedTokenSource(Ct);
+        waiting.CancelAfter(WaitTimeout);
+
+        string[] instances = [];
+        while (instances.Length < 2)
+        {
+            await Task.Delay(TimeSpan.FromMilliseconds(500), waiting.Token);
+            using var listed = await converter.GetAsync("/instances", waiting.Token);
+            instances = listed.IsSuccessStatusCode ? await listed.Content.ReadFromJsonAsync<string[]>(waiting.Token) ?? [] : [];
+        }
+
+        var conversion = await converter.GetFromJsonAsync<JsonElement>("/convert?amount=10&from=EUR&to=USD", Ct);
+        using var unknown = await converter.GetAsync("/convert?amount=10&from=EUR&to=XYZ", Ct);
+
+        Assert.StartsWith("rates-", conversion.GetProperty("servedBy").GetString());
+        Assert.Equal(HttpStatusCode.NotFound, unknown.StatusCode);
+        Assert.Equal("conversion.unknown_currency", (await unknown.Content.ReadFromJsonAsync<JsonElement>(Ct)).GetProperty("code").GetString());
     }
 }

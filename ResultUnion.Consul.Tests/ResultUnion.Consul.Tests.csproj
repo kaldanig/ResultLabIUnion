@@ -1,0 +1,35 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- The Consul sample's services in memory, with an in-memory Consul agent (FakeConsul) in place of a real one: the
+       rates instances register and report their checks to it, and the converter finds them and reads its settings there,
+       through the real Consul client. ResultUnion.AppHost.Tests runs the same services against Consul in a container.
+       Each service has a Program class, hence the aliases. -->
+
+  <PropertyGroup>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net11.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="xunit.runner.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.12.0" />
+    <PackageReference Include="xunit.v3" Version="4.0.3" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="4.0.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="11.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ResultUnion.Consul.Rates\ResultUnion.Consul.Rates.csproj" Aliases="rates" />
+    <ProjectReference Include="..\ResultUnion.Consul.Converter\ResultUnion.Consul.Converter.csproj" Aliases="converter" />
+  </ItemGroup>
+
+</Project>

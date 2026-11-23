@@ -30,4 +30,23 @@ builder.AddDotnetProject("shop", "../ResultUnion.Shop.Web/ResultUnion.Shop.Web.c
     .WaitFor(orders)
     .WithExternalHttpEndpoints();
 
+// The Consul sample: a Consul agent in dev mode (its UI at the consul resource's URL), two replicas of the rates
+// service that register themselves there, and the converter, which knows only Consul's address and finds the rates
+// instances in its catalog. Nothing here references the rates from the converter: that is Consul's job. The agent
+// keeps everything in memory, so a restart of the consul resource forgets the registrations and the key/value
+// settings; the instances register again at their next heartbeat.
+var consul = builder.AddContainer("consul", "hashicorp/consul", "2.1.0")
+    .WithHttpEndpoint(targetPort: 8500, name: "http")
+    .WithHttpHealthCheck("/v1/status/leader", endpointName: "http");
+
+builder.AddDotnetProject("rates", "../ResultUnion.Consul.Rates/ResultUnion.Consul.Rates.csproj")
+    .WithEnvironment("Consul__Address", consul.GetEndpoint("http"))
+    .WithReplicas(2)
+    .WaitFor(consul);
+
+builder.AddDotnetProject("converter", "../ResultUnion.Consul.Converter/ResultUnion.Consul.Converter.csproj")
+    .WithEnvironment("Consul__Address", consul.GetEndpoint("http"))
+    .WaitFor(consul)
+    .WithExternalHttpEndpoints();
+
 builder.Build().Run();

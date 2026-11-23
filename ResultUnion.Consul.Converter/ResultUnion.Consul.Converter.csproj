@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <!-- The Consul sample's converter (README, "A sample with HashiCorp Consul"): it finds the rates service's healthy
+       instances in Consul's catalog, reads its fee and a pause switch from Consul's key/value store, and calls the rates
+       with ResultUnion.Http, going to the next instance when one fails with a transient error. -->
+
+  <PropertyGroup>
+    <TargetFramework>net11.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Consul" Version="1.8.0" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="11.0.0" />
+    <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.21.0" />
+    <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.21.0" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.21.0" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.21.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ResultUnion.AspNetCore\ResultUnion.AspNetCore.csproj" />
+    <ProjectReference Include="..\ResultUnion.Http\ResultUnion.Http.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="ResultUnion" />
+  </ItemGroup>
+
+</Project>

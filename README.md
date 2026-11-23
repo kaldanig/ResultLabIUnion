@@ -40,6 +40,7 @@ Why it is built this way, with the alternatives that were considered: [docs/DESI
 - C# 15 for unions (`[Union]`, `IUnion`) and C# 14 extension members, both default for `net11.0`
 - The libraries are compiled with .NET 11 Runtime Async (`<Features>runtime-async=on</Features>`, set for every
   `net11.0` project in `Directory.Build.targets`); `-p:EnableRuntimeAsync=false` builds the classic state machines
+- Docker (or Podman) for `ResultUnion.AppHost` and its tests, which start Consul in a container
 
 ## Solution layout
 
@@ -73,7 +74,9 @@ Why it is built this way, with the alternatives that were considered: [docs/DESI
 | `ResultUnion.AppHost` | Runs the Web API, the gRPC service and the client together under Aspire, with their telemetry in Aspire's dashboard |
 | `ResultUnion.Shop.Inventory`, `ResultUnion.Shop.Orders`, `ResultUnion.Shop.Web` | The shop sample: an orders service in SQLite that reserves stock in an inventory service over HTTP, and a Blazor front end that calls both with ResultUnion.Http ([A sample with two services](#a-sample-with-two-services)) |
 | `ResultUnion.Shop.Tests` | Both shop services in memory, wired together: reservations, stock that runs out, an unreachable inventory, concurrency and Georgian messages; and the front end's client against them |
-| `ResultUnion.AppHost.Tests` | Starts the AppHost with `Aspire.Hosting.Testing` and checks that the Web API answers and that the gRPC client runs every call against the service and exits cleanly |
+| `ResultUnion.Consul.Rates`, `ResultUnion.Consul.Converter` | The Consul sample: rates instances that register themselves in HashiCorp Consul with a TTL check, and a converter that finds them in Consul's catalog, reads its settings from Consul's key/value store and goes to the next instance on a transient failure ([A sample with HashiCorp Consul](#a-sample-with-hashicorp-consul)) |
+| `ResultUnion.Consul.Tests` | The Consul sample in memory, with an in-memory Consul agent: discovery, failover, outages, a lost registration, an unreachable agent and invalid settings, through the real Consul client |
+| `ResultUnion.AppHost.Tests` | Starts the AppHost with `Aspire.Hosting.Testing` and checks that the Web API answers, that the gRPC client runs every call against the service and exits cleanly, that an order goes through both shop services, and that the converter finds the rates replicas through Consul in a container |
 
 ```bash
 dotnet build ResultLabIUnion.slnx
@@ -192,6 +195,57 @@ POST /orders/{id}/cancel  (version already used)   ->  409 order.changed_concurr
 test server, so these outcomes are tested across the real HTTP boundary, and runs the front end's `ShopClient` against
 them; `ResultUnion.AppHost.Tests` places an order
 through the two services as Aspire starts them.
+
+### A sample with HashiCorp Consul
+
+The Consul sample shows service discovery and remote configuration as operations that can fail, each with a code.
+`ResultUnion.Consul.Rates` serves exchange rates (`GET /rates/{from}/{to}`) and registers itself in a Consul agent;
+`ResultUnion.Consul.Converter` (`GET /convert?amount=100&from=USD&to=GEL`, `http://localhost:5310`) knows only the
+agent's address, and finds the rates instances there. Under Aspire
+(`dotnet run --project ResultUnion.AppHost --launch-profile http`) the AppHost starts Consul in a container
+(`hashicorp/consul`, dev mode; its UI is the `consul` resource's URL), two replicas of the rates service and the
+converter. Without Aspire, start an agent (`docker run -d -p 8500:8500 hashicorp/consul:2.1.0`), the rates service
+twice (`--launch-profile http` and `http-2`, ports 5311 and 5312) and the converter.
+
+- **Registration with a TTL check.** Once its server listens, each rates instance registers under `rates` with its own
+  address and port, and reports its check at every heartbeat (3 s; the TTL is 10 s). Consul lists only instances whose
+  check passes, so one that is killed drops out after the TTL, and one that stops cleanly deregisters. A heartbeat that
+  the agent answers with 404 means it forgot the instance (a dev agent restarted): `consul.registration_lost`, and the
+  instance registers again. The Consul client throws for every failure but that 404, which it returns as a status;
+  `ConsulAgent` turns both into errors, and the registration loop decides on the code. A rates instance keeps
+  answering while Consul is down.
+- **Discovery as a result.** `ServiceDiscovery` asks the health endpoint for passing instances only. An agent that
+  cannot be reached is `consul.unreachable` and no instance is `discovery.no_healthy_instance`, both 503; `GET
+  /instances` shows what Consul lists right now.
+- **Failover on `IsTransient`.** The converter tries the instances in random order and goes to the next one only while
+  the error is transient: a refused connection, a timeout or a 503 is `rates.unavailable`, while a currency without a
+  rate (`conversion.unknown_currency`, 404, on the `from` or `to` field) would be the same from every instance and
+  comes back at once. `POST /outage` on a rates instance makes it answer 503 `rates.outage` and report its check
+  critical: the next conversions fail over at once, and after the heartbeat Consul stops listing it. `DELETE /outage`
+  ends it.
+- **Settings in the key/value store.** Every conversion reads `converter/fee-percent` (default 0) and
+  `converter/paused` (default false), so a change in Consul's UI applies to the next request. Paused is
+  `conversion.paused`, 503. A key that holds something else is the operator's mistake, not the client's:
+  `settings.invalid`, an `Unexpected` error (500, logged with the key and the value).
+
+```text
+GET /convert?amount=100&from=USD&to=GEL  (fee 1.5)      ->  200 {"rate":2.71,"fee":4.07,"converted":266.93,"servedBy":"rates-5312"}
+GET /convert?amount=-1&from=us                          ->  400 amount.not_positive, currency.invalid_format, currency.required
+GET /convert?amount=5&from=USD&to=XYZ                   ->  404 conversion.unknown_currency  to
+GET /convert?...  (no rates instance registered)        ->  503 discovery.no_healthy_instance  {"service":"rates"}
+GET /convert?...  (Consul stopped)                      ->  503 consul.unreachable
+GET /convert?...  (converter/paused = true)             ->  503 conversion.paused
+GET /convert?...  (converter/fee-percent = lots)        ->  500 settings.invalid
+```
+
+```bash
+docker exec <consul container> consul kv put converter/fee-percent 1.5
+curl -X POST http://localhost:5311/outage
+```
+
+`ResultUnion.Consul.Tests` runs the services in memory against `FakeConsul`, an in-memory agent behind the real Consul
+client, so these outcomes are tested without a container; `ResultUnion.AppHost.Tests` converts through the two
+replicas as Aspire starts them, against Consul in a container.
 
 ## The types
 

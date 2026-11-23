@@ -1,6 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <!-- Runs the demos together under Aspire: the Web API, the gRPC service and the gRPC client, with their traces,
+  <!-- Runs the demos together under Aspire: the Web API, the gRPC service and the gRPC client, the shop sample and the
+       Consul sample (with Consul in a container, so Docker or Podman must be running), with their traces,
        metrics (ResultUnion's failure counter included) and logs in the Aspire dashboard. The demos are found by their
        paths in AppHost.cs, not referenced here. -->
 
